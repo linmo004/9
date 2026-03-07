@@ -1,3 +1,4 @@
+
 /* ============================================================
    liao-special.js — 特殊功能状态栏 / 时间戳 / 消息操作
                      表情包 / 语音 / 转账 / 假图片 / 真图片
@@ -73,7 +74,7 @@ function appendMessageBubble(msg, role, chatUserAvatar, animate) {
 
   if (msgType === 'voice') {
     const duration = calcVoiceDuration(msg.content);
-    bubbleInner = `<div class="voice-bubble" title="点击查看语音内容">
+    bubbleInner += `<div class="voice-bubble" title="点击查看语音内容">
       <span class="voice-bubble-icon">◎</span>
       <div class="voice-bubble-bar">${buildVoiceWaves(duration)}</div>
       <span class="voice-bubble-duration">${duration}"</span>
@@ -84,7 +85,7 @@ function appendMessageBubble(msg, role, chatUserAvatar, animate) {
                       : msg.transferStatus === 'declined' ? '已拒绝' : '待收款';
     const statusClass = msg.transferStatus === 'accepted' ? 'accepted'
                       : msg.transferStatus === 'declined' ? 'declined' : '';
-    bubbleInner = `<div class="transfer-bubble" data-msg-id="${escHtml(msg.id)}">
+    bubbleInner += `<div class="transfer-bubble" data-msg-id="${escHtml(msg.id)}">
       <div class="transfer-bubble-header">
         <span class="transfer-bubble-icon">◇</span>
         <span class="transfer-bubble-amount">${parseFloat(msg.amount || 0).toFixed(2)} 元</span>
@@ -95,7 +96,7 @@ function appendMessageBubble(msg, role, chatUserAvatar, animate) {
 
   } else if (msgType === 'fake_photo') {
     const shortDesc = (msg.content || '照片').slice(0, 12) + ((msg.content || '').length > 12 ? '…' : '');
-    bubbleInner = `<div class="fake-photo-bubble" data-photo-desc="${escHtml(msg.content)}">
+    bubbleInner += `<div class="fake-photo-bubble" data-photo-desc="${escHtml(msg.content)}">
       <div class="fake-photo-bubble-inner">
         <span class="fake-photo-icon">▤</span>
         <span class="fake-photo-label">${escHtml(shortDesc)}</span>
@@ -103,10 +104,10 @@ function appendMessageBubble(msg, role, chatUserAvatar, animate) {
     </div>`;
 
   } else if (msgType === 'image') {
-    bubbleInner = `<img class="real-image-bubble" src="${escHtml(msg.content)}" alt="图片">`;
+    bubbleInner += `<img class="real-image-bubble" src="${escHtml(msg.content)}" alt="图片">`;
 
   } else if (msgType === 'emoji') {
-    bubbleInner = `<img class="emoji-msg-bubble" src="${escHtml(msg.content)}"
+    bubbleInner += `<img class="emoji-msg-bubble" src="${escHtml(msg.content)}"
       alt="${escHtml(msg.emojiName || '表情包')}"
       title="${escHtml(msg.emojiName || '')}">`;
 
@@ -209,7 +210,7 @@ function bindBubbleEvents(row, msg) {
     });
   }
 
-  /* 修复：语音气泡点击使用专用语音内容查看弹窗，不再复用撤回弹窗 */
+  /* 语音气泡点击使用专用语音内容查看弹窗 */
   const voiceBubble = row.querySelector('.voice-bubble');
   if (voiceBubble) {
     voiceBubble.addEventListener('click', () => {
@@ -440,6 +441,11 @@ async function triggerAiReply() {
   const chatUserName2   = chat.chatUserName   || liaoUserName;
   const roleSetting     = role.setting || '';
 
+  /* 构建当前可用表情包名称列表，注入 prompt */
+  const emojiNameList = liaoEmojis.length
+    ? liaoEmojis.map(e => e.name).join('、')
+    : '（暂无表情包）';
+
   const systemPrompt =
     `你扮演角色：${role.realname}。\n` +
     (roleSetting ? `【角色设定】\n${roleSetting}\n` : '') +
@@ -449,15 +455,16 @@ async function triggerAiReply() {
     `【特殊消息格式说明】
 [VOICE:文字] 表示对方发来了语音，内容是"文字"。
 [IMAGE:描述] 表示对方发来了图片。
-[EMOJI:名称] 表示对方发来了表情包。
+[EMOJI:名称] 表示对方发来了表情包，名称即为该表情包的情绪或含义，你无法看到图片，请根据名称理解其情绪含义并自然回应，不要尝试描述图片内容。
 [TRANSFER:金额] 表示对方给你转账，请第一时间对转账做出反应，例如"怎么给我转钱了"。
 [PHOTO:描述] 表示对方发来了照片。
 你可以在回复中使用以下格式主动发起特殊消息：
 [SEND_VOICE:语音内容] 发语音，内容必须像随手拿起手机说出的自然口语，有语气词，不超过20字。
-[SEND_EMOJI:表情包名称] 发表情包。
+[SEND_EMOJI:表情包名称] 发表情包，只能从以下已有表情包名称中选择，不可使用列表以外的名称：${emojiNameList}。
 [SEND_TRANSFER:金额:备注] 给用户转账。
 [SEND_PHOTO:照片描述] 发假照片。
 [RECALL] 撤回自己刚才发的消息。
+[QUOTE:被引用的消息内容] 引用某条消息，将被引用内容填入冒号后，引用块会显示在你的回复气泡上方。例如：[QUOTE:好的我知道了]
 【回复规则】
 1. 用口语短句，像发微信一样聊天，有情绪有立场。
 2. 每句话单独一行，换行分隔，绝不写成一段。
@@ -465,7 +472,9 @@ async function triggerAiReply() {
 4. 不使用任何emoji或表情符号，纯文字（特殊格式指令除外）。
 5. 角色设定优先级最高。
 6. 收到转账必须第一条就回应。
-7. 发语音时必须像随手拿起手机说出的自然话语，有语气词。`;
+7. 发语音时必须像随手拿起手机说出的自然话语，有语气词。
+8. 发表情包时只能使用上方列出的已有表情包名称，若列表为空则不发表情包。
+9. 引用消息时使用 [QUOTE:内容] 格式，引用内容要简短准确，截取对方原话即可。`;
 
   let historyMsgs = chat.messages
     .filter(m => !m.hidden)
@@ -522,45 +531,66 @@ function processAiResponse(rawContent, role, chat) {
 
       let msgObj = null;
 
-      if (/^\[SEND_VOICE:(.+)\]$/.test(line)) {
-        const voiceText = line.match(/^\[SEND_VOICE:(.+)\]$/)[1];
+      /* 解析 [QUOTE:内容] 引用前缀，可与其他指令或文字组合 */
+      let quoteContent = '';
+      let processedLine = line;
+      const quoteMatch = line.match(/^\[QUOTE:(.+?)\]\s*/);
+      if (quoteMatch) {
+        quoteContent   = quoteMatch[1];
+        processedLine  = line.slice(quoteMatch[0].length).trim();
+      }
+
+      if (/^\[SEND_VOICE:(.+)\]$/.test(processedLine)) {
+        const voiceText = processedLine.match(/^\[SEND_VOICE:(.+)\]$/)[1];
         msgObj = {
           role: 'assistant', type: 'voice', content: voiceText,
+          quoteContent: quoteContent || undefined,
           ts: Date.now(),
           id: 'msg_' + Date.now() + '_' + Math.random().toString(36).slice(2)
         };
 
-      } else if (/^\[SEND_EMOJI:(.+)\]$/.test(line)) {
-        const emojiName = line.match(/^\[SEND_EMOJI:(.+)\]$/)[1];
+      } else if (/^\[SEND_EMOJI:(.+)\]$/.test(processedLine)) {
+        const emojiName = processedLine.match(/^\[SEND_EMOJI:(.+)\]$/)[1];
         const found     = liaoEmojis.find(e => e.name === emojiName);
         if (found) {
           msgObj = {
             role: 'assistant', type: 'emoji', content: found.url, emojiName: found.name,
+            quoteContent: quoteContent || undefined,
+            ts: Date.now(),
+            id: 'msg_' + Date.now() + '_' + Math.random().toString(36).slice(2)
+          };
+        } else {
+          /* 降级：找不到对应表情包，发送文字消息 */
+          msgObj = {
+            role: 'assistant', type: 'text', content: emojiName,
+            quoteContent: quoteContent || undefined,
             ts: Date.now(),
             id: 'msg_' + Date.now() + '_' + Math.random().toString(36).slice(2)
           };
         }
 
-      } else if (/^\[SEND_TRANSFER:([^:]+):?(.*)\]$/.test(line)) {
-        const m      = line.match(/^\[SEND_TRANSFER:([^:]+):?(.*)\]$/);
+      } else if (/^\[SEND_TRANSFER:([^:]+):?(.*)\]$/.test(processedLine)) {
+        const m      = processedLine.match(/^\[SEND_TRANSFER:([^:]+):?(.*)\]$/);
         const amount = parseFloat(m[1]) || 0;
         const note   = m[2] || '';
         msgObj = {
           role: 'assistant', type: 'transfer', amount, note,
+          quoteContent: quoteContent || undefined,
           ts: Date.now(),
           id: 'msg_' + Date.now() + '_' + Math.random().toString(36).slice(2),
           transferStatus: 'pending', fromRole: true
         };
 
-      } else if (/^\[SEND_PHOTO:(.+)\]$/.test(line)) {
-        const desc = line.match(/^\[SEND_PHOTO:(.+)\]$/)[1];
+      } else if (/^\[SEND_PHOTO:(.+)\]$/.test(processedLine)) {
+        const desc = processedLine.match(/^\[SEND_PHOTO:(.+)\]$/)[1];
         msgObj = {
           role: 'assistant', type: 'fake_photo', content: desc,
+          quoteContent: quoteContent || undefined,
           ts: Date.now(),
           id: 'msg_' + Date.now() + '_' + Math.random().toString(36).slice(2)
         };
 
-      } else if (/^\[RECALL\]$/.test(line)) {
+      } else if (/^\[RECALL\]$/.test(processedLine)) {
         const msgs = liaoChats[currentChatIdx].messages;
         for (let k = msgs.length - 1; k >= 0; k--) {
           if (msgs[k].role === 'assistant' && !msgs[k].recalled) {
@@ -572,14 +602,18 @@ function processAiResponse(rawContent, role, chat) {
           }
         }
 
-      } else {
-        const cleanLine = removeEmoji(line);
+      } else if (processedLine.length > 0) {
+        const cleanLine = removeEmoji(processedLine);
         if (!cleanLine) return;
         msgObj = {
           role: 'assistant', type: 'text', content: cleanLine,
+          quoteContent: quoteContent || undefined,
           ts: Date.now(),
           id: 'msg_' + Date.now() + '_' + Math.random().toString(36).slice(2)
         };
+
+      } else if (quoteContent) {
+        /* 仅有 [QUOTE:] 没有正文，跳过 */
       }
 
       if (msgObj) {
@@ -710,7 +744,7 @@ document.getElementById('liao-voice-confirm').addEventListener('click', () => {
 
   appendMessageBubble(msgObj, role, uAvt, true);
 
-  /* 注入系统提示让 AI 感知语音 */
+  /* 注入系统提示让 AI 感知语音，禁止自动调用 API */
   setTimeout(() => {
     if (currentChatIdx < 0) return;
     liaoChats[currentChatIdx].messages.push({
@@ -754,7 +788,7 @@ document.getElementById('liao-transfer-confirm').addEventListener('click', () =>
 
   appendMessageBubble(msgObj, role, uAvt, true);
 
-  /* 注入系统提示让 AI 感知转账 */
+  /* 注入系统提示让 AI 感知转账，禁止自动调用 API */
   setTimeout(() => {
     if (currentChatIdx < 0) return;
     liaoChats[currentChatIdx].messages.push({
@@ -763,7 +797,6 @@ document.getElementById('liao-transfer-confirm').addEventListener('click', () =>
       ts: Date.now(), id: 'sys_' + Date.now()
     });
     lSave('chats', liaoChats);
-    triggerAiReply();
   }, 600);
 });
 
@@ -816,6 +849,7 @@ document.getElementById('liao-camera-confirm').addEventListener('click', () => {
 
   appendMessageBubble(msgObj, role, uAvt, true);
 
+  /* 注入系统提示让 AI 感知拍摄，禁止自动调用 API */
   setTimeout(() => {
     if (currentChatIdx < 0) return;
     liaoChats[currentChatIdx].messages.push({
@@ -824,7 +858,6 @@ document.getElementById('liao-camera-confirm').addEventListener('click', () => {
       ts: Date.now(), id: 'sys_' + Date.now()
     });
     lSave('chats', liaoChats);
-    triggerAiReply();
   }, 500);
 });
 
@@ -886,6 +919,7 @@ document.getElementById('liao-image-confirm').addEventListener('click', () => {
   appendMessageBubble(msgObj, role, uAvt, true);
   pendingImageSrc = '';
 
+  /* 注入系统提示让 AI 感知图片，禁止自动调用 API */
   setTimeout(() => {
     if (currentChatIdx < 0) return;
     liaoChats[currentChatIdx].messages.push({
@@ -894,7 +928,6 @@ document.getElementById('liao-image-confirm').addEventListener('click', () => {
       ts: Date.now(), id: 'sys_' + Date.now()
     });
     lSave('chats', liaoChats);
-    triggerAiReply();
   }, 500);
 });
 
@@ -935,7 +968,6 @@ function renderEmojiPanel() {
   const allBtn = document.querySelector('.emoji-sidebar-btn[data-cat="all"]');
   if (allBtn) {
     allBtn.className = 'emoji-sidebar-btn' + (emojiCurrentCat === 'all' ? ' active' : '');
-    /* 重新绑定（避免重复绑定用克隆方式） */
     const newAllBtn = allBtn.cloneNode(true);
     allBtn.parentNode.replaceChild(newAllBtn, allBtn);
     newAllBtn.addEventListener('click', () => {
@@ -1000,16 +1032,16 @@ function sendEmojiMsg(emoji) {
   document.getElementById('emoji-panel').style.display = 'none';
   document.getElementById('csb-emoji').classList.remove('active');
 
-  /* 注入系统提示 */
+  /* 注入系统提示，包含表情包名称和情绪含义，禁止自动调用 API */
   setTimeout(() => {
     if (currentChatIdx < 0) return;
     liaoChats[currentChatIdx].messages.push({
-      role: 'user', content: `[EMOJI:${emoji.name || '表情包'}]`,
+      role: 'user',
+      content: `[EMOJI:${emoji.name || '表情包'}（这是一个名为"${emoji.name || '表情包'}"的表情包，请根据名称理解其情绪含义并自然回应）]`,
       type: 'system_hint', hidden: true,
       ts: Date.now(), id: 'sys_' + Date.now()
     });
     lSave('chats', liaoChats);
-    triggerAiReply();
   }, 400);
 }
 
