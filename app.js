@@ -315,7 +315,6 @@ document.getElementById('avatar-confirm-btn').addEventListener('click', function
     document.getElementById('user-avatar').src = url;
     save('userAvatar', url);
     document.getElementById('avatar-modal').classList.remove('show');
-    /* 同步到第二页头像 */
     const p2av = document.getElementById('p2-uc-avatar');
     if (p2av) p2av.src = url;
   } else {
@@ -503,7 +502,6 @@ const pagesWrap  = document.getElementById('pages-wrap');
 const totalPages = 3;
 let touchStartX  = 0, touchStartY = 0, touchMoved = false;
 
-/* 三页宽度 */
 pagesWrap.style.width = (totalPages * 100) + 'vw';
 
 function goToPage(idx) {
@@ -630,14 +628,29 @@ function applyP2Image(src) {
     if (bgEl) bgEl.style.backgroundImage = 'url(' + src + ')';
     save('p2AlbumBg', src);
 
+  } else if (p2ModalTarget === 'cdimg') {
+    /* CD 图片叠加在 r3 层上 */
+    const cdEl = document.getElementById('p2-cd');
+    if (cdEl) {
+      cdEl.style.setProperty('--cd-img', 'url(' + src + ')');
+      /* 直接把 r3 背景改为用户图片 */
+      const r3 = cdEl.querySelector('.p2-cd-r3');
+      if (r3) {
+        r3.style.backgroundImage = 'url(' + src + ')';
+        r3.style.backgroundSize  = 'cover';
+        r3.style.backgroundPosition = 'center';
+      }
+    }
+    save('p2CdImg', src);
+
   } else if (p2ModalTarget.startsWith('card-')) {
     const idx   = parseInt(p2ModalTarget.split('-')[1]);
     const imgEl = document.getElementById('p2-card-img-' + idx);
     if (imgEl) {
       imgEl.src = src;
       imgEl.style.display = 'block';
-      const ph = imgEl.nextElementSibling;
-      if (ph) ph.style.display = 'none';
+      const empty = imgEl.nextElementSibling;
+      if (empty) empty.style.display = 'none';
     }
     p2CardUrls[idx] = src;
     save('page2Cards', p2CardUrls);
@@ -674,6 +687,7 @@ document.getElementById('p2-img-modal').addEventListener('click', function(e) {
 
 /* ============================================================
    第二页：用户主页卡初始化
+   点击卡片整体 => 换背景；点击头像 => 换头像
    ============================================================ */
 (function initP2UserCard() {
   /* 恢复背景 */
@@ -695,12 +709,28 @@ document.getElementById('p2-img-modal').addEventListener('click', function(e) {
     }
   }
 
-  /* 更换背景按钮 */
-  const btn = document.getElementById('p2-uc-change-bg-btn');
-  if (btn) {
-    btn.addEventListener('click', function(e) {
-      e.stopPropagation();
+  /* 点击卡片整体换背景（排除头像区和音乐区的点击） */
+  const card = document.getElementById('p2-user-card');
+  if (card) {
+    card.addEventListener('click', function(e) {
+      /* 如果点击的是头像wrap，不触发换背景 */
+      if (e.target.closest('#p2-uc-avatar-wrap')) return;
+      /* 如果点击的是音乐控制区，不触发换背景 */
+      if (e.target.closest('.p2-uc-music')) return;
       openP2ImgModal('更换用户卡背景', 'ucbg');
+    });
+  }
+
+  /* 点击头像换头像（使用主页面同款弹窗） */
+  const avatarWrap = document.getElementById('p2-uc-avatar-wrap');
+  if (avatarWrap) {
+    avatarWrap.addEventListener('click', function(e) {
+      e.stopPropagation();
+      /* 复用主页头像弹窗 */
+      document.getElementById('avatar-url-input').value  = '';
+      document.getElementById('avatar-file-input').value = '';
+      setAvatarTab('url');
+      document.getElementById('avatar-modal').classList.add('show');
     });
   }
 })();
@@ -709,16 +739,16 @@ document.getElementById('p2-img-modal').addEventListener('click', function(e) {
    第二页：装饰音乐进度条 + 控制按钮
    ============================================================ */
 (function initP2MusicBar() {
-  const track  = document.getElementById('p2-music-track');
-  const played = document.getElementById('p2-music-played');
-  const thumb  = document.getElementById('p2-music-thumb');
-  const curEl  = document.getElementById('p2-music-cur');
+  const track   = document.getElementById('p2-music-track');
+  const played  = document.getElementById('p2-music-played');
+  const thumb   = document.getElementById('p2-music-thumb');
+  const curEl   = document.getElementById('p2-music-cur');
   const playBtn = document.getElementById('p2-mc-play');
   const prevBtn = document.getElementById('p2-mc-prev');
   const nextBtn = document.getElementById('p2-mc-next');
   if (!track) return;
 
-  const totalSecs = 217;   /* 3:37 假数据 */
+  const totalSecs = 217;
   let progress = 0.38;
   let dragging = false;
   let playing  = false;
@@ -767,7 +797,6 @@ document.getElementById('p2-img-modal').addEventListener('click', function(e) {
   document.addEventListener('mouseup',  function() { dragging = false; });
   document.addEventListener('touchend', function() { dragging = false; });
 
-  /* 播放/暂停按钮（装饰） */
   if (playBtn) {
     playBtn.addEventListener('click', function(e) {
       e.stopPropagation();
@@ -776,7 +805,6 @@ document.getElementById('p2-img-modal').addEventListener('click', function(e) {
     });
   }
 
-  /* 快退按钮（装饰：进度-5%） */
   if (prevBtn) {
     prevBtn.addEventListener('click', function(e) {
       e.stopPropagation();
@@ -784,7 +812,6 @@ document.getElementById('p2-img-modal').addEventListener('click', function(e) {
     });
   }
 
-  /* 快进按钮（装饰：进度+5%） */
   if (nextBtn) {
     nextBtn.addEventListener('click', function(e) {
       e.stopPropagation();
@@ -807,8 +834,8 @@ var p2CardUrls = load('page2Cards', ['', '', '', '']);
     if (!imgEl) return;
     imgEl.src = url;
     imgEl.style.display = 'block';
-    const ph = imgEl.nextElementSibling;
-    if (ph) ph.style.display = 'none';
+    const empty = imgEl.nextElementSibling;
+    if (empty) empty.style.display = 'none';
   });
 
   const widget = document.getElementById('p2-cards-widget');
@@ -823,20 +850,50 @@ var p2CardUrls = load('page2Cards', ['', '', '', '']);
 })();
 
 /* ============================================================
-   第二页：专辑组件背景
+   第二页：专辑封面（点击专辑主体换封面）
    ============================================================ */
 (function initP2Album() {
+  /* 恢复专辑背景 */
   const bg = load('p2AlbumBg', null);
   if (bg) {
     const bgEl = document.getElementById('p2-album-bg');
     if (bgEl) bgEl.style.backgroundImage = 'url(' + bg + ')';
   }
 
-  const changeBtn = document.getElementById('p2-album-change-btn');
-  if (changeBtn) {
-    changeBtn.addEventListener('click', function(e) {
+  /* 点击专辑主体换封面 */
+  const albumWidget = document.getElementById('p2-album-widget');
+  if (albumWidget) {
+    albumWidget.addEventListener('click', function(e) {
       e.stopPropagation();
-      openP2ImgModal('更换专辑背景', 'album');
+      openP2ImgModal('更换专辑封面', 'album');
+    });
+  }
+
+  /* 恢复 CD 图片 */
+  const cdImg = load('p2CdImg', null);
+  if (cdImg) {
+    const r3 = document.querySelector('#p2-cd .p2-cd-r3');
+    if (r3) {
+      r3.style.backgroundImage    = 'url(' + cdImg + ')';
+      r3.style.backgroundSize     = 'cover';
+      r3.style.backgroundPosition = 'center';
+    }
+  }
+
+  /* 点击 CD 非金属区换 CD 图（r3、r4 可点击） */
+  const cdClickable = document.getElementById('p2-cd-clickable');
+  if (cdClickable) {
+    cdClickable.addEventListener('click', function(e) {
+      e.stopPropagation();
+      openP2ImgModal('更换 CD 图片', 'cdimg');
+    });
+  }
+
+  const r4 = document.querySelector('#p2-cd .p2-cd-r4');
+  if (r4) {
+    r4.addEventListener('click', function(e) {
+      e.stopPropagation();
+      openP2ImgModal('更换 CD 图片', 'cdimg');
     });
   }
 })();

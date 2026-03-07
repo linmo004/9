@@ -105,18 +105,17 @@
     <div class="page" id="page2">
       <div id="page2-inner">
 
-        <!-- 模块一：用户主页卡（缩小为原来3/5，居中） -->
+        <!-- 模块一：用户主页卡（点击整体换背景，点击头像换头像，无加号按键） -->
         <div class="p2-section p2-section-uc">
           <div class="p2-user-card" id="p2-user-card">
-            <!-- 背景图层（最底层） -->
+            <!-- 背景图层（最底层，点击换背景） -->
             <div class="p2-uc-bg" id="p2-uc-bg"></div>
-            <!-- 白色渐变蒙版（压在背景上，但在头像下） -->
+            <!-- 白色渐变蒙版（压在背景上，在头像和音乐条下层） -->
             <div class="p2-uc-gradient"></div>
-            <!-- 更换背景按钮 -->
-            <button class="p2-uc-change-bg" id="p2-uc-change-bg-btn" title="更换背景">+</button>
-            <!-- 头像（在渐变上层） -->
-            <div class="p2-uc-avatar-wrap">
-              <img class="p2-uc-avatar" id="p2-uc-avatar" src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=halo9" alt="">
+            <!-- 头像（点击换头像，在渐变上层） -->
+            <div class="p2-uc-avatar-wrap" id="p2-uc-avatar-wrap">
+              <img class="p2-uc-avatar" id="p2-uc-avatar"
+                src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=halo9" alt="">
             </div>
             <!-- 音乐控制区（在渐变上层） -->
             <div class="p2-uc-music">
@@ -129,61 +128,65 @@
                 <span class="p2-music-time">3:37</span>
               </div>
               <div class="p2-music-controls">
-                <button class="p2-mc-btn" id="p2-mc-prev" title="快退">&#9664;&#9664;</button>
-                <button class="p2-mc-btn p2-mc-play" id="p2-mc-play" title="播放/暂停">&#9654;</button>
-                <button class="p2-mc-btn" id="p2-mc-next" title="快进">&#9654;&#9654;</button>
+                <button class="p2-mc-btn" id="p2-mc-prev">&#9664;&#9664;</button>
+                <button class="p2-mc-btn p2-mc-play" id="p2-mc-play">&#9654;</button>
+                <button class="p2-mc-btn" id="p2-mc-next">&#9654;&#9654;</button>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- 模块二：小卡图片横排展示 -->
-        <div class="p2-section">
+        <!-- 模块二：小卡图片横排（点击换图，无加号） -->
+        <div class="p2-section p2-section-cards">
           <div class="p2-cards-scroll">
             <div class="p2-cards-widget" id="p2-cards-widget">
               <div class="p2-card-item" data-card="0">
                 <img class="p2-card-img" id="p2-card-img-0" src="" alt="">
-                <div class="p2-card-placeholder">+</div>
+                <div class="p2-card-empty"></div>
               </div>
               <div class="p2-card-item" data-card="1">
                 <img class="p2-card-img" id="p2-card-img-1" src="" alt="">
-                <div class="p2-card-placeholder">+</div>
+                <div class="p2-card-empty"></div>
               </div>
               <div class="p2-card-item" data-card="2">
                 <img class="p2-card-img" id="p2-card-img-2" src="" alt="">
-                <div class="p2-card-placeholder">+</div>
+                <div class="p2-card-empty"></div>
               </div>
               <div class="p2-card-item" data-card="3">
                 <img class="p2-card-img" id="p2-card-img-3" src="" alt="">
-                <div class="p2-card-placeholder">+</div>
+                <div class="p2-card-empty"></div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- 模块三：专辑组件 + App区域 -->
+        <!-- 模块三：专辑 + App（点击专辑换封面，点击CD非金属区换CD图，无加号） -->
         <div class="p2-section">
           <div class="p2-bottom-row">
-            <!-- 左侧：专辑组件（CD溢出右侧） -->
+            <!-- 左：专辑 + CD -->
             <div class="p2-album-outer">
-              <!-- 专辑主体 -->
+              <!-- 专辑主体（点击换封面） -->
               <div class="p2-album-widget" id="p2-album-widget">
                 <div class="p2-album-bg" id="p2-album-bg"></div>
                 <div class="p2-album-border"></div>
-                <button class="p2-album-change-btn" id="p2-album-change-btn" title="更换专辑背景">+</button>
               </div>
-              <!-- CD（叠加在专辑右侧，左2/3压在专辑上） -->
-              <div class="p2-cd-wrap">
+              <!-- CD（左2/3压专辑，右1/3伸出，点击CD中心区换图） -->
+              <div class="p2-cd-wrap" id="p2-cd-wrap">
                 <div class="p2-cd" id="p2-cd">
+                  <!-- 金属光泽外环（不可点击换图） -->
                   <div class="p2-cd-ring p2-cd-r1"></div>
+                  <!-- 深色内环 -->
                   <div class="p2-cd-ring p2-cd-r2"></div>
-                  <div class="p2-cd-ring p2-cd-r3"></div>
+                  <!-- 彩虹环（可点击，换CD图） -->
+                  <div class="p2-cd-ring p2-cd-r3" id="p2-cd-clickable"></div>
+                  <!-- 中心深色 -->
                   <div class="p2-cd-ring p2-cd-r4"></div>
+                  <!-- 中心孔 -->
                   <div class="p2-cd-hole"></div>
                 </div>
               </div>
             </div>
-            <!-- 右侧：4个App图标 -->
+            <!-- 右：4个App -->
             <div class="p2-apps-grid">
               <div class="app-item" data-app="p2-app-0">
                 <img class="app-icon" src="https://img.icons8.com/fluency/96/note.png" alt="">
@@ -208,7 +211,7 @@
       </div>
     </div>
 
-    <!-- 第三页（空白保留） -->
+    <!-- 第三页（空白） -->
     <div class="page" id="page3"></div>
 
   </div><!-- /pages-wrap -->
