@@ -357,7 +357,7 @@ document.getElementById('liao-recall-view-close').addEventListener('click', () =
   document.getElementById('liao-recall-view-modal').style.display = 'none';
 });
 
-/* ---------- 语音内容查看关闭 ---------- */
+/* ---------- */
 document.getElementById('liao-voice-view-close').addEventListener('click', () => {
   document.getElementById('liao-voice-view-modal').style.display = 'none';
 });
@@ -372,7 +372,6 @@ document.getElementById('liao-fake-photo-close').addEventListener('click', () =>
    ============================================================ */
 function initSpecialBar() {
   document.getElementById('csb-ai').addEventListener('click', () => {
-    
     triggerAiReply();
   });
 
@@ -437,43 +436,47 @@ async function triggerAiReply() {
   const chatUserSetting = chat.chatUserSetting || '';
   const chatUserName2   = chat.chatUserName   || liaoUserName;
   const roleSetting     = role.setting || '';
+  const roleName2       = role.nickname || role.realname;
 
-  /* 构建当前可用表情包名称列表注入 prompt */
+  /* 构建当前可用表情包名称列表 */
   const emojiNameList = liaoEmojis.length
     ? liaoEmojis.map(e => e.name).join('、')
-    : '（暂无，禁止发送表情包）';
+    : '（暂无，不可发送表情包）';
 
   const systemPrompt =
-    `你扮演角色：${role.realname}。\n` +
+    `你扮演角色：${roleName2}。\n` +
     (roleSetting ? `【角色设定】\n${roleSetting}\n` : '') +
     (chatUserSetting
       ? `【用户设定】\n对方是${chatUserName2}，${chatUserSetting}\n`
       : `【用户设定】\n对方叫${chatUserName2}。\n`) +
-    `【收到的特殊消息格式说明】
-[VOICE:文字] 表示对方发来了语音，内容是"文字"。
-[IMAGE:描述] 表示对方发来了图片。
-[EMOJI:名称] 表示对方发来了名为"名称"的表情包。你看不到图片，请根据名称理解其情绪或含义并自然回应，不要尝试描述图片。
-[TRANSFER:金额] 表示对方给你转账，请第一时间回应。
-[PHOTO:描述] 表示对方发来了照片。
-【你可以主动发送的特殊消息格式】
-每种格式必须单独占一行，不可与其他文字混写在同一行。
-[SEND_VOICE:语音内容] — 发语音，内容必须是自然口语，有语气词，不超过20字。
-[SEND_EMOJI:表情包名称] — 发表情包。当前可用表情包名称列表：${emojiNameList}。必须从列表中原样选取名称，列表为空则不可发。
-[SEND_TRANSFER:金额:备注] — 给用户转账。
-[SEND_PHOTO:照片描述] — 发假照片。
-[RECALL] — 撤回自己刚才发的消息。
-[QUOTE:被引用内容] — 引用某条消息，将引用内容原样填入冒号后。此格式必须单独一行，紧接着下一行写你的回复正文。例如：
-[QUOTE:好的我知道了]
-明白，我记住了
+    `【收到的特殊消息说明】
+当你看到以下格式的消息时，说明对方发送了特殊内容：
+· "${chatUserName2}发送了一条语音：(内容)" — 对方发来语音，内容已转为文字。
+· "${chatUserName2}发送了一个表情包：(名称)" — 对方发来表情包，名称即代表该表情包的情绪含义，你看不到图片，直接根据名称理解并回应即可。
+· "${chatUserName2}发送了一张照片：(描述)" — 对方发来照片，括号内是照片描述。
+· "${chatUserName2}给你转账(金额)元，备注：(备注)" — 对方给你转账，请第一时间回应。
+· "${chatUserName2}发来了一张图片" — 对方发来了一张真实图片。
+【你可以主动发送的特殊消息指令】
+以下每种指令必须单独占一行，不可与普通文字混写在同一行：
+[SEND_VOICE:语音内容] — 发一条语音，内容必须是自然口语，有语气词，不超过20字。
+[SEND_EMOJI:表情包名称] — 发一个表情包。你只能从以下已有表情包名称中选择，不得使用列表以外的名称，列表为空则不可发：${emojiNameList}
+[SEND_TRANSFER:金额:备注] — 给对方转账，金额为数字，备注可为空。
+[SEND_PHOTO:照片描述] — 发一张假照片，括号内写照片描述。
+[RECALL] — 撤回你自己刚才发的上一条消息。
+[QUOTE:引用内容] — 引用对方的某句话。此指令必须单独一行，紧接着下一行写你的回复正文。例如：
+[QUOTE:你说的那件事]
+我记得，你是指那个吧
+注意：[QUOTE:] 后面必须紧跟一行回复正文，不能只有引用没有正文。
 【回复规则】
 1. 用口语短句，像发微信一样聊天，有情绪有立场。
 2. 每句话单独一行，换行分隔，绝不写成一段。
 3. 允许语气词、不完美表达。
-4. 不使用任何emoji或表情符号，纯文字（特殊格式指令除外）。
+4. 不使用任何 emoji 或颜文字，纯文字（特殊指令除外）。
 5. 角色设定优先级最高。
 6. 收到转账必须第一条就回应。
-7. 发语音时内容必须自然口语，有语气词。
-8. 引用消息时 [QUOTE:内容] 单独一行，下一行紧跟回复正文，不可省略正文。`;
+7. 发语音内容必须自然口语，有语气词。
+8. 发表情包只能用上方列出的名称，不得自造名称。
+9. 引用时 [QUOTE:内容] 单独一行，下一行必须是回复正文。`;
 
   let historyMsgs = chat.messages
     .filter(m => !m.hidden)
@@ -521,19 +524,21 @@ function processAiResponse(rawContent, role, chat) {
   const chatUserAvatar2 = chat.chatUserAvatar || liaoUserAvatar;
   let cumulativeDelay   = 0;
 
-  /* 预处理：将 [QUOTE:内容] 行与紧随的正文行合并为一个带 quoteContent 的条目 */
+  /*
+   * 预处理：将 [QUOTE:内容] 行与紧随的正文行合并为带 quoteContent 的条目。
+   * [QUOTE:] 行本身不产生气泡，只为下一行提供 quoteContent。
+   */
   const processedLines = [];
   for (let i = 0; i < lines.length; i++) {
     const quoteMatch = lines[i].match(/^\[QUOTE:(.+)\]$/);
     if (quoteMatch) {
       const quoteContent = quoteMatch[1].trim();
-      /* 取下一行作为正文 */
-      const nextLine = (i + 1 < lines.length) ? lines[i + 1].trim() : '';
-      if (nextLine && !/^\[QUOTE:/.test(nextLine)) {
-        processedLines.push({ text: nextLine, quoteContent });
-        i++; /* 跳过已消费的下一行 */
+      /* 下一行是正文（非空且不是另一个 [QUOTE:]） */
+      if (i + 1 < lines.length && !/^\[QUOTE:/.test(lines[i + 1])) {
+        processedLines.push({ text: lines[i + 1].trim(), quoteContent });
+        i++; /* 跳过已消费的正文行 */
       }
-      /* 若下一行不存在或仍是指令，则丢弃孤立的 [QUOTE:] 行 */
+      /* 孤立的 [QUOTE:] 没有正文则丢弃 */
     } else {
       processedLines.push({ text: lines[i], quoteContent: '' });
     }
@@ -570,7 +575,7 @@ function processAiResponse(rawContent, role, chat) {
             id: 'msg_' + Date.now() + '_' + Math.random().toString(36).slice(2)
           };
         } else {
-          /* 找不到对应表情包，降级为文字消息 */
+          /* 找不到对应表情包，降级为文字 */
           msgObj = {
             role: 'assistant', type: 'text', content: emojiName,
             quoteContent: quoteContent || undefined,
@@ -732,6 +737,7 @@ document.getElementById('liao-voice-confirm').addEventListener('click', () => {
   const chat = liaoChats[currentChatIdx];
   const role = liaoRoles.find(r => r.id === chat.roleId);
   const uAvt = chat.chatUserAvatar || liaoUserAvatar;
+  const userName = chat.chatUserName || liaoUserName;
 
   const quoteContent = (currentQuoteMsgIdx >= 0 && chat.messages[currentQuoteMsgIdx])
     ? (chat.messages[currentQuoteMsgIdx].content || '') : '';
@@ -755,7 +761,8 @@ document.getElementById('liao-voice-confirm').addEventListener('click', () => {
   setTimeout(() => {
     if (currentChatIdx < 0) return;
     liaoChats[currentChatIdx].messages.push({
-      role: 'user', content: `[VOICE:${text}]`,
+      role: 'user',
+      content: `${userName}发送了一条语音：${text}`,
       type: 'system_hint', hidden: true,
       ts: Date.now(), id: 'sys_' + Date.now()
     });
@@ -776,10 +783,11 @@ document.getElementById('liao-transfer-confirm').addEventListener('click', () =>
   if (!amount || amount <= 0 || currentChatIdx < 0) { alert('请输入正确的金额'); return; }
   document.getElementById('liao-transfer-modal').style.display = 'none';
 
-  const chat  = liaoChats[currentChatIdx];
-  const role  = liaoRoles.find(r => r.id === chat.roleId);
-  const uAvt  = chat.chatUserAvatar || liaoUserAvatar;
-  const msgId = 'msg_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+  const chat    = liaoChats[currentChatIdx];
+  const role    = liaoRoles.find(r => r.id === chat.roleId);
+  const uAvt    = chat.chatUserAvatar || liaoUserAvatar;
+  const userName = chat.chatUserName || liaoUserName;
+  const msgId   = 'msg_' + Date.now() + '_' + Math.random().toString(36).slice(2);
 
   const msgObj = {
     role: 'user', type: 'transfer', amount, note,
@@ -798,8 +806,12 @@ document.getElementById('liao-transfer-confirm').addEventListener('click', () =>
   /* 仅注入 system_hint，不调用 API */
   setTimeout(() => {
     if (currentChatIdx < 0) return;
+    const hintText = note
+      ? `${userName}给你转账${amount.toFixed(2)}元，备注：${note}`
+      : `${userName}给你转账${amount.toFixed(2)}元`;
     liaoChats[currentChatIdx].messages.push({
-      role: 'user', content: `[TRANSFER:${amount.toFixed(2)}]`,
+      role: 'user',
+      content: hintText,
       type: 'system_hint', hidden: true,
       ts: Date.now(), id: 'sys_' + Date.now()
     });
@@ -838,9 +850,10 @@ document.getElementById('liao-camera-confirm').addEventListener('click', () => {
   if (!desc || currentChatIdx < 0) return;
   document.getElementById('liao-camera-modal').style.display = 'none';
 
-  const chat = liaoChats[currentChatIdx];
-  const role = liaoRoles.find(r => r.id === chat.roleId);
-  const uAvt = chat.chatUserAvatar || liaoUserAvatar;
+  const chat     = liaoChats[currentChatIdx];
+  const role     = liaoRoles.find(r => r.id === chat.roleId);
+  const uAvt     = chat.chatUserAvatar || liaoUserAvatar;
+  const userName = chat.chatUserName || liaoUserName;
 
   const msgObj = {
     role: 'user', type: 'fake_photo', content: desc,
@@ -860,7 +873,8 @@ document.getElementById('liao-camera-confirm').addEventListener('click', () => {
   setTimeout(() => {
     if (currentChatIdx < 0) return;
     liaoChats[currentChatIdx].messages.push({
-      role: 'user', content: `[PHOTO:${desc}]`,
+      role: 'user',
+      content: `${userName}发送了一张照片：${desc}`,
       type: 'system_hint', hidden: true,
       ts: Date.now(), id: 'sys_' + Date.now()
     });
@@ -907,9 +921,10 @@ document.getElementById('liao-image-confirm').addEventListener('click', () => {
   if (!pendingImageSrc || currentChatIdx < 0) { alert('请先选择图片'); return; }
   document.getElementById('liao-image-modal').style.display = 'none';
 
-  const chat = liaoChats[currentChatIdx];
-  const role = liaoRoles.find(r => r.id === chat.roleId);
-  const uAvt = chat.chatUserAvatar || liaoUserAvatar;
+  const chat     = liaoChats[currentChatIdx];
+  const role     = liaoRoles.find(r => r.id === chat.roleId);
+  const uAvt     = chat.chatUserAvatar || liaoUserAvatar;
+  const userName = chat.chatUserName || liaoUserName;
 
   const msgObj = {
     role: 'user', type: 'image', content: pendingImageSrc,
@@ -930,7 +945,8 @@ document.getElementById('liao-image-confirm').addEventListener('click', () => {
   setTimeout(() => {
     if (currentChatIdx < 0) return;
     liaoChats[currentChatIdx].messages.push({
-      role: 'user', content: '[IMAGE:用户发来了一张图片，请根据上下文分析并回应]',
+      role: 'user',
+      content: `${userName}发来了一张图片`,
       type: 'system_hint', hidden: true,
       ts: Date.now(), id: 'sys_' + Date.now()
     });
@@ -1015,9 +1031,10 @@ function renderEmojiGrid() {
 
 function sendEmojiMsg(emoji) {
   if (currentChatIdx < 0) return;
-  const chat = liaoChats[currentChatIdx];
-  const role = liaoRoles.find(r => r.id === chat.roleId);
-  const uAvt = chat.chatUserAvatar || liaoUserAvatar;
+  const chat     = liaoChats[currentChatIdx];
+  const role     = liaoRoles.find(r => r.id === chat.roleId);
+  const uAvt     = chat.chatUserAvatar || liaoUserAvatar;
+  const userName = chat.chatUserName || liaoUserName;
 
   const msgObj = {
     role: 'user', type: 'emoji',
@@ -1043,7 +1060,8 @@ function sendEmojiMsg(emoji) {
   setTimeout(() => {
     if (currentChatIdx < 0) return;
     liaoChats[currentChatIdx].messages.push({
-      role: 'user', content: `[EMOJI:${emoji.name || '表情包'}]`,
+      role: 'user',
+      content: `${userName}发送了一个表情包：${emoji.name || '表情包'}`,
       type: 'system_hint', hidden: true,
       ts: Date.now(), id: 'sys_' + Date.now()
     });
