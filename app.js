@@ -552,6 +552,18 @@ document.querySelectorAll('.dot').forEach(dot => {
 });
 
 /* ============================================================
+   世界书 App 点击
+   ============================================================ */
+document.addEventListener('click', function(e) {
+  const appItem = e.target.closest('.app-item[data-app="worldbook"]');
+  if (appItem) {
+    if (typeof openWorldBook === 'function') {
+      openWorldBook();
+    }
+  }
+});
+
+/* ============================================================
    弹窗遮罩点击关闭
    ============================================================ */
 document.querySelectorAll('.modal-mask').forEach(mask => {

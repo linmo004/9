@@ -477,6 +477,16 @@ async function triggerAiReply() {
 7. 发语音内容必须自然口语，有语气词。
 8. 发表情包只能用上方列出的名称，不得自造名称。
 9. 引用时 [QUOTE:内容] 单独一行，下一行必须是回复正文。`;
+  /* 世界书注入 */
+  let worldBookSection = '';
+  if (typeof getWorldBookInjection === 'function') {
+    const wbText = getWorldBookInjection(chat.messages, role.id);
+    if (wbText) {
+      worldBookSection = '\n\n【世界背景设定】\n以下是本次对话适用的世界书背景设定，请将其作为背景知识融入角色扮演，不要直接引用或朗读这些设定：\n' + wbText;
+    }
+  }
+
+  const finalSystemPrompt = systemPrompt + worldBookSection;
 
   let historyMsgs = chat.messages
     .filter(m => !m.hidden)
@@ -488,7 +498,7 @@ async function triggerAiReply() {
     historyMsgs = historyMsgs.slice(-maxApiMsgs);
   }
 
-  const messages = [{ role: 'system', content: systemPrompt }, ...historyMsgs];
+  const messages = [{ role: 'system', content: finalSystemPrompt }, ...historyMsgs];
 
   try {
     const endpoint = activeConfig.url.replace(/\/$/, '') + '/chat/completions';
