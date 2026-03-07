@@ -1,20 +1,504 @@
 /* ============================================================
-   第二页
+   第二页 — 韩系偶像风重建
    ============================================================ */
+
+/* 第二页整体容器 */
 #page2-inner {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  gap: 10px;
-  color: var(--text-light);
-  font-size: 13px;
-  opacity: 0.5;
-  user-select: none;
+  gap: 0;
+  padding: 14px 16px 0;
 }
 
-#page2-inner .p2-icon {
-  font-size: 34px;
-  opacity: 0.4;
+/* 第三页空白容器 */
+#page3-inner {
+  width: 100%;
+  height: 100%;
+}
+
+/* ============================================================
+   通用 section 间距
+   ============================================================ */
+.p2-section {
+  margin-bottom: 20px;
+}
+
+/* ============================================================
+   模块一：用户主页卡
+   ============================================================ */
+.p2-user-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 22px;
+  overflow: hidden;
+  background: linear-gradient(145deg, #c8e4f8 0%, #dbeeff 50%, #f0f7ff 100%);
+  box-shadow: 0 6px 28px rgba(100, 160, 210, 0.18);
+  border: 1.5px solid rgba(153, 200, 237, 0.28);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* 背景图层 */
+.p2-uc-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 0;
+  transition: opacity 0.4s;
+}
+
+/* 更换背景按钮 */
+.p2-uc-change-bg {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(153, 200, 237, 0.45);
+  color: #7a9abf;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 2px 8px rgba(100, 150, 200, 0.15);
+  transition: background 0.18s;
+}
+
+.p2-uc-change-bg:active {
+  background: rgba(153, 200, 237, 0.35);
+}
+
+/* 头像容器 */
+.p2-uc-avatar-wrap {
+  position: relative;
+  z-index: 2;
+  margin-top: 22%;
+}
+
+.p2-uc-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow: 0 4px 16px rgba(80, 130, 190, 0.22);
+  display: block;
+  background: #d6e8f7;
+}
+
+/* 下半白色渐变蒙版 + 音乐条 */
+.p2-uc-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  background: linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.72) 30%, rgba(255,255,255,0.97) 100%);
+  padding: 28px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 音乐进度条容器 */
+.p2-music-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.p2-music-time {
+  font-size: 10px;
+  color: var(--text-mid, #5a6a80);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+
+/* 进度条轨道 */
+.p2-music-track {
+  flex: 1;
+  height: 4px;
+  background: #B3D8F4;
+  border-radius: 999px;
+  position: relative;
+  cursor: pointer;
+  touch-action: none;
+}
+
+/* 已播放部分 */
+.p2-music-played {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: #99C8ED;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+/* 拖拽滑块 */
+.p2-music-thumb {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border: 2px solid #99C8ED;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(80, 130, 190, 0.22);
+  cursor: grab;
+  transition: transform 0.1s;
+  pointer-events: none;
+}
+
+/* ============================================================
+   模块二：小卡图片展示
+   ============================================================ */
+.p2-cards-widget {
+  position: relative;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.p2-card-item {
+  position: absolute;
+  width: 88px;
+  height: 136px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #e8f3fb;
+  border: 1.5px solid rgba(153, 200, 237, 0.30);
+  box-shadow: 0 4px 14px rgba(80, 130, 190, 0.16);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: box-shadow 0.2s;
+}
+
+.p2-card-item:active {
+  box-shadow: 0 6px 22px rgba(80, 130, 190, 0.28);
+}
+
+.p2-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  position: absolute;
+  inset: 0;
+}
+
+.p2-card-placeholder {
+  font-size: 22px;
+  color: rgba(153, 200, 237, 0.60);
+  font-weight: 200;
+  line-height: 1;
+  pointer-events: none;
+  position: relative;
+  z-index: 1;
+}
+
+.p2-card-item .p2-card-img[src=""] ,
+.p2-card-item .p2-card-img:not([src]) {
+  display: none;
+}
+
+/* ============================================================
+   模块三：专辑组件 + App 区域
+   ============================================================ */
+.p2-bottom-row {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+/* 专辑组件 */
+.p2-album-widget {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  flex-shrink: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  background: linear-gradient(145deg, #1a1f2e 0%, #2c3a54 100%);
+  box-shadow: 0 4px 18px rgba(40, 60, 100, 0.22);
+  border: 1.5px solid rgba(153, 200, 237, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 专辑背景图 */
+.p2-album-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 0;
+  opacity: 0.45;
+  transition: opacity 0.4s;
+}
+
+/* 专辑更换按钮 */
+.p2-album-change-btn {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  z-index: 10;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: rgba(255, 255, 255, 0.80);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: background 0.18s;
+}
+
+.p2-album-change-btn:active {
+  background: rgba(153, 200, 237, 0.35);
+}
+
+/* CD 光碟容器 */
+.p2-cd {
+  position: relative;
+  z-index: 2;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  animation: p2-cd-spin 8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes p2-cd-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* CD 同心圆环 */
+.p2-cd-ring {
+  position: absolute;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.p2-cd-r1 {
+  width: 90px;
+  height: 90px;
+  background: conic-gradient(
+    #c8d8e8 0deg,
+    #e8f0f8 40deg,
+    #a0b8d0 80deg,
+    #d4e4f0 120deg,
+    #b8cce0 160deg,
+    #e0eaf4 200deg,
+    #9ab4cc 240deg,
+    #ccdae8 280deg,
+    #b0c6da 320deg,
+    #c8d8e8 360deg
+  );
+  box-shadow: 0 0 12px rgba(60, 100, 160, 0.35), inset 0 0 8px rgba(255,255,255,0.15);
+}
+
+.p2-cd-r2 {
+  width: 68px;
+  height: 68px;
+  background: conic-gradient(
+    #1a2438 0deg,
+    #2c3e58 45deg,
+    #182030 90deg,
+    #243248 135deg,
+    #1c2840 180deg,
+    #2e4060 225deg,
+    #1a2438 270deg,
+    #263a52 315deg,
+    #1a2438 360deg
+  );
+  box-shadow: inset 0 0 6px rgba(255,255,255,0.08);
+}
+
+.p2-cd-r3 {
+  width: 46px;
+  height: 46px;
+  background: conic-gradient(
+    #b8cce0 0deg,
+    #d8eaf8 60deg,
+    #99C8ED 120deg,
+    #c4d8ec 180deg,
+    #b0c8e0 240deg,
+    #daeaf8 300deg,
+    #b8cce0 360deg
+  );
+  box-shadow: 0 0 6px rgba(153, 200, 237, 0.40);
+}
+
+.p2-cd-r4 {
+  width: 28px;
+  height: 28px;
+  background: conic-gradient(
+    #1e2c42 0deg,
+    #2e4060 60deg,
+    #1a2438 120deg,
+    #263a52 180deg,
+    #1e2c42 360deg
+  );
+}
+
+/* CD 中心孔 */
+.p2-cd-hole {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fff;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  box-shadow: 0 0 3px rgba(0,0,0,0.25);
+}
+
+/* 右侧 App 网格 */
+.p2-apps-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 8px;
+  justify-items: center;
+}
+
+/* ============================================================
+   图片更换弹窗
+   ============================================================ */
+.p2-img-modal-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 700;
+  background: rgba(0, 0, 0, 0.40);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.p2-img-modal-box {
+  background: #fff;
+  border-radius: 18px;
+  padding: 22px 20px 18px;
+  width: 100%;
+  max-width: 320px;
+  box-shadow: 0 8px 36px rgba(80, 120, 180, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.p2-img-modal-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-dark, #2c3448);
+  margin-bottom: 2px;
+}
+
+.p2-img-modal-input {
+  border: 1.5px solid rgba(153, 200, 237, 0.40);
+  border-radius: 10px;
+  padding: 8px 11px;
+  font-size: 13px;
+  color: var(--text-dark, #2c3448);
+  background: #f5f8fc;
+  outline: none;
+  font-family: inherit;
+  width: 100%;
+}
+
+.p2-img-modal-input:focus {
+  border-color: #99C8ED;
+  background: #fff;
+}
+
+.p2-img-modal-or {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-light, #9aafc4);
+}
+
+.p2-img-modal-file-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px dashed rgba(153, 200, 237, 0.50);
+  border-radius: 10px;
+  padding: 9px;
+  font-size: 13px;
+  color: #7a9abf;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.18s;
+}
+
+.p2-img-modal-file-btn:active {
+  background: rgba(153, 200, 237, 0.10);
+}
+
+.p2-img-modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+  justify-content: flex-end;
+}
+
+.p2-img-modal-cancel {
+  background: none;
+  border: 1.5px solid rgba(153, 200, 237, 0.40);
+  border-radius: 10px;
+  color: var(--text-mid, #5a6a80);
+  font-size: 13px;
+  padding: 7px 16px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.p2-img-modal-confirm {
+  background: #99C8ED;
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 18px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.p2-img-modal-confirm:active {
+  opacity: 0.82;
 }

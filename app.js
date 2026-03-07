@@ -366,7 +366,7 @@ let msgData = load('msgData', [
   },
   {
     avatar:   'https://api.dicebear.com/7.x/bottts-neutral/svg?seed=nova',
-    messages: ['HALO·九 已上线 ✨']
+    messages: ['HALO·九 已上线']
   }
 ]);
 let msgEditIdx = 0, msgTab = 'url';
@@ -491,13 +491,15 @@ document.getElementById('textbar-cancel-btn').addEventListener('click', function
 });
 
 /* ============================================================
-   页面横滑
+   页面横滑（支持三页）
    ============================================================ */
 let currentPage  = 0;
 const pagesWrap  = document.getElementById('pages-wrap');
+const totalPages = 3;
 let touchStartX  = 0, touchStartY = 0, touchMoved = false;
 
 function goToPage(idx) {
+  if (idx < 0 || idx >= totalPages) return;
   currentPage = idx;
   pagesWrap.style.transform = `translateX(-${idx * 100}vw)`;
   document.querySelectorAll('.dot').forEach((dot, i) => {
@@ -520,18 +522,18 @@ document.addEventListener('touchmove', function(e) {
 document.addEventListener('touchend', function(e) {
   if (!touchMoved) return;
   const dx = e.changedTouches[0].clientX - touchStartX;
-  if (dx < -50 && currentPage < 1) goToPage(1);
-  else if (dx > 50 && currentPage > 0) goToPage(0);
+  if (dx < -50 && currentPage < totalPages - 1) goToPage(currentPage + 1);
+  else if (dx > 50 && currentPage > 0) goToPage(currentPage - 1);
   touchMoved = false;
 }, { passive: true });
 
-/* 修复Bug：加入 mouseMoved 标志位，防止点击被误判为滑动 */
 let mouseStartX = 0, mouseIsDown = false, mouseMoved = false;
 
 document.addEventListener('mousedown', function(e) {
   if (e.target.closest('.modal-mask')) return;
   if (e.target.closest('.settings-layer')) return;
   if (e.target.closest('#worldbook-app')) return;
+  if (e.target.closest('.p2-img-modal-mask')) return;
   mouseStartX = e.clientX;
   mouseIsDown = true;
   mouseMoved  = false;
@@ -549,9 +551,10 @@ document.addEventListener('mouseup', function(e) {
   if (e.target.closest('.modal-mask')) return;
   if (e.target.closest('.settings-layer')) return;
   if (e.target.closest('#worldbook-app')) return;
+  if (e.target.closest('.p2-img-modal-mask')) return;
   const dx = e.clientX - mouseStartX;
-  if (dx < -60 && currentPage < 1) goToPage(1);
-  else if (dx > 60 && currentPage > 0) goToPage(0);
+  if (dx < -60 && currentPage < totalPages - 1) goToPage(currentPage + 1);
+  else if (dx > 60 && currentPage > 0) goToPage(currentPage - 1);
   mouseMoved = false;
 });
 
@@ -584,3 +587,227 @@ document.querySelectorAll('.modal-mask').forEach(mask => {
     if (e.target === this) this.classList.remove('show');
   });
 });
+
+/* ============================================================
+   第二页：共用图片更换弹窗
+   ============================================================ */
+var p2ModalTarget  = null;
+var p2ModalPending = '';
+
+function openP2ImgModal(title, target) {
+  p2ModalTarget  = target;
+  p2ModalPending = '';
+  document.getElementById('p2-img-modal-title').textContent = title;
+  document.getElementById('p2-img-modal-url').value = '';
+  document.getElementById('p2-img-modal-file').value = '';
+  document.getElementById('p2-img-modal').style.display = 'flex';
+}
+
+function closeP2ImgModal() {
+  document.getElementById('p2-img-modal').style.display = 'none';
+  p2ModalTarget  = null;
+  p2ModalPending = '';
+}
+
+function applyP2Image(src) {
+  if (!src || !p2ModalTarget) return;
+
+  if (p2ModalTarget === 'ucbg') {
+    document.getElementById('p2-uc-bg').style.backgroundImage = 'url(' + src + ')';
+    save('p2UcBg', src);
+
+  } else if (p2ModalTarget === 'album') {
+    document.getElementById('p2-album-bg').style.backgroundImage = 'url(' + src + ')';
+    save('p2AlbumBg', src);
+
+  } else if (p2ModalTarget.startsWith('card-')) {
+    const idx = parseInt(p2ModalTarget.split('-')[1]);
+    const imgEl = document.getElementById('p2-card-img-' + idx);
+    if (imgEl) {
+      imgEl.src = src;
+      imgEl.style.display = 'block';
+      const ph = imgEl.nextElementSibling;
+      if (ph) ph.style.display = 'none';
+    }
+    p2CardUrls[idx] = src;
+    save('page2Cards', p2CardUrls);
+  }
+  closeP2ImgModal();
+}
+
+document.getElementById('p2-img-modal-confirm').addEventListener('click', function() {
+  if (p2ModalPending) {
+    applyP2Image(p2ModalPending);
+    return;
+  }
+  const url = document.getElementById('p2-img-modal-url').value.trim();
+  if (url) { p2ModalPending = url; applyP2Image(url); return; }
+  alert('请输入图片URL或选择本地文件');
+});
+
+document.getElementById('p2-img-modal-cancel').addEventListener('click', function() {
+  closeP2ImgModal();
+});
+
+document.getElementById('p2-img-modal-file').addEventListener('change', function() {
+  const file = this.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    p2ModalPending = e.target.result;
+    applyP2Image(e.target.result);
+  };
+  reader.readAsDataURL(file);
+  this.value = '';
+});
+
+document.getElementById('p2-img-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeP2ImgModal();
+});
+
+/* ============================================================
+   第二页：用户主页卡
+   ============================================================ */
+(function initP2UserCard() {
+  const bg = load('p2UcBg', null);
+  if (bg) {
+    const bgEl = document.getElementById('p2-uc-bg');
+    if (bgEl) bgEl.style.backgroundImage = 'url(' + bg + ')';
+  }
+
+  function syncP2Avatar() {
+    const av   = load('userAvatar', null);
+    const p2av = document.getElementById('p2-uc-avatar');
+    if (!p2av) return;
+    if (av) {
+      p2av.src = av;
+    } else {
+      const mainAv = document.getElementById('user-avatar');
+      if (mainAv) p2av.src = mainAv.src;
+    }
+  }
+  syncP2Avatar();
+
+  const changeBgBtn = document.getElementById('p2-uc-change-bg-btn');
+  if (changeBgBtn) {
+    changeBgBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      openP2ImgModal('更换用户卡背景', 'ucbg');
+    });
+  }
+})();
+
+/* ============================================================
+   第二页：装饰音乐进度条
+   ============================================================ */
+(function initP2MusicBar() {
+  const track  = document.getElementById('p2-music-track');
+  const played = document.getElementById('p2-music-played');
+  const thumb  = document.getElementById('p2-music-thumb');
+  const curEl  = document.getElementById('p2-music-cur');
+  if (!track) return;
+
+  const totalSecs = 217;
+  let progress = 0.38;
+  let dragging = false;
+
+  function updateBar(p) {
+    progress = Math.max(0, Math.min(1, p));
+    const pct = (progress * 100).toFixed(1) + '%';
+    if (played) played.style.width = pct;
+    if (thumb)  thumb.style.left  = pct;
+    if (curEl) {
+      const cur = Math.round(progress * totalSecs);
+      const m   = Math.floor(cur / 60);
+      const s   = String(cur % 60).padStart(2, '0');
+      curEl.textContent = m + ':' + s;
+    }
+  }
+
+  function getPct(e) {
+    const rect    = track.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    return (clientX - rect.left) / rect.width;
+  }
+
+  track.addEventListener('mousedown', function(e) {
+    dragging = true;
+    updateBar(getPct(e));
+    e.stopPropagation();
+  });
+
+  track.addEventListener('touchstart', function(e) {
+    dragging = true;
+    updateBar(getPct(e));
+    e.stopPropagation();
+  }, { passive: true });
+
+  document.addEventListener('mousemove', function(e) {
+    if (!dragging) return;
+    updateBar(getPct(e));
+  });
+
+  document.addEventListener('touchmove', function(e) {
+    if (!dragging) return;
+    updateBar(getPct(e));
+  }, { passive: true });
+
+  document.addEventListener('mouseup',  function() { dragging = false; });
+  document.addEventListener('touchend', function() { dragging = false; });
+
+  updateBar(0.38);
+})();
+
+/* ============================================================
+   第二页：小卡图片
+   ============================================================ */
+var p2CardUrls = load('page2Cards', ['', '', '', '']);
+
+(function initP2Cards() {
+  p2CardUrls.forEach(function(url, idx) {
+    if (!url) return;
+    const imgEl = document.getElementById('p2-card-img-' + idx);
+    if (!imgEl) return;
+    imgEl.src = url;
+    imgEl.style.display = 'block';
+    const ph = imgEl.nextElementSibling;
+    if (ph) ph.style.display = 'none';
+  });
+
+  const widget = document.getElementById('p2-cards-widget');
+  if (widget) {
+    widget.addEventListener('click', function(e) {
+      const card = e.target.closest('.p2-card-item');
+      if (!card) return;
+      const idx = card.dataset.card;
+      openP2ImgModal('更换小卡图片 ' + (parseInt(idx) + 1), 'card-' + idx);
+    });
+  }
+})();
+
+/* ============================================================
+   第二页：专辑组件背景
+   ============================================================ */
+(function initP2Album() {
+  const bg = load('p2AlbumBg', null);
+  if (bg) {
+    const bgEl = document.getElementById('p2-album-bg');
+    if (bgEl) bgEl.style.backgroundImage = 'url(' + bg + ')';
+  }
+
+  const changeBtn = document.getElementById('p2-album-change-btn');
+  if (changeBtn) {
+    changeBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      openP2ImgModal('更换专辑背景', 'album');
+    });
+  }
+})();
+
+/* ============================================================
+   第二页：pages-wrap 宽度适配三页
+   ============================================================ */
+(function initPagesWrapWidth() {
+  const pw = document.getElementById('pages-wrap');
+  if (pw) pw.style.width = (totalPages * 100) + 'vw';
+})();

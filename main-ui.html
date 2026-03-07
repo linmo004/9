@@ -1,7 +1,7 @@
 <!-- 全屏竖向容器：状态栏 + 页面内容，随 body 壁纸显示 -->
 <div id="screen-wrap">
 
-  <!-- 顶部状态栏（普通流，不再 fixed，随壁纸显示） -->
+  <!-- 顶部状态栏 -->
   <div id="status-bar">
     <div id="status-time">00:00</div>
     <div id="status-watermark">MX_4</div>
@@ -9,6 +9,8 @@
 
   <!-- 页面横滑容器 -->
   <div id="pages-wrap">
+
+    <!-- 第一页 -->
     <div class="page" id="page1">
       <div id="page1-inner">
         <div id="date-capsule">
@@ -53,7 +55,7 @@
               </div>
               <div class="app-item" data-app="worldbook">
                 <img class="app-icon" src="https://img.icons8.com/fluency/96/book-reading.png" alt="">
-              <div class="app-name">世界书</div>
+                <div class="app-name">世界书</div>
               </div>
               <div class="app-item" data-app="2">
                 <img class="app-icon" src="https://img.icons8.com/fluency/96/calendar--v1.png" alt="">
@@ -99,20 +101,128 @@
       </div>
     </div>
 
+    <!-- 第二页 -->
     <div class="page" id="page2">
       <div id="page2-inner">
-        <div class="p2-icon">◐</div>
-        <div>第二页</div>
-        <div style="font-size:11px;margin-top:4px;opacity:.7;">向左滑动返回 · 待更新</div>
+
+        <!-- 模块一：用户主页卡 -->
+        <div class="p2-section">
+          <div class="p2-user-card" id="p2-user-card">
+            <!-- 背景图 -->
+            <div class="p2-uc-bg" id="p2-uc-bg"></div>
+            <!-- 点击更换背景按钮 -->
+            <button class="p2-uc-change-bg" id="p2-uc-change-bg-btn" title="更换背景">&#43;</button>
+            <!-- 头像 -->
+            <div class="p2-uc-avatar-wrap">
+              <img class="p2-uc-avatar" id="p2-uc-avatar" src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=halo9" alt="">
+            </div>
+            <!-- 白色渐变蒙版 + 音乐条 -->
+            <div class="p2-uc-bottom">
+              <div class="p2-music-bar-wrap">
+                <span class="p2-music-time p2-music-cur" id="p2-music-cur">1:23</span>
+                <div class="p2-music-track" id="p2-music-track">
+                  <div class="p2-music-played" id="p2-music-played" style="width:38%;"></div>
+                  <div class="p2-music-thumb" id="p2-music-thumb" style="left:38%;"></div>
+                </div>
+                <span class="p2-music-time p2-music-total">3:37</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 模块二：小卡图片展示 -->
+        <div class="p2-section">
+          <div class="p2-cards-widget" id="p2-cards-widget">
+            <div class="p2-card-item" data-card="0" style="transform: rotate(-4deg) translateX(-18px) translateY(8px); z-index:1;">
+              <img class="p2-card-img" id="p2-card-img-0" src="" alt="">
+              <div class="p2-card-placeholder">&#43;</div>
+            </div>
+            <div class="p2-card-item" data-card="1" style="transform: rotate(5deg) translateX(-6px) translateY(0px); z-index:2;">
+              <img class="p2-card-img" id="p2-card-img-1" src="" alt="">
+              <div class="p2-card-placeholder">&#43;</div>
+            </div>
+            <div class="p2-card-item" data-card="2" style="transform: rotate(-3.5deg) translateX(6px) translateY(4px); z-index:3;">
+              <img class="p2-card-img" id="p2-card-img-2" src="" alt="">
+              <div class="p2-card-placeholder">&#43;</div>
+            </div>
+            <div class="p2-card-item" data-card="3" style="transform: rotate(4.5deg) translateX(20px) translateY(-4px); z-index:4;">
+              <img class="p2-card-img" id="p2-card-img-3" src="" alt="">
+              <div class="p2-card-placeholder">&#43;</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 模块三：专辑小组件 + App区域 -->
+        <div class="p2-section">
+          <div class="p2-bottom-row">
+            <!-- 左侧：专辑组件 -->
+            <div class="p2-album-widget" id="p2-album-widget">
+              <div class="p2-album-bg" id="p2-album-bg"></div>
+              <button class="p2-album-change-btn" id="p2-album-change-btn" title="更换背景">&#43;</button>
+              <!-- CD光碟 -->
+              <div class="p2-cd" id="p2-cd">
+                <div class="p2-cd-ring p2-cd-r1"></div>
+                <div class="p2-cd-ring p2-cd-r2"></div>
+                <div class="p2-cd-ring p2-cd-r3"></div>
+                <div class="p2-cd-ring p2-cd-r4"></div>
+                <div class="p2-cd-hole"></div>
+              </div>
+            </div>
+            <!-- 右侧：4个App图标 -->
+            <div class="p2-apps-grid">
+              <div class="app-item" data-app="p2-app-0">
+                <img class="app-icon" src="https://img.icons8.com/fluency/96/note.png" alt="">
+                <div class="app-name">备忘录</div>
+              </div>
+              <div class="app-item" data-app="p2-app-1">
+                <img class="app-icon" src="https://img.icons8.com/fluency/96/alarm.png" alt="">
+                <div class="app-name">闹钟</div>
+              </div>
+              <div class="app-item" data-app="p2-app-2">
+                <img class="app-icon" src="https://img.icons8.com/fluency/96/map.png" alt="">
+                <div class="app-name">地图</div>
+              </div>
+              <div class="app-item" data-app="p2-app-3">
+                <img class="app-icon" src="https://img.icons8.com/fluency/96/star.png" alt="">
+                <div class="app-name">收藏</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
+
+    <!-- 第三页（空白保留） -->
+    <div class="page" id="page3">
+      <div id="page3-inner"></div>
+    </div>
+
   </div><!-- /pages-wrap -->
 
 </div><!-- /screen-wrap -->
 
+<!-- 图片更换弹窗（小卡 / 用户卡背景 / 专辑背景 共用） -->
+<div class="p2-img-modal-mask" id="p2-img-modal" style="display:none;">
+  <div class="p2-img-modal-box">
+    <div class="p2-img-modal-title" id="p2-img-modal-title">更换图片</div>
+    <input class="p2-img-modal-input" id="p2-img-modal-url" placeholder="粘贴图片 URL…" />
+    <div class="p2-img-modal-or">或</div>
+    <label class="p2-img-modal-file-btn">
+      从本地上传
+      <input type="file" accept="image/*" id="p2-img-modal-file" style="display:none;">
+    </label>
+    <div class="p2-img-modal-actions">
+      <button class="p2-img-modal-cancel" id="p2-img-modal-cancel">取消</button>
+      <button class="p2-img-modal-confirm" id="p2-img-modal-confirm">确认</button>
+    </div>
+  </div>
+</div>
+
 <div id="page-dots">
   <div class="dot active" data-page="0"></div>
   <div class="dot" data-page="1"></div>
+  <div class="dot" data-page="2"></div>
 </div>
 
 <div id="dock">
