@@ -304,18 +304,19 @@
   display: flex;
   gap: 10px;
   align-items: center;
+  justify-content: flex-end;  /* 整体靠右 */
+  padding-right: 2px;
 }
 
 /* 专辑外层（overflow visible 让CD溢出） */
 .p2-album-outer {
   position: relative;
   flex-shrink: 0;
-  /* 专辑本体 100px，CD直径78px，右1/3溢出 = 26px，总宽 = 100+26 = 126px */
   width: 126px;
   height: 100px;
 }
 
-/* 专辑主体（缩小：100x100） */
+/* 专辑主体（100x100） */
 .p2-album-widget {
   position: absolute;
   top: 0;
@@ -331,7 +332,7 @@
     3px 0 0 0 rgba(153,200,237,0.28);
   border: 1.5px solid rgba(153,200,237,0.18);
   z-index: 1;
-  cursor: pointer;            /* 点击换封面 */
+  cursor: pointer;
 }
 
 .p2-album-bg {
@@ -346,7 +347,6 @@
   pointer-events: none;
 }
 
-/* 右侧半边框光效 */
 .p2-album-border {
   position: absolute;
   top: 8px;
@@ -366,10 +366,6 @@
   pointer-events: none;
 }
 
-/* CD 定位：
-   CD直径78px，左2/3=52px压在专辑上，右1/3=26px伸出
-   left = 专辑宽 - CD直径*2/3 = 100 - 52 = 48px
-   top  = (专辑高 - CD高) / 2 = (100 - 78) / 2 = 11px */
 .p2-cd-wrap {
   position: absolute;
   top: 11px;
@@ -385,7 +381,7 @@
   height: 78px;
   border-radius: 50%;
   animation: p2-cd-spin 9s linear infinite;
-  cursor: pointer;            /* 点击换CD图 */
+  cursor: pointer;
 }
 
 @keyframes p2-cd-spin {
@@ -401,7 +397,6 @@
   transform: translate(-50%, -50%);
 }
 
-/* 最外层金属光泽（不可点击换图，pointer-events:none） */
 .p2-cd-r1 {
   width: 78px;
   height: 78px;
@@ -415,7 +410,7 @@
     0 0 0 1px rgba(153,200,237,0.40),
     0 2px 10px rgba(60,100,160,0.35),
     inset 0 0 6px rgba(255,255,255,0.18);
-  pointer-events: none;       /* 金属区不触发点击换图 */
+  pointer-events: none;
 }
 
 .p2-cd-r2 {
@@ -438,7 +433,7 @@
     #b8cce0 360deg
   );
   box-shadow: 0 0 8px rgba(153,200,237,0.45);
-  cursor: pointer;            /* 可点击区域换CD图 */
+  cursor: pointer;
 }
 
 .p2-cd-r4 {
@@ -465,16 +460,18 @@
   pointer-events: none;
 }
 
-/* App 网格：学习主页面 four-apps 间距 */
+/* App 网格：4个app紧凑，向中间靠拢 */
 .p2-apps-grid {
-  flex: 1;
+  flex-shrink: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px 8px;
+  gap: 8px 6px;          /* 行距列距都收紧 */
   justify-items: center;
   align-items: start;
-  padding: 4px 0;
+  padding: 0 6px;        /* 左右内缩，向中间聚拢 */
+  width: auto;
 }
+
 
 /* ============================================================
    共用图片更换弹窗
