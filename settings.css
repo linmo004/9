@@ -1,0 +1,408 @@
+/* ============================================================
+   settings.css — 设置 App 专属样式
+   ============================================================ */
+
+/* ---- 设置层覆盖容器（全屏覆盖） ---- */
+.settings-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  background: var(--bg, #F5F5F0);
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ---- 顶部导航栏 ---- */
+.settings-topbar {
+  display: flex;
+  align-items: center;
+  height: 52px;
+  padding: 0 16px;
+  background: rgba(255,255,255,0.92);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(153,200,237,0.22);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.settings-topbar-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-dark, #2c3448);
+  letter-spacing: .02em;
+}
+
+.settings-back-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: var(--primary, #99C8ED);
+  cursor: pointer;
+  padding: 6px 8px 6px 0;
+  line-height: 1;
+  font-family: inherit;
+  -webkit-appearance: none;
+  z-index: 1;
+}
+
+/* ---- 设置主列表 ---- */
+.settings-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 16px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings-item {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 12px rgba(100,140,190,0.09);
+  border: 1.5px solid rgba(153,200,237,0.15);
+  cursor: pointer;
+  transition: background .15s;
+  margin-bottom: 4px;
+}
+
+.settings-item:active {
+  background: #eaf4fc;
+}
+
+.settings-item-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-item-icon {
+  font-size: 22px;
+  width: 36px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.settings-item-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dark, #2c3448);
+  margin-bottom: 3px;
+}
+
+.settings-item-sub {
+  font-size: 11px;
+  color: var(--text-light, #9aafc4);
+}
+
+.settings-item-arrow {
+  font-size: 18px;
+  color: var(--text-light, #9aafc4);
+}
+
+/* ---- 设置内页滚动区 ---- */
+.settings-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 16px 50px;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ---- 分组标题 ---- */
+.settings-section-title {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-light, #9aafc4);
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  padding-left: 4px;
+}
+
+.settings-section-title:first-child {
+  margin-top: 4px;
+}
+
+/* ---- 卡片 ---- */
+.settings-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 18px 16px;
+  box-shadow: 0 2px 14px rgba(100,140,190,0.09);
+  border: 1.5px solid rgba(153,200,237,0.15);
+  margin-bottom: 6px;
+}
+
+/* ---- 表单元素 ---- */
+.settings-label {
+  display: block;
+  font-size: 11.5px;
+  color: var(--text-mid, #5a6a80);
+  margin-bottom: 6px;
+  margin-top: 14px;
+}
+
+.settings-label:first-child {
+  margin-top: 0;
+}
+
+.settings-input {
+  width: 100%;
+  border: 1.5px solid var(--light-blue, #B3D8F4);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--text-dark, #2c3448);
+  background: var(--bg2, #F8F9FA);
+  outline: none;
+  font-family: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color .2s;
+  box-sizing: border-box;
+}
+
+.settings-input:focus {
+  border-color: var(--primary, #99C8ED);
+}
+
+/* ---- 按钮行 ---- */
+.settings-row-btns {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.settings-btn-primary {
+  background: var(--primary, #99C8ED);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 20px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 500;
+  -webkit-appearance: none;
+  transition: opacity .18s;
+  white-space: nowrap;
+}
+
+.settings-btn-primary:active {
+  opacity: 0.76;
+}
+
+.settings-btn-ghost {
+  background: var(--bg2, #F8F9FA);
+  color: var(--text-mid, #5a6a80);
+  border: 1.5px solid var(--light-blue, #B3D8F4);
+  border-radius: 999px;
+  padding: 9px 18px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  -webkit-appearance: none;
+  white-space: nowrap;
+}
+
+.settings-btn-danger {
+  background: #fff0f0;
+  color: #e05c5c;
+  border: 1.5px solid #f5c0c0;
+  border-radius: 999px;
+  padding: 9px 18px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  -webkit-appearance: none;
+  white-space: nowrap;
+}
+
+/* ---- 描述文字 ---- */
+.settings-desc {
+  font-size: 12px;
+  color: var(--text-light, #9aafc4);
+  line-height: 1.6;
+}
+
+/* ---- API 状态文字 ---- */
+.api-status-text {
+  font-size: 12px;
+  color: var(--text-mid, #5a6a80);
+  margin-top: 8px;
+  min-height: 18px;
+}
+
+.api-status-text.success {
+  color: #4caf84;
+}
+
+.api-status-text.error {
+  color: #e05c5c;
+}
+
+/* ---- API 存档条目 ---- */
+.api-archive-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg2, #F8F9FA);
+  border-radius: 11px;
+  padding: 12px 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: background .15s;
+}
+
+.api-archive-item:last-child {
+  margin-bottom: 0;
+}
+
+.api-archive-item:active {
+  background: #eaf4fc;
+}
+
+.api-archive-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.api-archive-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dark, #2c3448);
+  margin-bottom: 3px;
+}
+
+.api-archive-url {
+  font-size: 10.5px;
+  color: var(--text-light, #9aafc4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.api-archive-del {
+  background: #ffe0e0;
+  color: #e05c5c;
+  border: none;
+  border-radius: 8px;
+  padding: 5px 11px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+
+/* ---- 壁纸预览 ---- */
+.theme-wallpaper-preview {
+  width: 100%;
+  height: 90px;
+  border-radius: 12px;
+  background: var(--bg2, #F8F9FA);
+  border: 1.5px dashed var(--light-blue, #B3D8F4);
+  background-size: cover;
+  background-position: center;
+}
+
+/* ---- 图标替换列表 ---- */
+.icon-replace-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(153,200,237,0.14);
+  cursor: pointer;
+  transition: background .15s;
+}
+
+.icon-replace-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.icon-replace-row:first-child {
+  padding-top: 0;
+}
+
+.icon-replace-row:active {
+  opacity: 0.7;
+}
+
+.icon-replace-preview {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: var(--light-blue, #B3D8F4);
+  flex-shrink: 0;
+}
+
+.icon-replace-name {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text-dark, #2c3448);
+  font-weight: 500;
+}
+
+.icon-replace-hint {
+  font-size: 11px;
+  color: var(--text-light, #9aafc4);
+}
+
+/* ---- 配色字段 ---- */
+.color-field-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(153,200,237,0.12);
+}
+
+.color-field-row:last-child {
+  border-bottom: none;
+}
+
+.color-field-label {
+  flex: 1;
+  font-size: 12.5px;
+  color: var(--text-mid, #5a6a80);
+}
+
+.color-field-input {
+  width: 36px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1.5px solid var(--light-blue, #B3D8F4);
+  padding: 2px;
+  cursor: pointer;
+  background: none;
+  -webkit-appearance: none;
+  flex-shrink: 0;
+}
+
+.color-field-hex {
+  width: 80px;
+  border: 1.5px solid var(--light-blue, #B3D8F4);
+  border-radius: 8px;
+  padding: 5px 8px;
+  font-size: 12px;
+  color: var(--text-dark, #2c3448);
+  background: var(--bg2, #F8F9FA);
+  outline: none;
+  font-family: 'SF Mono', 'Menlo', monospace;
+  -webkit-appearance: none;
+  flex-shrink: 0;
+}
