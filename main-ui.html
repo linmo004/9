@@ -105,36 +105,37 @@
     <div class="page" id="page2">
       <div id="page2-inner">
 
-        <!-- 模块一：用户主页卡（点击整体换背景，点击头像换头像，无加号按键） -->
-        <div class="p2-section p2-section-uc">
-          <div class="p2-user-card" id="p2-user-card">
-            <!-- 背景图层（最底层，点击换背景） -->
-            <div class="p2-uc-bg" id="p2-uc-bg"></div>
-            <!-- 白色渐变蒙版（压在背景上，在头像和音乐条下层） -->
-            <div class="p2-uc-gradient"></div>
-            <!-- 头像（点击换头像，在渐变上层） -->
-            <div class="p2-uc-avatar-wrap" id="p2-uc-avatar-wrap">
-              <img class="p2-uc-avatar" id="p2-uc-avatar"
-                src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=halo9" alt="">
-            </div>
-            <!-- 音乐控制区（在渐变上层） -->
-            <div class="p2-uc-music">
-              <div class="p2-music-bar-wrap">
-                <span class="p2-music-time" id="p2-music-cur">1:23</span>
-                <div class="p2-music-track" id="p2-music-track">
-                  <div class="p2-music-played" id="p2-music-played"></div>
-                  <div class="p2-music-thumb" id="p2-music-thumb"></div>
-                </div>
-                <span class="p2-music-time">3:37</span>
-              </div>
-              <div class="p2-music-controls">
-                <button class="p2-mc-btn" id="p2-mc-prev">&#9664;&#9664;</button>
-                <button class="p2-mc-btn p2-mc-play" id="p2-mc-play">&#9654;</button>
-                <button class="p2-mc-btn" id="p2-mc-next">&#9654;&#9654;</button>
-              </div>
-            </div>
-          </div>
+        <!-- 模块一：用户主页卡 -->
+<div class="p2-section p2-section-uc">
+  <div class="p2-user-card" id="p2-user-card">
+    <!-- 背景图层（最底层，点击换背景） -->
+    <div class="p2-uc-bg" id="p2-uc-bg"></div>
+    <!-- 白色渐变蒙版（压在背景上，在头像和信息下层） -->
+    <div class="p2-uc-gradient"></div>
+    <!-- 头像（点击换头像，在渐变上层） -->
+    <div class="p2-uc-avatar-wrap" id="p2-uc-avatar-wrap">
+      <img class="p2-uc-avatar" id="p2-uc-avatar"
+        src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=halo9" alt="">
+    </div>
+    <!-- 用户信息区（在渐变上层） -->
+    <div class="p2-uc-info">
+      <div class="p2-uc-name" id="p2-uc-name">点击填写用户名</div>
+      <div class="p2-uc-uid" id="p2-uc-uid"># 点击填写账户码</div>
+      <div class="p2-uc-stats">
+        <div class="p2-uc-stat" id="p2-uc-fans">
+          <span class="p2-uc-stat-num" id="p2-uc-fans-num">0</span>
+          <span class="p2-uc-stat-label">粉丝</span>
         </div>
+        <div class="p2-uc-stat-divider"></div>
+        <div class="p2-uc-stat" id="p2-uc-likes">
+          <span class="p2-uc-stat-num" id="p2-uc-likes-num">0</span>
+          <span class="p2-uc-stat-label">获赞</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
         <!-- 模块二：小卡图片横排（点击换图，无加号） -->
         <div class="p2-section p2-section-cards">

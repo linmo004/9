@@ -688,6 +688,7 @@ document.getElementById('p2-img-modal').addEventListener('click', function(e) {
 /* ============================================================
    第二页：用户主页卡初始化
    点击卡片整体 => 换背景；点击头像 => 换头像
+   点击用户名/账户码/粉丝/获赞 => 弹框填写
    ============================================================ */
 (function initP2UserCard() {
   /* 恢复背景 */
@@ -709,24 +710,162 @@ document.getElementById('p2-img-modal').addEventListener('click', function(e) {
     }
   }
 
-  /* 点击卡片整体换背景（排除头像区和音乐区的点击） */
+  /* 恢复用户信息文本 */
+  function restoreText(id, storageKey, placeholder, isPlaceholder) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const val = load(storageKey, null);
+    if (val) {
+      el.textContent = val;
+      el.classList.remove('p2-placeholder');
+      if (isPlaceholder) {
+        /* stat-num 恢复 */
+        const numEl = el.querySelector ? el : el;
+        numEl.classList.remove('p2-placeholder');
+      }
+    } else {
+      el.classList.add('p2-placeholder');
+    }
+  }
+
+  /* 恢复用户名 */
+  const nameEl = document.getElementById('p2-uc-name');
+  if (nameEl) {
+    const savedName = load('p2UcName', null);
+    if (savedName) {
+      nameEl.textContent = savedName;
+      nameEl.classList.remove('p2-placeholder');
+    }
+  }
+
+  /* 恢复账户码 */
+  const uidEl = document.getElementById('p2-uc-uid');
+  if (uidEl) {
+    const savedUid = load('p2UcUid', null);
+    if (savedUid) {
+      uidEl.textContent = '# ' + savedUid;
+      uidEl.classList.remove('p2-placeholder');
+    }
+  }
+
+  /* 恢复粉丝数 */
+  const fansNumEl = document.getElementById('p2-uc-fans-num');
+  if (fansNumEl) {
+    const savedFans = load('p2UcFans', null);
+    if (savedFans !== null) {
+      fansNumEl.textContent = savedFans;
+      fansNumEl.classList.remove('p2-placeholder');
+    } else {
+      fansNumEl.classList.add('p2-placeholder');
+    }
+  }
+
+  /* 恢复获赞数 */
+  const likesNumEl = document.getElementById('p2-uc-likes-num');
+  if (likesNumEl) {
+    const savedLikes = load('p2UcLikes', null);
+    if (savedLikes !== null) {
+      likesNumEl.textContent = savedLikes;
+      likesNumEl.classList.remove('p2-placeholder');
+    } else {
+      likesNumEl.classList.add('p2-placeholder');
+    }
+  }
+
+  /* 通用文字编辑弹框（用系统 prompt 轻量实现） */
+  function editField(promptText, storageKey, onSave) {
+    const cur = load(storageKey, '');
+    const val = window.prompt(promptText, cur);
+    if (val === null) return; /* 取消 */
+    save(storageKey, val.trim());
+    onSave(val.trim());
+  }
+
+  /* 点击用户名 */
+  if (nameEl) {
+    nameEl.addEventListener('click', function(e) {
+      e.stopPropagation();
+      editField('填写用户名', 'p2UcName', function(val) {
+        if (val) {
+          nameEl.textContent = val;
+          nameEl.classList.remove('p2-placeholder');
+        } else {
+          nameEl.textContent = '点击填写用户名';
+          nameEl.classList.add('p2-placeholder');
+        }
+      });
+    });
+  }
+
+  /* 点击账户码 */
+  if (uidEl) {
+    uidEl.addEventListener('click', function(e) {
+      e.stopPropagation();
+      editField('填写账户码', 'p2UcUid', function(val) {
+        if (val) {
+          uidEl.textContent = '# ' + val;
+          uidEl.classList.remove('p2-placeholder');
+        } else {
+          uidEl.textContent = '# 点击填写账户码';
+          uidEl.classList.add('p2-placeholder');
+        }
+      });
+    });
+  }
+
+  /* 点击粉丝数 */
+  const fansEl = document.getElementById('p2-uc-fans');
+  if (fansEl) {
+    fansEl.addEventListener('click', function(e) {
+      e.stopPropagation();
+      editField('填写粉丝数量', 'p2UcFans', function(val) {
+        if (fansNumEl) {
+          if (val) {
+            fansNumEl.textContent = val;
+            fansNumEl.classList.remove('p2-placeholder');
+          } else {
+            fansNumEl.textContent = '0';
+            fansNumEl.classList.add('p2-placeholder');
+          }
+        }
+      });
+    });
+  }
+
+  /* 点击获赞数 */
+  const likesEl = document.getElementById('p2-uc-likes');
+  if (likesEl) {
+    likesEl.addEventListener('click', function(e) {
+      e.stopPropagation();
+      editField('填写获赞数量', 'p2UcLikes', function(val) {
+        if (likesNumEl) {
+          if (val) {
+            likesNumEl.textContent = val;
+            likesNumEl.classList.remove('p2-placeholder');
+          } else {
+            likesNumEl.textContent = '0';
+            likesNumEl.classList.add('p2-placeholder');
+          }
+        }
+      });
+    });
+  }
+
+  /* 点击卡片整体换背景（排除头像、信息区点击） */
   const card = document.getElementById('p2-user-card');
   if (card) {
     card.addEventListener('click', function(e) {
-      /* 如果点击的是头像wrap，不触发换背景 */
       if (e.target.closest('#p2-uc-avatar-wrap')) return;
-      /* 如果点击的是音乐控制区，不触发换背景 */
-      if (e.target.closest('.p2-uc-music')) return;
+      if (e.target.closest('.p2-uc-info')) return;
       openP2ImgModal('更换用户卡背景', 'ucbg');
     });
   }
 
-  /* 点击头像换头像（使用主页面同款弹窗） */
+  /* 点击头像换头像（复用主页面弹窗） */
   const avatarWrap = document.getElementById('p2-uc-avatar-wrap');
   if (avatarWrap) {
     avatarWrap.addEventListener('click', function(e) {
       e.stopPropagation();
-      /* 复用主页头像弹窗 */
       document.getElementById('avatar-url-input').value  = '';
       document.getElementById('avatar-file-input').value = '';
       setAvatarTab('url');
@@ -735,92 +874,6 @@ document.getElementById('p2-img-modal').addEventListener('click', function(e) {
   }
 })();
 
-/* ============================================================
-   第二页：装饰音乐进度条 + 控制按钮
-   ============================================================ */
-(function initP2MusicBar() {
-  const track   = document.getElementById('p2-music-track');
-  const played  = document.getElementById('p2-music-played');
-  const thumb   = document.getElementById('p2-music-thumb');
-  const curEl   = document.getElementById('p2-music-cur');
-  const playBtn = document.getElementById('p2-mc-play');
-  const prevBtn = document.getElementById('p2-mc-prev');
-  const nextBtn = document.getElementById('p2-mc-next');
-  if (!track) return;
-
-  const totalSecs = 217;
-  let progress = 0.38;
-  let dragging = false;
-  let playing  = false;
-
-  function updateBar(p) {
-    progress = Math.max(0, Math.min(1, p));
-    const pct = (progress * 100).toFixed(1) + '%';
-    if (played) played.style.width = pct;
-    if (thumb)  thumb.style.left   = pct;
-    if (curEl) {
-      const cur = Math.round(progress * totalSecs);
-      const mm  = Math.floor(cur / 60);
-      const ss  = String(cur % 60).padStart(2, '0');
-      curEl.textContent = mm + ':' + ss;
-    }
-  }
-
-  function getPct(e) {
-    const rect    = track.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    return (clientX - rect.left) / rect.width;
-  }
-
-  track.addEventListener('mousedown', function(e) {
-    dragging = true;
-    updateBar(getPct(e));
-    e.stopPropagation();
-  });
-
-  track.addEventListener('touchstart', function(e) {
-    dragging = true;
-    updateBar(getPct(e));
-    e.stopPropagation();
-  }, { passive: true });
-
-  document.addEventListener('mousemove', function(e) {
-    if (!dragging) return;
-    updateBar(getPct(e));
-  });
-
-  document.addEventListener('touchmove', function(e) {
-    if (!dragging) return;
-    updateBar(getPct(e));
-  }, { passive: true });
-
-  document.addEventListener('mouseup',  function() { dragging = false; });
-  document.addEventListener('touchend', function() { dragging = false; });
-
-  if (playBtn) {
-    playBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      playing = !playing;
-      playBtn.innerHTML = playing ? '&#9646;&#9646;' : '&#9654;';
-    });
-  }
-
-  if (prevBtn) {
-    prevBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      updateBar(progress - 0.05);
-    });
-  }
-
-  if (nextBtn) {
-    nextBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      updateBar(progress + 0.05);
-    });
-  }
-
-  updateBar(0.38);
-})();
 
 /* ============================================================
    第二页：小卡图片
