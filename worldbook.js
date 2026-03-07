@@ -3,24 +3,6 @@
    数据存储键：liao_worldbook（含 categories 和 entries）
    ============================================================ */
 
-/* ---------- 数据结构 ----------
-  {
-    categories: ['分类A', '分类B', ...],
-    entries: [
-      {
-        id: 'wb_xxx',
-        name: '条目名称',
-        cat: '分类A',
-        content: '背景设定内容',
-        keywords: ['关键词1', '关键词2'],  // 空数组=默认注入
-        bindRoles: ['roleId1', ...],        // 空数组=对所有角色生效
-        enabled: true
-      },
-      ...
-    ]
-  }
-   ------------------------------------------------------------ */
-
 var wbData = wbLoad();
 
 function wbLoad() {
@@ -70,7 +52,7 @@ function wbRenderBody() {
     const header = document.createElement('div');
     header.className = 'wb-cat-header';
     header.innerHTML = `
-      <span class="wb-cat-arrow open">▶</span>
+      <span class="wb-cat-arrow open">&#9658;</span>
       <span class="wb-cat-name">${wbEsc(cat)}</span>
       <span class="wb-cat-count">${entries.length} 条</span>`;
 
@@ -95,20 +77,26 @@ function wbRenderBody() {
   /* 未分类条目（分类已被删除） */
   const orphans = wbData.entries.filter(e => !wbData.categories.includes(e.cat));
   if (orphans.length) {
-    const block   = document.createElement('div');
+    const block = document.createElement('div');
     block.className = 'wb-cat-block';
-    block.innerHTML = `<div class="wb-cat-header">
-      <span class="wb-cat-arrow open">▶</span>
+
+    const orphanHeader = document.createElement('div');
+    orphanHeader.className = 'wb-cat-header';
+    orphanHeader.innerHTML = `
+      <span class="wb-cat-arrow open">&#9658;</span>
       <span class="wb-cat-name" style="color:#e07a7a;">未分类</span>
-      <span class="wb-cat-count">${orphans.length} 条</span>
-    </div>`;
+      <span class="wb-cat-count">${orphans.length} 条</span>`;
+
     const entryWrap = document.createElement('div');
     entryWrap.className = 'wb-cat-entries open';
-    orphans.forEach(entry => entryWrap.appendChild(wbBuildEntryRow(entry)));
-    block.querySelector('.wb-cat-header').addEventListener('click', () => {
+
+    orphanHeader.addEventListener('click', () => {
       entryWrap.classList.toggle('open');
-      block.querySelector('.wb-cat-arrow').classList.toggle('open');
+      orphanHeader.querySelector('.wb-cat-arrow').classList.toggle('open');
     });
+
+    orphans.forEach(entry => entryWrap.appendChild(wbBuildEntryRow(entry)));
+    block.appendChild(orphanHeader);
     block.appendChild(entryWrap);
     body.appendChild(block);
   }
@@ -159,7 +147,7 @@ function wbBuildEntryRow(entry) {
   });
 
   row.querySelector('.wb-del-btn').addEventListener('click', () => {
-    if (!confirm(`确定删除条目「${entry.name}」？`)) return;
+    if (!confirm('确定删除条目「' + entry.name + '」？')) return;
     wbData.entries = wbData.entries.filter(e => e.id !== entry.id);
     wbSave();
     wbRenderBody();
@@ -237,7 +225,6 @@ document.getElementById('wb-entry-confirm').addEventListener('click', () => {
   const bindRoles = Array.from(checkedRoleEls).map(el => el.dataset.roleId);
 
   if (wbEditingEntryId) {
-    /* 编辑已有条目 */
     const entry = wbData.entries.find(e => e.id === wbEditingEntryId);
     if (entry) {
       entry.name      = name;
@@ -248,7 +235,6 @@ document.getElementById('wb-entry-confirm').addEventListener('click', () => {
       entry.enabled   = enabled;
     }
   } else {
-    /* 新建条目 */
     wbData.entries.push({
       id:        'wb_' + Date.now() + '_' + Math.random().toString(36).slice(2),
       name, cat, content, keywords, bindRoles,
@@ -325,7 +311,7 @@ function wbRenderManageModal() {
       <button class="wb-manage-cat-del" data-cat="${wbEsc(cat)}">删除</button>`;
     row.querySelector('.wb-manage-cat-del').addEventListener('click', function() {
       const catName = this.dataset.cat;
-      if (!confirm(`删除分类「${catName}」？该分类下的条目将变为未分类状态。`)) return;
+      if (!confirm('删除分类「' + catName + '」？该分类下的条目将变为未分类状态。')) return;
       wbData.categories = wbData.categories.filter(c => c !== catName);
       wbSave();
       wbRenderBody();
@@ -335,7 +321,8 @@ function wbRenderManageModal() {
   });
 }
 
-document.getElementById('wb-manage-close').addEventListener('click', () {
+/* 修复Bug：原代码此处缺少箭头符号 => 导致语法错误整个文件崩溃 */
+document.getElementById('wb-manage-close').addEventListener('click', () => {
   document.getElementById('wb-manage-modal').style.display = 'none';
 });
 
@@ -371,14 +358,11 @@ function wbEsc(str) {
 
 /* ============================================================
    世界书注入函数（供 liao-special.js 调用）
-   传入：当前对话消息数组、当前角色id
-   返回：需要注入的世界书内容字符串（已拼好，空字符串=无需注入）
    ============================================================ */
 function getWorldBookInjection(chatMessages, roleId) {
   const data = wbLoad();
   if (!data.entries || !data.entries.length) return '';
 
-  /* 拼接近期消息文本用于关键词匹配 */
   const recentMsgs = chatMessages
     .filter(m => !m.hidden)
     .slice(-20)
@@ -390,18 +374,16 @@ function getWorldBookInjection(chatMessages, roleId) {
   data.entries.forEach(entry => {
     if (!entry.enabled) return;
 
-    /* 角色绑定过滤：有绑定角色时，只对绑定角色生效 */
     if (entry.bindRoles && entry.bindRoles.length > 0) {
       if (!entry.bindRoles.includes(roleId)) return;
     }
 
-    /* 关键词匹配：无关键词=默认注入；有关键词=至少命中一个 */
     if (entry.keywords && entry.keywords.length > 0) {
       const hit = entry.keywords.some(kw => kw && recentMsgs.includes(kw));
       if (!hit) return;
     }
 
-    injected.push(`【世界书·${entry.name}】\n${entry.content}`);
+    injected.push('【世界书·' + entry.name + '】\n' + entry.content);
   });
 
   return injected.join('\n\n');

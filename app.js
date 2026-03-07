@@ -525,21 +525,34 @@ document.addEventListener('touchend', function(e) {
   touchMoved = false;
 }, { passive: true });
 
-let mouseStartX = 0, mouseIsDown = false;
+/* 修复Bug：加入 mouseMoved 标志位，防止点击被误判为滑动 */
+let mouseStartX = 0, mouseIsDown = false, mouseMoved = false;
+
 document.addEventListener('mousedown', function(e) {
   if (e.target.closest('.modal-mask')) return;
   if (e.target.closest('.settings-layer')) return;
+  if (e.target.closest('#worldbook-app')) return;
   mouseStartX = e.clientX;
   mouseIsDown = true;
+  mouseMoved  = false;
 });
+
+document.addEventListener('mousemove', function(e) {
+  if (!mouseIsDown) return;
+  if (Math.abs(e.clientX - mouseStartX) > 8) mouseMoved = true;
+});
+
 document.addEventListener('mouseup', function(e) {
   if (!mouseIsDown) return;
   mouseIsDown = false;
+  if (!mouseMoved) return;
   if (e.target.closest('.modal-mask')) return;
   if (e.target.closest('.settings-layer')) return;
+  if (e.target.closest('#worldbook-app')) return;
   const dx = e.clientX - mouseStartX;
   if (dx < -60 && currentPage < 1) goToPage(1);
   else if (dx > 60 && currentPage > 0) goToPage(0);
+  mouseMoved = false;
 });
 
 /* ============================================================
