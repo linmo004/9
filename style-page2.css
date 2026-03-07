@@ -304,16 +304,24 @@
   display: flex;
   gap: 10px;
   align-items: center;
-  justify-content: flex-end;  /* 整体靠右 */
-  padding-right: 2px;
+  /* 专辑左边框对齐第二模块最左边，整体不靠右不靠左 */
+  justify-content: flex-start;
+  padding-left: 6px;   /* 与 p2-cards-scroll padding-left 的 6px 对齐 */
 }
 
 /* 专辑外层（overflow visible 让CD溢出） */
 .p2-album-outer {
   position: relative;
   flex-shrink: 0;
+  /* 专辑100px宽，CD右1/3=26px溢出，总占126px */
   width: 126px;
   height: 100px;
+  /* 向右偏移，使专辑中心落在卡片1-2重叠区正下方
+     卡片1-2重叠区大约在距离左边 (卡片1宽 + 卡片2宽*0.5 - 重叠量) 处
+     实测约在页面左侧 23vw 附近，这里用 margin-left 微调 */
+  margin-left: calc(23vw - 56px);
+  /* 限制：专辑左边不超过第二模块左边框（padding-left=6px之后起算0） */
+  /* max 保证 margin-left 不为负 */
 }
 
 /* 专辑主体（100x100） */
@@ -366,6 +374,7 @@
   pointer-events: none;
 }
 
+/* CD 定位：左2/3压专辑，右1/3伸出 */
 .p2-cd-wrap {
   position: absolute;
   top: 11px;
@@ -460,16 +469,15 @@
   pointer-events: none;
 }
 
-/* App 网格：4个app紧凑，向中间靠拢 */
+/* App 网格：学习主页 four-apps 间距风格，紧凑不松散 */
 .p2-apps-grid {
-  flex-shrink: 0;
+  flex: 1;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px 6px;          /* 行距列距都收紧 */
+  gap: 12px 8px;
   justify-items: center;
   align-items: start;
-  padding: 0 6px;        /* 左右内缩，向中间聚拢 */
-  width: auto;
+  padding: 0 4px;
 }
 
 
