@@ -10,7 +10,7 @@
   <!-- 页面横滑容器 -->
   <div id="pages-wrap">
 
-    <!-- 第一页 -->
+    <!-- 第一页（不修改） -->
     <div class="page" id="page1">
       <div id="page1-inner">
         <div id="date-capsule">
@@ -105,67 +105,82 @@
     <div class="page" id="page2">
       <div id="page2-inner">
 
-        <!-- 模块一：用户主页卡 -->
-        <div class="p2-section">
+        <!-- 模块一：用户主页卡（缩小为原来3/5，居中） -->
+        <div class="p2-section p2-section-uc">
           <div class="p2-user-card" id="p2-user-card">
-            <!-- 背景图 -->
+            <!-- 背景图层（最底层） -->
             <div class="p2-uc-bg" id="p2-uc-bg"></div>
-            <!-- 点击更换背景按钮 -->
-            <button class="p2-uc-change-bg" id="p2-uc-change-bg-btn" title="更换背景">&#43;</button>
-            <!-- 头像 -->
+            <!-- 白色渐变蒙版（压在背景上，但在头像下） -->
+            <div class="p2-uc-gradient"></div>
+            <!-- 更换背景按钮 -->
+            <button class="p2-uc-change-bg" id="p2-uc-change-bg-btn" title="更换背景">+</button>
+            <!-- 头像（在渐变上层） -->
             <div class="p2-uc-avatar-wrap">
               <img class="p2-uc-avatar" id="p2-uc-avatar" src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=halo9" alt="">
             </div>
-            <!-- 白色渐变蒙版 + 音乐条 -->
-            <div class="p2-uc-bottom">
+            <!-- 音乐控制区（在渐变上层） -->
+            <div class="p2-uc-music">
               <div class="p2-music-bar-wrap">
-                <span class="p2-music-time p2-music-cur" id="p2-music-cur">1:23</span>
+                <span class="p2-music-time" id="p2-music-cur">1:23</span>
                 <div class="p2-music-track" id="p2-music-track">
-                  <div class="p2-music-played" id="p2-music-played" style="width:38%;"></div>
-                  <div class="p2-music-thumb" id="p2-music-thumb" style="left:38%;"></div>
+                  <div class="p2-music-played" id="p2-music-played"></div>
+                  <div class="p2-music-thumb" id="p2-music-thumb"></div>
                 </div>
-                <span class="p2-music-time p2-music-total">3:37</span>
+                <span class="p2-music-time">3:37</span>
+              </div>
+              <div class="p2-music-controls">
+                <button class="p2-mc-btn" id="p2-mc-prev" title="快退">&#9664;&#9664;</button>
+                <button class="p2-mc-btn p2-mc-play" id="p2-mc-play" title="播放/暂停">&#9654;</button>
+                <button class="p2-mc-btn" id="p2-mc-next" title="快进">&#9654;&#9654;</button>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- 模块二：小卡图片展示 -->
+        <!-- 模块二：小卡图片横排展示 -->
         <div class="p2-section">
-          <div class="p2-cards-widget" id="p2-cards-widget">
-            <div class="p2-card-item" data-card="0" style="transform: rotate(-4deg) translateX(-18px) translateY(8px); z-index:1;">
-              <img class="p2-card-img" id="p2-card-img-0" src="" alt="">
-              <div class="p2-card-placeholder">&#43;</div>
-            </div>
-            <div class="p2-card-item" data-card="1" style="transform: rotate(5deg) translateX(-6px) translateY(0px); z-index:2;">
-              <img class="p2-card-img" id="p2-card-img-1" src="" alt="">
-              <div class="p2-card-placeholder">&#43;</div>
-            </div>
-            <div class="p2-card-item" data-card="2" style="transform: rotate(-3.5deg) translateX(6px) translateY(4px); z-index:3;">
-              <img class="p2-card-img" id="p2-card-img-2" src="" alt="">
-              <div class="p2-card-placeholder">&#43;</div>
-            </div>
-            <div class="p2-card-item" data-card="3" style="transform: rotate(4.5deg) translateX(20px) translateY(-4px); z-index:4;">
-              <img class="p2-card-img" id="p2-card-img-3" src="" alt="">
-              <div class="p2-card-placeholder">&#43;</div>
+          <div class="p2-cards-scroll">
+            <div class="p2-cards-widget" id="p2-cards-widget">
+              <div class="p2-card-item" data-card="0">
+                <img class="p2-card-img" id="p2-card-img-0" src="" alt="">
+                <div class="p2-card-placeholder">+</div>
+              </div>
+              <div class="p2-card-item" data-card="1">
+                <img class="p2-card-img" id="p2-card-img-1" src="" alt="">
+                <div class="p2-card-placeholder">+</div>
+              </div>
+              <div class="p2-card-item" data-card="2">
+                <img class="p2-card-img" id="p2-card-img-2" src="" alt="">
+                <div class="p2-card-placeholder">+</div>
+              </div>
+              <div class="p2-card-item" data-card="3">
+                <img class="p2-card-img" id="p2-card-img-3" src="" alt="">
+                <div class="p2-card-placeholder">+</div>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- 模块三：专辑小组件 + App区域 -->
+        <!-- 模块三：专辑组件 + App区域 -->
         <div class="p2-section">
           <div class="p2-bottom-row">
-            <!-- 左侧：专辑组件 -->
-            <div class="p2-album-widget" id="p2-album-widget">
-              <div class="p2-album-bg" id="p2-album-bg"></div>
-              <button class="p2-album-change-btn" id="p2-album-change-btn" title="更换背景">&#43;</button>
-              <!-- CD光碟 -->
-              <div class="p2-cd" id="p2-cd">
-                <div class="p2-cd-ring p2-cd-r1"></div>
-                <div class="p2-cd-ring p2-cd-r2"></div>
-                <div class="p2-cd-ring p2-cd-r3"></div>
-                <div class="p2-cd-ring p2-cd-r4"></div>
-                <div class="p2-cd-hole"></div>
+            <!-- 左侧：专辑组件（CD溢出右侧） -->
+            <div class="p2-album-outer">
+              <!-- 专辑主体 -->
+              <div class="p2-album-widget" id="p2-album-widget">
+                <div class="p2-album-bg" id="p2-album-bg"></div>
+                <div class="p2-album-border"></div>
+                <button class="p2-album-change-btn" id="p2-album-change-btn" title="更换专辑背景">+</button>
+              </div>
+              <!-- CD（叠加在专辑右侧，左2/3压在专辑上） -->
+              <div class="p2-cd-wrap">
+                <div class="p2-cd" id="p2-cd">
+                  <div class="p2-cd-ring p2-cd-r1"></div>
+                  <div class="p2-cd-ring p2-cd-r2"></div>
+                  <div class="p2-cd-ring p2-cd-r3"></div>
+                  <div class="p2-cd-ring p2-cd-r4"></div>
+                  <div class="p2-cd-hole"></div>
+                </div>
               </div>
             </div>
             <!-- 右侧：4个App图标 -->
@@ -194,15 +209,13 @@
     </div>
 
     <!-- 第三页（空白保留） -->
-    <div class="page" id="page3">
-      <div id="page3-inner"></div>
-    </div>
+    <div class="page" id="page3"></div>
 
   </div><!-- /pages-wrap -->
 
 </div><!-- /screen-wrap -->
 
-<!-- 图片更换弹窗（小卡 / 用户卡背景 / 专辑背景 共用） -->
+<!-- 共用图片更换弹窗 -->
 <div class="p2-img-modal-mask" id="p2-img-modal" style="display:none;">
   <div class="p2-img-modal-box">
     <div class="p2-img-modal-title" id="p2-img-modal-title">更换图片</div>

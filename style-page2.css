@@ -1,70 +1,87 @@
 /* ============================================================
-   第二页 — 韩系偶像风重建
+   第二页 — 韩系偶像风 v2
+   全部样式只影响 #page2-inner 及其子元素，不污染其他页面
    ============================================================ */
 
-/* 第二页整体容器 */
+/* ---- 第二页容器 ---- */
 #page2-inner {
   display: flex;
   flex-direction: column;
+  padding: 18px 16px 0;
   gap: 0;
-  padding: 14px 16px 0;
+  min-height: 100%;
 }
 
-/* 第三页空白容器 */
-#page3-inner {
-  width: 100%;
-  height: 100%;
-}
-
-/* ============================================================
-   通用 section 间距
-   ============================================================ */
+/* ---- section 通用间距 ---- */
 .p2-section {
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
 /* ============================================================
-   模块一：用户主页卡
+   模块一：用户主页卡（原大小的 3/5，居中）
    ============================================================ */
+.p2-section-uc {
+  display: flex;
+  justify-content: center;
+}
+
+/* 卡片本体：宽度为页面60%，aspect-ratio 1:1 正方形 */
 .p2-user-card {
   position: relative;
-  width: 100%;
+  width: 60%;
   aspect-ratio: 1 / 1;
-  border-radius: 22px;
+  border-radius: 20px;
   overflow: hidden;
-  background: linear-gradient(145deg, #c8e4f8 0%, #dbeeff 50%, #f0f7ff 100%);
-  box-shadow: 0 6px 28px rgba(100, 160, 210, 0.18);
-  border: 1.5px solid rgba(153, 200, 237, 0.28);
+  background: linear-gradient(145deg, #c8e4f8 0%, #dbeeff 55%, #eef6ff 100%);
+  box-shadow: 0 8px 32px rgba(80, 140, 200, 0.20), 0 2px 8px rgba(80,140,200,0.10);
+  border: 1.5px solid rgba(153, 200, 237, 0.30);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  /* 不设 justify-content，靠子元素绝对定位 */
 }
 
-/* 背景图层 */
+/* 背景图层 —— z-index 最低 */
 .p2-uc-bg {
   position: absolute;
   inset: 0;
+  z-index: 0;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  z-index: 0;
   transition: opacity 0.4s;
+}
+
+/* 白色渐变蒙版：从底部到卡片中线，只压在背景上 z-index:1 */
+.p2-uc-gradient {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 60%;          /* 覆盖下半张卡 */
+  z-index: 1;
+  background: linear-gradient(
+    to top,
+    rgba(255,255,255,0.96) 0%,
+    rgba(255,255,255,0.70) 45%,
+    rgba(255,255,255,0.00) 100%
+  );
+  pointer-events: none;
 }
 
 /* 更换背景按钮 */
 .p2-uc-change-bg {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 8px;
+  right: 8px;
   z-index: 10;
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(153, 200, 237, 0.45);
+  background: rgba(255,255,255,0.75);
+  border: 1px solid rgba(153,200,237,0.50);
   color: #7a9abf;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1;
   cursor: pointer;
   display: flex;
@@ -72,57 +89,56 @@
   justify-content: center;
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  box-shadow: 0 2px 8px rgba(100, 150, 200, 0.15);
+  box-shadow: 0 1px 6px rgba(100,150,200,0.14);
   transition: background 0.18s;
 }
+.p2-uc-change-bg:active { background: rgba(153,200,237,0.35); }
 
-.p2-uc-change-bg:active {
-  background: rgba(153, 200, 237, 0.35);
-}
-
-/* 头像容器 */
+/* 头像容器 —— z-index:3，在渐变层上面 */
 .p2-uc-avatar-wrap {
-  position: relative;
-  z-index: 2;
-  margin-top: 22%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -62%);   /* 整体偏上，让头像中心略高于卡片中心 */
+  z-index: 3;
 }
 
 .p2-uc-avatar {
-  width: 72px;
-  height: 72px;
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid #fff;
-  box-shadow: 0 4px 16px rgba(80, 130, 190, 0.22);
+  box-shadow: 0 3px 12px rgba(80,130,190,0.25);
   display: block;
   background: #d6e8f7;
 }
 
-/* 下半白色渐变蒙版 + 音乐条 */
-.p2-uc-bottom {
+/* 音乐控制区 —— z-index:3，在渐变上层 */
+.p2-uc-music {
   position: absolute;
-  bottom: 0;
   left: 0;
   right: 0;
+  bottom: 0;
   z-index: 3;
-  background: linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.72) 30%, rgba(255,255,255,0.97) 100%);
-  padding: 28px 20px 20px;
+  padding: 0 12px 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 6px;
 }
 
-/* 音乐进度条容器 */
+/* 进度条行 */
 .p2-music-bar-wrap {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   width: 100%;
 }
 
 .p2-music-time {
-  font-size: 10px;
-  color: var(--text-mid, #5a6a80);
+  font-size: 9px;
+  color: #5a6a80;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   flex-shrink: 0;
@@ -132,7 +148,7 @@
 /* 进度条轨道 */
 .p2-music-track {
   flex: 1;
-  height: 4px;
+  height: 3px;
   background: #B3D8F4;
   border-radius: 999px;
   position: relative;
@@ -140,49 +156,101 @@
   touch-action: none;
 }
 
-/* 已播放部分 */
+/* 已播放 */
 .p2-music-played {
   position: absolute;
   left: 0;
   top: 0;
   height: 100%;
+  width: 38%;
   background: #99C8ED;
   border-radius: 999px;
   pointer-events: none;
 }
 
-/* 拖拽滑块 */
+/* 滑块 */
 .p2-music-thumb {
   position: absolute;
   top: 50%;
+  left: 38%;
   transform: translate(-50%, -50%);
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   background: #fff;
   border: 2px solid #99C8ED;
   border-radius: 50%;
-  box-shadow: 0 1px 4px rgba(80, 130, 190, 0.22);
-  cursor: grab;
-  transition: transform 0.1s;
+  box-shadow: 0 1px 4px rgba(80,130,190,0.22);
   pointer-events: none;
 }
 
-/* ============================================================
-   模块二：小卡图片展示
-   ============================================================ */
-.p2-cards-widget {
-  position: relative;
-  height: 160px;
+/* 控制按钮行 */
+.p2-music-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.p2-mc-btn {
+  background: none;
+  border: none;
+  color: #7a9abf;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 2px 4px;
+  line-height: 1;
+  transition: color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.p2-mc-btn:active { color: #99C8ED; }
+
+.p2-mc-play {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #99C8ED;
+  color: #fff;
+  font-size: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 8px rgba(100,160,210,0.22);
+  padding: 0;
 }
 
+.p2-mc-play:active { opacity: 0.82; }
+
+/* ============================================================
+   模块二：小卡横排
+   ============================================================ */
+.p2-cards-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 12px 4px 16px;
+  /* 隐藏滚动条 */
+  scrollbar-width: none;
+}
+.p2-cards-scroll::-webkit-scrollbar { display: none; }
+
+.p2-cards-widget {
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  align-items: center;
+  justify-content: center;
+  width: max-content;
+  min-width: 100%;
+  padding: 8px 12px;
+}
+
+/* 每张小卡：55:85 韩娱小卡比例，宽约页面20% */
 .p2-card-item {
-  position: absolute;
-  width: 88px;
-  height: 136px;
-  border-radius: 10px;
+  position: relative;
+  width: calc(20vw - 4px);
+  max-width: 76px;
+  aspect-ratio: 55 / 85;
+  border-radius: 8px;
   overflow: hidden;
   background: #e8f3fb;
   border: 1.5px solid rgba(153, 200, 237, 0.30);
@@ -191,11 +259,35 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: box-shadow 0.2s;
+  flex-shrink: 0;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+/* 四张小卡的旋转角度和偏移，制造自然层叠感 */
+.p2-card-item:nth-child(1) {
+  transform: rotate(-4deg) translateY(4px);
+  z-index: 1;
+  margin-right: -6px;
+}
+.p2-card-item:nth-child(2) {
+  transform: rotate(5deg) translateY(-3px);
+  z-index: 2;
+  margin-right: -6px;
+}
+.p2-card-item:nth-child(3) {
+  transform: rotate(-3.5deg) translateY(5px);
+  z-index: 3;
+  margin-right: -6px;
+}
+.p2-card-item:nth-child(4) {
+  transform: rotate(4.5deg) translateY(-2px);
+  z-index: 4;
 }
 
 .p2-card-item:active {
   box-shadow: 0 6px 22px rgba(80, 130, 190, 0.28);
+  transform: scale(1.04) rotate(0deg) !important;
+  z-index: 10;
 }
 
 .p2-card-img {
@@ -207,8 +299,14 @@
   inset: 0;
 }
 
+/* src为空时隐藏图片 */
+.p2-card-img[src=""],
+.p2-card-img:not([src]) {
+  display: none;
+}
+
 .p2-card-placeholder {
-  font-size: 22px;
+  font-size: 20px;
   color: rgba(153, 200, 237, 0.60);
   font-weight: 200;
   line-height: 1;
@@ -217,34 +315,39 @@
   z-index: 1;
 }
 
-.p2-card-item .p2-card-img[src=""] ,
-.p2-card-item .p2-card-img:not([src]) {
-  display: none;
-}
-
 /* ============================================================
-   模块三：专辑组件 + App 区域
+   模块三：专辑 + App
    ============================================================ */
 .p2-bottom-row {
   display: flex;
-  gap: 14px;
+  gap: 12px;
   align-items: center;
 }
 
-/* 专辑组件 */
-.p2-album-widget {
+/* 专辑外层容器：overflow visible，让CD能溢出 */
+.p2-album-outer {
   position: relative;
-  width: 130px;
-  height: 130px;
   flex-shrink: 0;
-  border-radius: 18px;
+  width: 120px;
+  height: 120px;
+}
+
+/* 专辑主体 */
+.p2-album-widget {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 120px;
+  height: 120px;
+  border-radius: 16px;
   overflow: hidden;
   background: linear-gradient(145deg, #1a1f2e 0%, #2c3a54 100%);
-  box-shadow: 0 4px 18px rgba(40, 60, 100, 0.22);
-  border: 1.5px solid rgba(153, 200, 237, 0.18);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  box-shadow:
+    0 4px 18px rgba(40, 60, 100, 0.28),
+    inset 0 0 0 1px rgba(153,200,237,0.15),
+    4px 0 0 0 rgba(153,200,237,0.25);   /* 右侧半边框点缀 */
+  border: 1.5px solid rgba(153, 200, 237, 0.20);
+  z-index: 1;
 }
 
 /* 专辑背景图 */
@@ -255,23 +358,42 @@
   background-position: center;
   background-repeat: no-repeat;
   z-index: 0;
-  opacity: 0.45;
+  opacity: 0.55;
   transition: opacity 0.4s;
 }
 
-/* 专辑更换按钮 */
+/* 专辑右侧半边框装饰（CSS实现） */
+.p2-album-border {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  right: 0;
+  width: 3px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(153,200,237,0.55) 30%,
+    rgba(153,200,237,0.80) 50%,
+    rgba(153,200,237,0.55) 70%,
+    transparent 100%
+  );
+  z-index: 2;
+  border-radius: 999px;
+}
+
+/* 专辑更换背景按钮 */
 .p2-album-change-btn {
   position: absolute;
-  top: 7px;
-  right: 7px;
+  top: 6px;
+  left: 7px;
   z-index: 10;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  color: rgba(255, 255, 255, 0.80);
-  font-size: 14px;
+  background: rgba(255,255,255,0.16);
+  border: 1px solid rgba(255,255,255,0.28);
+  color: rgba(255,255,255,0.80);
+  font-size: 13px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -280,20 +402,29 @@
   -webkit-backdrop-filter: blur(4px);
   transition: background 0.18s;
 }
+.p2-album-change-btn:active { background: rgba(153,200,237,0.40); }
 
-.p2-album-change-btn:active {
-  background: rgba(153, 200, 237, 0.35);
+/* CD 外层定位容器：
+   CD直径 90px。左2/3压在专辑上，右1/3伸出专辑右边框外。
+   left = 专辑宽 - CD直径*2/3 = 120 - 60 = 60px
+   垂直居中：top = (120 - 90) / 2 = 15px */
+.p2-cd-wrap {
+  position: absolute;
+  top: 15px;
+  left: 60px;
+  z-index: 3;    /* 在专辑上层 */
+  width: 90px;
+  height: 90px;
 }
 
-/* CD 光碟容器 */
+/* CD 本体 */
 .p2-cd {
   position: relative;
-  z-index: 2;
   width: 90px;
   height: 90px;
   border-radius: 50%;
-  animation: p2-cd-spin 8s linear infinite;
-  flex-shrink: 0;
+  animation: p2-cd-spin 9s linear infinite;
+  cursor: pointer;
 }
 
 @keyframes p2-cd-spin {
@@ -310,64 +441,72 @@
   transform: translate(-50%, -50%);
 }
 
+/* 最外层：金属光泽 */
 .p2-cd-r1 {
   width: 90px;
   height: 90px;
   background: conic-gradient(
     #c8d8e8 0deg,
-    #e8f0f8 40deg,
-    #a0b8d0 80deg,
-    #d4e4f0 120deg,
-    #b8cce0 160deg,
-    #e0eaf4 200deg,
-    #9ab4cc 240deg,
-    #ccdae8 280deg,
-    #b0c6da 320deg,
+    #f0f6fc 35deg,
+    #a8c0d8 75deg,
+    #e0eef8 115deg,
+    #b8cce0 155deg,
+    #f2f8fe 195deg,
+    #9ab4cc 235deg,
+    #d8eaf8 275deg,
+    #b0c8de 315deg,
     #c8d8e8 360deg
   );
-  box-shadow: 0 0 12px rgba(60, 100, 160, 0.35), inset 0 0 8px rgba(255,255,255,0.15);
+  box-shadow:
+    0 0 0 1px rgba(153,200,237,0.40),
+    0 2px 12px rgba(60,100,160,0.35),
+    inset 0 0 8px rgba(255,255,255,0.18);
 }
 
+/* 第二层：深色沟槽 */
 .p2-cd-r2 {
-  width: 68px;
-  height: 68px;
+  width: 70px;
+  height: 70px;
   background: conic-gradient(
     #1a2438 0deg,
-    #2c3e58 45deg,
-    #182030 90deg,
-    #243248 135deg,
-    #1c2840 180deg,
-    #2e4060 225deg,
-    #1a2438 270deg,
-    #263a52 315deg,
+    #2e4060 50deg,
+    #182030 100deg,
+    #243248 150deg,
+    #1c2840 200deg,
+    #304462 250deg,
+    #1a2438 300deg,
+    #263a52 350deg,
     #1a2438 360deg
   );
-  box-shadow: inset 0 0 6px rgba(255,255,255,0.08);
+  box-shadow: inset 0 0 6px rgba(255,255,255,0.06);
 }
 
+/* 第三层：彩虹光晕 */
 .p2-cd-r3 {
-  width: 46px;
-  height: 46px;
+  width: 48px;
+  height: 48px;
   background: conic-gradient(
     #b8cce0 0deg,
-    #d8eaf8 60deg,
-    #99C8ED 120deg,
-    #c4d8ec 180deg,
-    #b0c8e0 240deg,
-    #daeaf8 300deg,
-    #b8cce0 360deg
+    #d8eaf8 55deg,
+    #99C8ED 110deg,
+    #c4d8ec 165deg,
+    #b0c8e0 220deg,
+    #daeaf8 275deg,
+    #b8cce0 330deg,
+    #c8dcf0 360deg
   );
-  box-shadow: 0 0 6px rgba(153, 200, 237, 0.40);
+  box-shadow: 0 0 8px rgba(153,200,237,0.45);
 }
 
+/* 第四层：中心深色 */
 .p2-cd-r4 {
   width: 28px;
   height: 28px;
   background: conic-gradient(
     #1e2c42 0deg,
-    #2e4060 60deg,
-    #1a2438 120deg,
-    #263a52 180deg,
+    #2e4060 80deg,
+    #1a2438 160deg,
+    #263a52 240deg,
     #1e2c42 360deg
   );
 }
@@ -378,12 +517,12 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #fff;
+  background: radial-gradient(circle, #f5f5f0 0%, #e8e8e0 100%);
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 3;
-  box-shadow: 0 0 3px rgba(0,0,0,0.25);
+  z-index: 5;
+  box-shadow: 0 0 3px rgba(0,0,0,0.30), inset 0 1px 2px rgba(255,255,255,0.6);
 }
 
 /* 右侧 App 网格 */
@@ -391,18 +530,19 @@
   flex: 1;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px 8px;
+  gap: 12px 6px;
   justify-items: center;
+  align-items: center;
 }
 
 /* ============================================================
-   图片更换弹窗
+   共用图片更换弹窗
    ============================================================ */
 .p2-img-modal-mask {
   position: fixed;
   inset: 0;
   z-index: 700;
-  background: rgba(0, 0, 0, 0.40);
+  background: rgba(0,0,0,0.42);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -415,7 +555,7 @@
   padding: 22px 20px 18px;
   width: 100%;
   max-width: 320px;
-  box-shadow: 0 8px 36px rgba(80, 120, 180, 0.18);
+  box-shadow: 0 8px 36px rgba(80,120,180,0.18);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -424,22 +564,21 @@
 .p2-img-modal-title {
   font-size: 15px;
   font-weight: 700;
-  color: var(--text-dark, #2c3448);
+  color: #2c3448;
   margin-bottom: 2px;
 }
 
 .p2-img-modal-input {
-  border: 1.5px solid rgba(153, 200, 237, 0.40);
+  border: 1.5px solid rgba(153,200,237,0.40);
   border-radius: 10px;
   padding: 8px 11px;
   font-size: 13px;
-  color: var(--text-dark, #2c3448);
+  color: #2c3448;
   background: #f5f8fc;
   outline: none;
   font-family: inherit;
   width: 100%;
 }
-
 .p2-img-modal-input:focus {
   border-color: #99C8ED;
   background: #fff;
@@ -448,14 +587,14 @@
 .p2-img-modal-or {
   text-align: center;
   font-size: 11px;
-  color: var(--text-light, #9aafc4);
+  color: #9aafc4;
 }
 
 .p2-img-modal-file-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1.5px dashed rgba(153, 200, 237, 0.50);
+  border: 1.5px dashed rgba(153,200,237,0.50);
   border-radius: 10px;
   padding: 9px;
   font-size: 13px;
@@ -464,10 +603,7 @@
   text-align: center;
   transition: background 0.18s;
 }
-
-.p2-img-modal-file-btn:active {
-  background: rgba(153, 200, 237, 0.10);
-}
+.p2-img-modal-file-btn:active { background: rgba(153,200,237,0.10); }
 
 .p2-img-modal-actions {
   display: flex;
@@ -478,9 +614,9 @@
 
 .p2-img-modal-cancel {
   background: none;
-  border: 1.5px solid rgba(153, 200, 237, 0.40);
+  border: 1.5px solid rgba(153,200,237,0.40);
   border-radius: 10px;
-  color: var(--text-mid, #5a6a80);
+  color: #5a6a80;
   font-size: 13px;
   padding: 7px 16px;
   cursor: pointer;
@@ -498,7 +634,4 @@
   cursor: pointer;
   font-family: inherit;
 }
-
-.p2-img-modal-confirm:active {
-  opacity: 0.82;
-}
+.p2-img-modal-confirm:active { opacity: 0.82; }

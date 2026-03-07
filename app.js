@@ -315,6 +315,9 @@ document.getElementById('avatar-confirm-btn').addEventListener('click', function
     document.getElementById('user-avatar').src = url;
     save('userAvatar', url);
     document.getElementById('avatar-modal').classList.remove('show');
+    /* 同步到第二页头像 */
+    const p2av = document.getElementById('p2-uc-avatar');
+    if (p2av) p2av.src = url;
   } else {
     const file = document.getElementById('avatar-file-input').files[0];
     if (!file) return;
@@ -323,6 +326,8 @@ document.getElementById('avatar-confirm-btn').addEventListener('click', function
       document.getElementById('user-avatar').src = e.target.result;
       save('userAvatar', e.target.result);
       document.getElementById('avatar-modal').classList.remove('show');
+      const p2av = document.getElementById('p2-uc-avatar');
+      if (p2av) p2av.src = e.target.result;
     };
     reader.readAsDataURL(file);
   }
@@ -498,6 +503,9 @@ const pagesWrap  = document.getElementById('pages-wrap');
 const totalPages = 3;
 let touchStartX  = 0, touchStartY = 0, touchMoved = false;
 
+/* 三页宽度 */
+pagesWrap.style.width = (totalPages * 100) + 'vw';
+
 function goToPage(idx) {
   if (idx < 0 || idx >= totalPages) return;
   currentPage = idx;
@@ -613,15 +621,17 @@ function applyP2Image(src) {
   if (!src || !p2ModalTarget) return;
 
   if (p2ModalTarget === 'ucbg') {
-    document.getElementById('p2-uc-bg').style.backgroundImage = 'url(' + src + ')';
+    const bgEl = document.getElementById('p2-uc-bg');
+    if (bgEl) bgEl.style.backgroundImage = 'url(' + src + ')';
     save('p2UcBg', src);
 
   } else if (p2ModalTarget === 'album') {
-    document.getElementById('p2-album-bg').style.backgroundImage = 'url(' + src + ')';
+    const bgEl = document.getElementById('p2-album-bg');
+    if (bgEl) bgEl.style.backgroundImage = 'url(' + src + ')';
     save('p2AlbumBg', src);
 
   } else if (p2ModalTarget.startsWith('card-')) {
-    const idx = parseInt(p2ModalTarget.split('-')[1]);
+    const idx   = parseInt(p2ModalTarget.split('-')[1]);
     const imgEl = document.getElementById('p2-card-img-' + idx);
     if (imgEl) {
       imgEl.src = src;
@@ -636,10 +646,7 @@ function applyP2Image(src) {
 }
 
 document.getElementById('p2-img-modal-confirm').addEventListener('click', function() {
-  if (p2ModalPending) {
-    applyP2Image(p2ModalPending);
-    return;
-  }
+  if (p2ModalPending) { applyP2Image(p2ModalPending); return; }
   const url = document.getElementById('p2-img-modal-url').value.trim();
   if (url) { p2ModalPending = url; applyP2Image(url); return; }
   alert('请输入图片URL或选择本地文件');
@@ -666,19 +673,20 @@ document.getElementById('p2-img-modal').addEventListener('click', function(e) {
 });
 
 /* ============================================================
-   第二页：用户主页卡
+   第二页：用户主页卡初始化
    ============================================================ */
 (function initP2UserCard() {
+  /* 恢复背景 */
   const bg = load('p2UcBg', null);
   if (bg) {
     const bgEl = document.getElementById('p2-uc-bg');
     if (bgEl) bgEl.style.backgroundImage = 'url(' + bg + ')';
   }
 
-  function syncP2Avatar() {
-    const av   = load('userAvatar', null);
-    const p2av = document.getElementById('p2-uc-avatar');
-    if (!p2av) return;
+  /* 同步头像 */
+  const av   = load('userAvatar', null);
+  const p2av = document.getElementById('p2-uc-avatar');
+  if (p2av) {
     if (av) {
       p2av.src = av;
     } else {
@@ -686,11 +694,11 @@ document.getElementById('p2-img-modal').addEventListener('click', function(e) {
       if (mainAv) p2av.src = mainAv.src;
     }
   }
-  syncP2Avatar();
 
-  const changeBgBtn = document.getElementById('p2-uc-change-bg-btn');
-  if (changeBgBtn) {
-    changeBgBtn.addEventListener('click', function(e) {
+  /* 更换背景按钮 */
+  const btn = document.getElementById('p2-uc-change-bg-btn');
+  if (btn) {
+    btn.addEventListener('click', function(e) {
       e.stopPropagation();
       openP2ImgModal('更换用户卡背景', 'ucbg');
     });
@@ -698,29 +706,33 @@ document.getElementById('p2-img-modal').addEventListener('click', function(e) {
 })();
 
 /* ============================================================
-   第二页：装饰音乐进度条
+   第二页：装饰音乐进度条 + 控制按钮
    ============================================================ */
 (function initP2MusicBar() {
   const track  = document.getElementById('p2-music-track');
   const played = document.getElementById('p2-music-played');
   const thumb  = document.getElementById('p2-music-thumb');
   const curEl  = document.getElementById('p2-music-cur');
+  const playBtn = document.getElementById('p2-mc-play');
+  const prevBtn = document.getElementById('p2-mc-prev');
+  const nextBtn = document.getElementById('p2-mc-next');
   if (!track) return;
 
-  const totalSecs = 217;
+  const totalSecs = 217;   /* 3:37 假数据 */
   let progress = 0.38;
   let dragging = false;
+  let playing  = false;
 
   function updateBar(p) {
     progress = Math.max(0, Math.min(1, p));
     const pct = (progress * 100).toFixed(1) + '%';
     if (played) played.style.width = pct;
-    if (thumb)  thumb.style.left  = pct;
+    if (thumb)  thumb.style.left   = pct;
     if (curEl) {
       const cur = Math.round(progress * totalSecs);
-      const m   = Math.floor(cur / 60);
-      const s   = String(cur % 60).padStart(2, '0');
-      curEl.textContent = m + ':' + s;
+      const mm  = Math.floor(cur / 60);
+      const ss  = String(cur % 60).padStart(2, '0');
+      curEl.textContent = mm + ':' + ss;
     }
   }
 
@@ -754,6 +766,31 @@ document.getElementById('p2-img-modal').addEventListener('click', function(e) {
 
   document.addEventListener('mouseup',  function() { dragging = false; });
   document.addEventListener('touchend', function() { dragging = false; });
+
+  /* 播放/暂停按钮（装饰） */
+  if (playBtn) {
+    playBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      playing = !playing;
+      playBtn.innerHTML = playing ? '&#9646;&#9646;' : '&#9654;';
+    });
+  }
+
+  /* 快退按钮（装饰：进度-5%） */
+  if (prevBtn) {
+    prevBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      updateBar(progress - 0.05);
+    });
+  }
+
+  /* 快进按钮（装饰：进度+5%） */
+  if (nextBtn) {
+    nextBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      updateBar(progress + 0.05);
+    });
+  }
 
   updateBar(0.38);
 })();
@@ -802,12 +839,4 @@ var p2CardUrls = load('page2Cards', ['', '', '', '']);
       openP2ImgModal('更换专辑背景', 'album');
     });
   }
-})();
-
-/* ============================================================
-   第二页：pages-wrap 宽度适配三页
-   ============================================================ */
-(function initPagesWrapWidth() {
-  const pw = document.getElementById('pages-wrap');
-  if (pw) pw.style.width = (totalPages * 100) + 'vw';
 })();
