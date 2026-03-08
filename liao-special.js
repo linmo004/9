@@ -25,10 +25,10 @@ function renderSpecialContent(content, msg) {
   function transferButtons(msgId, status) {
     if (status === 'accepted') return '<div class="transfer-inline-status accepted">已收款</div>';
     if (status === 'declined') return '<div class="transfer-inline-status declined">已拒绝</div>';
-    return `<div class="transfer-inline-actions">
-      <button class="transfer-inline-accept" data-transfer-id="${escHtml(msgId)}">接受</button>
-      <button class="transfer-inline-decline" data-transfer-id="${escHtml(msgId)}">拒绝</button>
-    </div>`;
+    return '<div class="transfer-inline-actions">' +
+      '<button class="transfer-inline-accept" data-transfer-id="' + escHtml(msgId) + '">接受</button>' +
+      '<button class="transfer-inline-decline" data-transfer-id="' + escHtml(msgId) + '">拒绝</button>' +
+      '</div>';
   }
 
   const globalRe = /\[(.+?)(?:发送了一个表情包：(.+?)|发送了一条语音：([\s\S]+?)|发起了一笔转账：(\d+\.?\d*)元(?:，备注：([\s\S]+?))?|发送了一张照片：([\s\S]+?))\]/g;
@@ -48,7 +48,7 @@ function renderSpecialContent(content, msg) {
       const emojiName = match[2].trim();
       const found     = liaoEmojis.find(e => e.name === emojiName);
       if (found) {
-        result += `<img class="emoji-msg-bubble" src="${escHtml(found.url)}" alt="${escHtml(emojiName)}" title="${escHtml(emojiName)}">`;
+        result += '<img class="emoji-msg-bubble" src="' + escHtml(found.url) + '" alt="' + escHtml(emojiName) + '" title="' + escHtml(emojiName) + '">';
       } else {
         result += escHtml(full);
       }
@@ -56,11 +56,11 @@ function renderSpecialContent(content, msg) {
     } else if (match[3] !== undefined) {
       const voiceText = match[3].trim();
       const duration  = calcVoiceDuration(voiceText);
-      result += `<div class="voice-bubble special-inline-bubble" data-voice-text="${escHtml(voiceText)}" title="点击查看语音内容">
-        <span class="voice-bubble-icon">◎</span>
-        <div class="voice-bubble-bar">${buildVoiceWaves(duration)}</div>
-        <span class="voice-bubble-duration">${duration}"</span>
-      </div>`;
+      result += '<div class="voice-bubble special-inline-bubble" data-voice-text="' + escHtml(voiceText) + '" title="点击查看语音内容">' +
+        '<span class="voice-bubble-icon">◎</span>' +
+        '<div class="voice-bubble-bar">' + buildVoiceWaves(duration) + '</div>' +
+        '<span class="voice-bubble-duration">' + duration + '"</span>' +
+        '</div>';
 
     } else if (match[4] !== undefined) {
       const amount  = parseFloat(match[4]) || 0;
@@ -70,25 +70,25 @@ function renderSpecialContent(content, msg) {
       const isRole  = msg ? (msg.role === 'assistant') : false;
       const btnHtml = isRole
         ? transferButtons(msgId, status)
-        : `<div class="transfer-inline-status">${status === 'accepted' ? '已收款' : status === 'declined' ? '已拒绝' : '已发出'}</div>`;
-      result += `<div class="transfer-inline-card" data-transfer-id="${escHtml(msgId)}">
-        <div class="transfer-inline-header">
-          <span class="transfer-bubble-icon">◇</span>
-          <span class="transfer-bubble-amount">${amount.toFixed(2)} 元</span>
-        </div>
-        ${note ? `<div class="transfer-bubble-note">${escHtml(note)}</div>` : ''}
-        ${btnHtml}
-      </div>`;
+        : '<div class="transfer-inline-status">' + (status === 'accepted' ? '已收款' : status === 'declined' ? '已拒绝' : '已发出') + '</div>';
+      result += '<div class="transfer-inline-card" data-transfer-id="' + escHtml(msgId) + '">' +
+        '<div class="transfer-inline-header">' +
+        '<span class="transfer-bubble-icon">◇</span>' +
+        '<span class="transfer-bubble-amount">' + amount.toFixed(2) + ' 元</span>' +
+        '</div>' +
+        (note ? '<div class="transfer-bubble-note">' + escHtml(note) + '</div>' : '') +
+        btnHtml +
+        '</div>';
 
     } else if (match[6] !== undefined) {
       const desc      = match[6].trim();
       const shortDesc = desc.slice(0, 12) + (desc.length > 12 ? '…' : '');
-      result += `<div class="fake-photo-bubble special-inline-bubble" data-photo-desc="${escHtml(desc)}">
-        <div class="fake-photo-bubble-inner">
-          <span class="fake-photo-icon">▤</span>
-          <span class="fake-photo-label">${escHtml(shortDesc)}</span>
-        </div>
-      </div>`;
+      result += '<div class="fake-photo-bubble special-inline-bubble" data-photo-desc="' + escHtml(desc) + '">' +
+        '<div class="fake-photo-bubble-inner">' +
+        '<span class="fake-photo-icon">▤</span>' +
+        '<span class="fake-photo-label">' + escHtml(shortDesc) + '</span>' +
+        '</div>' +
+        '</div>';
     } else {
       result += escHtml(full);
     }
@@ -150,19 +150,19 @@ function appendMessageBubble(msg, role, chatUserAvatar, animate) {
   let bubbleInner = '';
 
   if (msg.quoteContent) {
-    bubbleInner += `<div class="msg-quote-block">${escHtml(msg.quoteContent)}</div>`;
+    bubbleInner += '<div class="msg-quote-block">' + escHtml(msg.quoteContent) + '</div>';
   }
 
   const msgType = msg.type || 'text';
 
   if (msgType === 'image') {
-    bubbleInner += `<img class="real-image-bubble" src="${escHtml(msg.content)}" alt="图片">`;
+    bubbleInner += '<img class="real-image-bubble" src="' + escHtml(msg.content) + '" alt="图片">';
     bubbleEl.innerHTML = bubbleInner;
   } else {
     const { html, isEmojiOnly, isSpecialOnly } = renderSpecialContent(msg.content || '', msg);
     bubbleInner += html;
     bubbleEl.innerHTML = bubbleInner;
-    if (isEmojiOnly)   bubbleEl.classList.add('bubble-emoji-only');
+    if (isEmojiOnly)        bubbleEl.classList.add('bubble-emoji-only');
     else if (isSpecialOnly) bubbleEl.classList.add('bubble-special-only');
   }
 
@@ -208,7 +208,7 @@ function formatFullTime(ts) {
   const H  = String(d.getHours()).padStart(2, '0');
   const Mi = String(d.getMinutes()).padStart(2, '0');
   const S  = String(d.getSeconds()).padStart(2, '0');
-  return `${Y}-${Mo}-${D} ${H}:${Mi}:${S}`;
+  return Y + '-' + Mo + '-' + D + ' ' + H + ':' + Mi + ':' + S;
 }
 
 /* ---------- 动态时间描述（记忆宫殿用） ---------- */
@@ -241,7 +241,7 @@ function buildVoiceWaves(duration) {
   const heights = [8, 13, 18, 14, 10, 16, 12, 9, 15, 11, 17, 13, 8, 12];
   let html = '';
   for (let i = 0; i < count; i++) {
-    html += `<span class="voice-bubble-wave" style="height:${heights[i % heights.length]}px;"></span>`;
+    html += '<span class="voice-bubble-wave" style="height:' + heights[i % heights.length] + 'px;"></span>';
   }
   return html;
 }
@@ -344,7 +344,7 @@ function openMsgActionMenu(e, msgId) {
 
   actions.push({ label: '收藏', fn: () => {
     const groupKey = isUser
-      ? `角色 `角色 ${role ? (role.nickname || role.realname) : ''}` 的收藏`
+      ? '角色 ' + (role ? (role.nickname || role.realname) : '') + ' 的收藏'
       : '我的收藏';
     addFavorite({
       roleId:     chat.roleId,
@@ -495,7 +495,7 @@ document.getElementById('liao-voice-confirm').addEventListener('click', () => {
   const quoteContent = (currentQuoteMsgIdx >= 0 && chat.messages[currentQuoteMsgIdx])
     ? (chat.messages[currentQuoteMsgIdx].content || '') : '';
 
-  const content = `[(${userName})发送了一条语音：${text}]`;
+  const content = '[(' + userName + ')发送了一条语音：' + text + ']';
   const msgObj  = {
     role: 'user', type: 'text', content,
     quoteContent: quoteContent || undefined,
@@ -531,8 +531,8 @@ document.getElementById('liao-transfer-confirm').addEventListener('click', () =>
   const userName = chat.chatUserName || liaoUserName;
 
   const content = note
-    ? `[(${userName})发起了一笔转账：${amount.toFixed(2)}元，备注：${note}]`
-    : `[(${userName})发起了一笔转账：${amount.toFixed(2)}元]`;
+    ? '[(' + userName + ')发起了一笔转账：' + amount.toFixed(2) + '元，备注：' + note + ']'
+    : '[(' + userName + ')发起了一笔转账：' + amount.toFixed(2) + '元]';
   const msgObj = {
     role: 'user', type: 'text', content,
     ts: Date.now(),
@@ -566,7 +566,7 @@ document.getElementById('liao-camera-confirm').addEventListener('click', () => {
   const uAvt     = chat.chatUserAvatar || liaoUserAvatar;
   const userName = chat.chatUserName || liaoUserName;
 
-  const content = `[(${userName})发送了一张照片：${desc}]`;
+  const content = '[(' + userName + ')发送了一张照片：' + desc + ']';
   const msgObj  = {
     role: 'user', type: 'text', content,
     ts: Date.now(),
@@ -686,10 +686,10 @@ function renderRoleLib() {
     realDiv.className   = 'role-card-real';
     realDiv.textContent = role.realname;
 
-    const settingsBtn         = document.createElement('button');
-    settingsBtn.className     = 'role-card-settings-btn';
+    const settingsBtn          = document.createElement('button');
+    settingsBtn.className      = 'role-card-settings-btn';
     settingsBtn.dataset.roleId = role.id;
-    settingsBtn.textContent   = '聊天设置';
+    settingsBtn.textContent    = '聊天设置';
 
     card.appendChild(avatarImg);
     card.appendChild(nameDiv);
@@ -719,7 +719,7 @@ function renderRoleLib() {
     grid.appendChild(card);
   });
 
-  if (count) count.textContent = `共 ${liaoRoles.length} 个角色`;
+  if (count) count.textContent = '共 ' + liaoRoles.length + ' 个角色';
 }
 
 /* ============================================================

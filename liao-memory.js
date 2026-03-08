@@ -102,7 +102,7 @@ function renderOtherMemoryList() {
     const items     = (chat.memory && chat.memory.other && chat.memory.other[app.key]) || [];
     const countDiv  = document.createElement('div');
     countDiv.className   = 'other-memory-count';
-    countDiv.textContent = items.length ? `共 ${items.length} 条记忆` : '暂无记忆';
+    countDiv.textContent = items.length ? '共 ' + items.length + ' 条记忆' : '暂无记忆';
 
     entry.appendChild(header);
     entry.appendChild(countDiv);
@@ -139,8 +139,8 @@ document.getElementById('memory-add-confirm').addEventListener('click', () => {
     type
   };
 
-  if (type === 'long')      chat.memory.longTerm.push(item);
-  else if (type === 'short') chat.memory.shortTerm.push(item);
+  if (type === 'long')           chat.memory.longTerm.push(item);
+  else if (type === 'short')     chat.memory.shortTerm.push(item);
   else if (type === 'important') chat.memory.important.push(item);
 
   lSave('chats', liaoChats);
@@ -156,11 +156,11 @@ document.getElementById('memory-add-cancel').addEventListener('click', () => {
 
 function openMemoryEditModal(type, idx) {
   if (currentChatIdx < 0) return;
-  const chat  = liaoChats[currentChatIdx];
-  const arr   = type === 'long' ? chat.memory.longTerm
-              : type === 'short' ? chat.memory.shortTerm
-              : chat.memory.important;
-  const item  = arr[idx];
+  const chat = liaoChats[currentChatIdx];
+  const arr  = type === 'long' ? chat.memory.longTerm
+             : type === 'short' ? chat.memory.shortTerm
+             : chat.memory.important;
+  const item = arr[idx];
   if (!item) return;
 
   memoryEditType = type;
@@ -221,8 +221,8 @@ async function triggerMemorySummary(chat, role, targetType) {
   const model = loadApiModel();
   if (!model) { alert('请先在设置中选择模型'); return; }
 
-  const userName  = chat.chatUserName || liaoUserName;
-  const roleName  = role.nickname || role.realname;
+  const userName   = chat.chatUserName || liaoUserName;
+  const roleName   = role.nickname || role.realname;
   const recentMsgs = chat.messages
     .filter(m => !m.hidden && (m.role === 'user' || m.role === 'assistant'))
     .slice(-50)
@@ -235,11 +235,11 @@ async function triggerMemorySummary(chat, role, targetType) {
   if (!recentMsgs.trim()) { alert('暂无聊天记录可供总结'); return; }
 
   const systemPrompt =
-    `你是记忆整理助手，请根据以下聊天记录，为角色（${roleName}）生成记忆摘要。
-要求：分别提炼长期记忆（稳定的性格特征、关系背景、重要事件）、短期记忆（近期发生的具体事情）、重要记忆（对关系影响重大的关键时刻）。
-每类记忆输出若干条，每条一行，格式为：[类型:内容]，类型用 long、short、important 表示。
-例如：[long:${userName}喜欢喝咖啡]、[short:昨天一起看了电影]、[important:${userName}第一次说喜欢你]
-只输出记忆条目，不输出其他文字。`;
+    '你是记忆整理助手，请根据以下聊天记录，为角色（' + roleName + '）生成记忆摘要。\n' +
+    '要求：分别提炼长期记忆（稳定的性格特征、关系背景、重要事件）、短期记忆（近期发生的具体事情）、重要记忆（对关系影响重大的关键时刻）。\n' +
+    '每类记忆输出若干条，每条一行，格式为：[类型:内容]，类型用 long、short、important 表示。\n' +
+    '例如：[long:' + userName + '喜欢喝咖啡]、[short:昨天一起看了电影]、[important:' + userName + '第一次说喜欢你]\n' +
+    '只输出记忆条目，不输出其他文字。';
 
   const statusBtn = document.getElementById('memory-ai-summarize-btn');
   if (statusBtn) { statusBtn.textContent = '总结中…'; statusBtn.disabled = true; }
@@ -320,9 +320,9 @@ async function triggerOtherMemoryOrganize(appKey, appLabel) {
   const roleName      = role.nickname || role.realname;
 
   const systemPrompt =
-    `你是记忆整理助手。以下是来自「${appLabel}」的现有记忆内容，请为角色（${roleName}）整理并优化这些记忆。
-每条记忆一行，格式为：[memory:内容]
-只输出记忆条目，不输出其他文字。`;
+    '你是记忆整理助手。以下是来自「' + appLabel + '」的现有记忆内容，请为角色（' + roleName + '）整理并优化这些记忆。\n' +
+    '每条记忆一行，格式为：[memory:内容]\n' +
+    '只输出记忆条目，不输出其他文字。';
 
   try {
     const endpoint = activeConfig.url.replace(/\/$/, '') + '/chat/completions';
@@ -438,8 +438,8 @@ async function triggerAiReply() {
   }
 
   /* ---- 第三段：当前时间 ---- */
-  const now        = new Date();
-  const weekNames  = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+  const now       = new Date();
+  const weekNames = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
   const Y  = now.getFullYear();
   const Mo = String(now.getMonth() + 1).padStart(2, '0');
   const D  = String(now.getDate()).padStart(2, '0');
@@ -466,7 +466,7 @@ async function triggerAiReply() {
     '所有特殊消息统一使用以下格式，出现在消息文字中：\n' +
     '· [(' + chatUserName2 + ')发送了一个表情包：名称] — 表情包\n' +
     '· [(' + chatUserName2 + ')发送了一条语音：内容] — 语音消息\n' +
-    '· [(' + chatUserName2 + )发起了一笔转账：金额元，备注：备注内容] — 转账\n' +
+    '· [(' + chatUserName2 + ')发起了一笔转账：金额元，备注：备注内容] — 转账\n' +
     '· [(' + chatUserName2 + ')发送了一张照片：描述] — 照片\n\n' +
     '【你可以在回复里使用的特殊格式】\n' +
     '以下每种格式必须单独占一行，不可和其他文字混写在同一行：\n' +
@@ -480,13 +480,12 @@ async function triggerAiReply() {
     '1. 用口语短句，像发微信一样聊天，有情绪有立场。\n' +
     '2. 每句话单独一行，换行分隔，绝不写成一段。\n' +
     '3. 允许语气词、不完美表达。\n' +
-    '4. 可以适当在复合角色设定的前提下使用 emoji 或颜文字，纯文字（特殊格式除外）。\n' +
+    '4. 可以适当在符合角色设定的前提下使用 emoji 或颜文字。\n' +
     '5. 角色设定优先级最高。\n' +
     '6. 收到转账必须第一条就回应。\n' +
-    '7. 发语音内容必须自然口语，有语气词。'
-    '8. 主动分享自己身边发生的事，无论是趣事还是吐槽都可以，这样更像活人。'
-    '9. 理解用户说的谐音梗、热梗等等，配合用户聊天玩梗'
-    ;
+    '7. 发语音内容必须自然口语，有语气词。\n' +
+    '8. 主动分享自己身边发生的事，无论是趣事还是吐槽都可以，这样更像活人。\n' +
+    '9. 理解用户说的谐音梗、热梗等等，配合用户聊天玩梗。';
 
   const finalSystemPrompt =
     worldBookSection +
@@ -630,13 +629,13 @@ function scheduleRoleSuiyanNew(role) {
     if (!model) return;
 
     const systemPrompt =
-      `你是角色 ${role.realname}，${role.setting || ''}。
-现在请你发一条随言（类似朋友圈的短动态），内容随意，可以和你最近的聊天内容有关，也可以是你此刻的感受、所见所闻、心情或想法。
-要求：
-1. 不超过80个字。
-2. 纯文字，不使用任何特殊格式。
-3. 口语化，自然真实，像随手发的朋友圈。
-4. 只输出动态内容本身，不要加任何前缀或说明。`;
+      '你是角色 ' + role.realname + '，' + (role.setting || '') + '。\n' +
+      '现在请你发一条随言（类似朋友圈的短动态），内容随意，可以和你最近的聊天内容有关，也可以是你此刻的感受、所见所闻、心情或想法。\n' +
+      '要求：\n' +
+      '1. 不超过80个字。\n' +
+      '2. 纯文字，不使用任何特殊格式。\n' +
+      '3. 口语化，自然真实，像随手发的朋友圈。\n' +
+      '4. 只输出动态内容本身，不要加任何前缀或说明。';
 
     try {
       const endpoint = activeConfig.url.replace(/\/$/, '') + '/chat/completions';
