@@ -65,7 +65,7 @@
     });
   }
 
-    async function initScripts() {
+        async function initScripts() {
     await loadScript('app.js');
     await loadScript('settings.js');
     await loadScript('liao-core.js');
@@ -74,15 +74,18 @@
     await loadScript('liao-suiyan.js');
     await loadScript('liao-chat.js');
     await loadScript('liao-special.js');
+    await loadScript('liao-emoji.js');
+    await loadScript('liao-memory.js');
     await loadScript('liao-persona.js');
     await loadScript('liao-favorites.js');
     await loadScript('lockscreen.js');
     await loadScript('worldbook.js');
-    await loadScript('garden-core.js');   
-    await loadScript('garden-ui.js');     
-    await loadScript('garden-main.js');   
+    await loadScript('garden-core.js');
+    await loadScript('garden-ui.js');
+    await loadScript('garden-main.js');
     initPrivacySettings();
   }
+
 
 
   function initPrivacySettings() {

@@ -21,12 +21,8 @@ function renderChatList() {
     const lastMsg = msgs.length ? msgs[msgs.length - 1] : null;
     let preview   = '暂无消息';
     if (lastMsg) {
-      if (lastMsg.recalled)              preview = '[撤回了一条消息]';
-      else if (lastMsg.type === 'voice') preview = '[语音]';
-      else if (lastMsg.type === 'transfer') preview = '[转账]';
-      else if (lastMsg.type === 'fake_photo') preview = '[照片]';
+      if (lastMsg.recalled)   preview = '[撤回了一条消息]';
       else if (lastMsg.type === 'image') preview = '[图片]';
-      else if (lastMsg.type === 'emoji') preview = '[表情包]';
       else preview = lastMsg.content || '暂无消息';
     }
     const lastTime = lastMsg ? formatTime(lastMsg.ts) : '';
@@ -37,7 +33,7 @@ function renderChatList() {
       <img class="chat-item-avatar" src="${escHtml(role.avatar || defaultAvatar())}" alt="">
       <div class="chat-item-body">
         <div class="chat-item-name">${escHtml(role.nickname || role.realname)}</div>
-        <div class="chat-item-preview">${escHtml(preview)}</div>
+        <div class="chat-item-preview">${escHtml(preview.slice(0, 40))}</div>
       </div>
       <div class="chat-item-meta">
         <div class="chat-item-time">${lastTime}</div>
@@ -107,10 +103,11 @@ document.getElementById('liao-role-confirm-btn').addEventListener('click', () =>
   liaoRoles.push(role);
   lSave('roles', liaoRoles);
 
-  liaoChats.push({
+  /* 新建 chat 时初始化 memory 字段 */
+  liaoChats.push(initChatMemory({
     roleId: role.id, messages: [],
     chatUserName: liaoUserName, chatUserAvatar: liaoUserAvatar, chatUserSetting: ''
-  });
+  }));
   lSave('chats', liaoChats);
 
   document.getElementById('liao-new-role-modal').classList.remove('show');
@@ -154,10 +151,10 @@ document.getElementById('liao-import-file').addEventListener('change', function 
         r.setting  = r.setting  || '';
         if (!liaoRoles.find(ex => ex.id === r.id)) {
           liaoRoles.push(r);
-          liaoChats.push({
+          liaoChats.push(initChatMemory({
             roleId: r.id, messages: [],
             chatUserName: liaoUserName, chatUserAvatar: liaoUserAvatar, chatUserSetting: ''
-          });
+          }));
           imported++;
         }
       });
@@ -179,6 +176,29 @@ document.getElementById('liao-import-cancel').addEventListener('click', () => {
 });
 
 /* ============================================================
+   记忆数据结构初始化工具
+   ============================================================ */
+function initChatMemory(chat) {
+  if (!chat.memory) {
+    chat.memory = {
+      longTerm:  [],
+      shortTerm: [],
+      important: [],
+      other:     {}
+    };
+  } else {
+    if (!chat.memory.longTerm)  chat.memory.longTerm  = [];
+    if (!chat.memory.shortTerm) chat.memory.shortTerm = [];
+    if (!chat.memory.important) chat.memory.important = [];
+    if (!chat.memory.other)     chat.memory.other     = {};
+  }
+  return chat;
+}
+
+/* 启动时补全所有现有 chat 的 memory 字段 */
+liaoChats.forEach(c => initChatMemory(c));
+
+/* ============================================================
    聊天界面 — openChatView（唯一定义处）
    ============================================================ */
 function openChatView(chatIdx) {
@@ -187,28 +207,27 @@ function openChatView(chatIdx) {
   const role = liaoRoles.find(r => r.id === chat.roleId);
   if (!role) return;
 
+  /* 确保 memory 字段存在 */
+  initChatMemory(chat);
+
   document.getElementById('chat-view-title').textContent = role.nickname || role.realname;
 
-  /* 重置引用状态 */
   currentQuoteMsgIdx = -1;
   const quoteBar = document.getElementById('chat-quote-bar');
   if (quoteBar) quoteBar.style.display = 'none';
 
-  /* 关闭表情包面板 */
   const emojiPanel = document.getElementById('emoji-panel');
   if (emojiPanel) emojiPanel.style.display = 'none';
   emojiPanelOpen = false;
   const csbEmoji = document.getElementById('csb-emoji');
   if (csbEmoji) csbEmoji.classList.remove('active');
 
-  /* 应用时间戳隐藏设置 */
   const hidden = !!(chat.chatSettings && chat.chatSettings.hideTimestamp);
   document.body.classList.toggle('timestamp-hidden', hidden);
 
   renderChatMessages();
   applyCurrentChatBeauty();
 
-  /* 重置聊天设置返回标记 */
   const csCloseBtn = document.getElementById('cs-close-btn');
   if (csCloseBtn) csCloseBtn.dataset.returnTo = '';
 
@@ -238,8 +257,12 @@ function renderChatMessages() {
   area.innerHTML = '';
 
   const chatUserAvatar = chat.chatUserAvatar || liaoUserAvatar;
-  chat.messages.forEach(msg => {
-    if (msg.hidden) return;
+  const settings       = chat.chatSettings || {};
+  const maxLoad        = settings.maxLoadMsgs > 0 ? settings.maxLoadMsgs : 0;
+  const msgs           = chat.messages.filter(m => !m.hidden);
+  const toRender       = maxLoad > 0 ? msgs.slice(-maxLoad) : msgs;
+
+  toRender.forEach(msg => {
     appendMessageBubble(msg, role, chatUserAvatar, false);
   });
   scrollChatToBottom();
@@ -256,7 +279,7 @@ function showTypingIndicator(show) {
   if (show) scrollChatToBottom();
 }
 
-/* ---------- 发送用户消息（支持引用） ---------- */
+/* ---------- 发送用户消息 ---------- */
 document.getElementById('chat-send-btn').addEventListener('click', sendUserMessage);
 document.getElementById('chat-view-input').addEventListener('keydown', function (e) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendUserMessage(); }
@@ -287,7 +310,6 @@ function sendUserMessage() {
   lSave('chats', liaoChats);
   input.value = '';
 
-  /* 清除引用 */
   currentQuoteMsgIdx = -1;
   const quoteBar = document.getElementById('chat-quote-bar');
   if (quoteBar) quoteBar.style.display = 'none';
@@ -327,8 +349,9 @@ function openChatSettings() {
   document.getElementById('cs-custom-css').value         = beauty.customCSS        || '';
 
   const settings = chat.chatSettings || {};
-  document.getElementById('cs-max-api-msgs').value  = settings.maxApiMsgs  !== undefined ? settings.maxApiMsgs  : 0;
-  document.getElementById('cs-max-load-msgs').value = settings.maxLoadMsgs !== undefined ? settings.maxLoadMsgs : 50;
+  document.getElementById('cs-max-api-msgs').value          = settings.maxApiMsgs          !== undefined ? settings.maxApiMsgs          : 0;
+  document.getElementById('cs-max-load-msgs').value         = settings.maxLoadMsgs         !== undefined ? settings.maxLoadMsgs         : 50;
+  document.getElementById('cs-auto-memory-interval').value  = settings.autoMemoryInterval  !== undefined ? settings.autoMemoryInterval  : 0;
 
   const tsCheck = document.getElementById('cs-hide-timestamp');
   if (tsCheck) tsCheck.checked = !!(settings.hideTimestamp);
@@ -339,7 +362,6 @@ function openChatSettings() {
 
 document.getElementById('chat-settings-open-btn').addEventListener('click', openChatSettings);
 
-/* 聊天设置关闭按钮 — 支持从角色库进入时返回角色库 */
 document.getElementById('cs-close-btn').addEventListener('click', function () {
   document.getElementById('liao-chat-settings').classList.remove('show');
   const returnTo = this.dataset.returnTo;
@@ -356,11 +378,28 @@ function switchChatSettingsTab(tabId) {
   document.querySelectorAll('.cs-page').forEach(page => {
     page.classList.toggle('active', page.id === tabId + '-page');
   });
+  /* 切换到记忆Tab时渲染记忆列表 */
+  if (tabId === 'cs-tab-memory') {
+    renderMemoryLists();
+    renderOtherMemoryList();
+  }
 }
 
 document.querySelectorAll('.cs-tab-btn').forEach(btn => {
   btn.addEventListener('click', function () {
     switchChatSettingsTab(this.dataset.cstab);
+  });
+});
+
+/* ---- 记忆子页切换 ---- */
+document.querySelectorAll('.memory-sub-tab-btn').forEach(btn => {
+  btn.addEventListener('click', function () {
+    const target = this.dataset.memorytab;
+    document.querySelectorAll('.memory-sub-tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.memory-sub-page').forEach(p => p.classList.remove('active'));
+    this.classList.add('active');
+    const page = document.getElementById(target + '-page');
+    if (page) page.classList.add('active');
   });
 });
 
@@ -522,8 +561,9 @@ document.getElementById('cs-msgs-save-btn').addEventListener('click', () => {
   if (currentChatIdx < 0) return;
   const chat = liaoChats[currentChatIdx];
   if (!chat.chatSettings) chat.chatSettings = {};
-  chat.chatSettings.maxApiMsgs  = parseInt(document.getElementById('cs-max-api-msgs').value)  || 0;
-  chat.chatSettings.maxLoadMsgs = parseInt(document.getElementById('cs-max-load-msgs').value) || 50;
+  chat.chatSettings.maxApiMsgs         = parseInt(document.getElementById('cs-max-api-msgs').value)         || 0;
+  chat.chatSettings.maxLoadMsgs        = parseInt(document.getElementById('cs-max-load-msgs').value)        || 50;
+  chat.chatSettings.autoMemoryInterval = parseInt(document.getElementById('cs-auto-memory-interval').value) || 0;
   lSave('chats', liaoChats);
   alert('消息数量设置已保存');
 });

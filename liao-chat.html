@@ -138,7 +138,6 @@
           <label class="liao-modal-label">用户设定</label>
           <textarea class="liao-modal-textarea" id="cs-user-setting"
             placeholder="用户的身份、性格、与角色的关系…" style="min-height:80px;"></textarea>
-          <!-- 从人设库导入 -->
           <div style="margin-top:10px;">
             <button class="liao-btn-ghost" id="cs-import-persona-btn" style="width:100%;">从我的人设库导入</button>
           </div>
@@ -200,6 +199,8 @@
           <input class="liao-modal-input" id="cs-max-api-msgs" type="number" min="0" value="0" placeholder="0">
           <label class="liao-modal-label" style="margin-top:14px;">界面加载的消息数量</label>
           <input class="liao-modal-input" id="cs-max-load-msgs" type="number" min="10" value="50" placeholder="50">
+          <label class="liao-modal-label" style="margin-top:14px;">每隔多少条消息自动触发 AI 总结记忆（0 为关闭）</label>
+          <input class="liao-modal-input" id="cs-auto-memory-interval" type="number" min="0" value="0" placeholder="0">
           <div style="margin-top:12px;">
             <button class="liao-btn-primary" id="cs-msgs-save-btn" style="width:100%;">保存</button>
           </div>
@@ -217,14 +218,73 @@
       </div>
     </div>
 
-    <!-- 第三页：角色记忆（待开发） -->
+    <!-- 第三页：角色记忆 -->
     <div class="cs-page" id="cs-tab-memory-page">
-      <div class="cs-page-scroll cs-coming-soon">
-        <div class="cs-coming-soon-icon">◎</div>
-        <div class="cs-coming-soon-text">角色记忆</div>
-        <div class="cs-coming-soon-sub">功能建设中，敬请期待</div>
+      <!-- 子页切换按钮 -->
+      <div class="memory-sub-tabs" id="memory-sub-tabs">
+        <button class="memory-sub-tab-btn active" data-memorytab="chat-memory">聊天记忆</button>
+        <button class="memory-sub-tab-btn" data-memorytab="other-memory">其他记忆</button>
       </div>
-    </div>
+
+      <!-- 聊天记忆子页 -->
+      <div class="memory-sub-page active" id="chat-memory-page">
+        <div class="cs-page-scroll">
+
+          <!-- 操作栏 -->
+          <div class="memory-action-bar">
+            <button class="liao-btn-primary" id="memory-ai-summarize-btn" style="flex:1;">AI 总结记忆</button>
+            <button class="liao-btn-ghost" id="memory-manual-add-btn" style="flex:1;">手动添加记忆</button>
+          </div>
+
+          <!-- 手动添加表单（默认隐藏） -->
+          <div class="memory-add-form" id="memory-add-form" style="display:none;">
+            <div class="cs-section-card">
+              <label class="liao-modal-label">记忆内容</label>
+              <textarea class="liao-modal-textarea" id="memory-add-content"
+                placeholder="输入记忆内容…" style="min-height:70px;"></textarea>
+              <label class="liao-modal-label" style="margin-top:10px;">记忆类型</label>
+              <select class="liao-modal-input" id="memory-add-type">
+                <option value="long">长期记忆</option>
+                <option value="short">短期记忆</option>
+                <option value="important">重要记忆</option>
+              </select>
+              <div style="display:flex;gap:8px;margin-top:12px;">
+                <button class="liao-btn-primary" id="memory-add-confirm" style="flex:1;">确认</button>
+                <button class="liao-btn-ghost" id="memory-add-cancel" style="flex:1;">取消</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 长期记忆 -->
+          <div class="cs-section-title">长期记忆</div>
+          <div class="cs-section-card memory-list-card" id="memory-long-list">
+            <div class="memory-empty">暂无长期记忆</div>
+          </div>
+
+          <!-- 短期记忆 -->
+          <div class="cs-section-title">短期记忆</div>
+          <div class="cs-section-card memory-list-card" id="memory-short-list">
+            <div class="memory-empty">暂无短期记忆</div>
+          </div>
+
+          <!-- 重要记忆 -->
+          <div class="cs-section-title">重要记忆</div>
+          <div class="cs-section-card memory-list-card" id="memory-important-list">
+            <div class="memory-empty">暂无重要记忆</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 其他记忆子页 -->
+      <div class="memory-sub-page" id="other-memory-page">
+        <div class="cs-page-scroll">
+          <div class="cs-section-title">其他 App 产生的记忆</div>
+          <div id="other-memory-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+        </div>
+      </div>
+
+    </div><!-- /cs-tab-memory-page -->
 
     <!-- 第四页：角色手机（占位） -->
     <div class="cs-page" id="cs-tab-rolephone-page">
@@ -238,11 +298,25 @@
   </div>
 </div><!-- /liao-chat-settings -->
 
+<!-- ===================== 记忆条目编辑弹窗 ===================== -->
+<div id="liao-memory-edit-modal" class="liao-bubble-modal" style="display:none;">
+  <div class="liao-bubble-modal-box">
+    <div class="liao-modal-title">编辑记忆</div>
+    <label class="liao-modal-label">记忆内容</label>
+    <textarea class="liao-modal-textarea" id="memory-edit-content" style="min-height:80px;"></textarea>
+    <div class="liao-modal-btns">
+      <button class="liao-btn-primary" id="memory-edit-confirm">保存</button>
+      <button class="liao-btn-ghost" id="memory-edit-cancel">取消</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===================== 语音输入气泡弹窗 ===================== -->
 <div id="liao-voice-modal" class="liao-bubble-modal" style="display:none;">
   <div class="liao-bubble-modal-box">
     <div class="liao-modal-title">发送语音</div>
     <input class="liao-modal-input" id="liao-voice-input" placeholder="输入语音内容…">
+    
     <div class="liao-modal-btns">
       <button class="liao-btn-primary" id="liao-voice-confirm">发送</button>
       <button class="liao-btn-ghost" id="liao-voice-cancel">取消</button>
