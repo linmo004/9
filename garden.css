@@ -1,0 +1,726 @@
+/* ============================================================
+   家园App样式
+   ============================================================ */
+
+#garden-app {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: #f0f7ee;
+  display: flex;
+  flex-direction: column;
+  font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  overflow: hidden;
+}
+
+/* 顶部标题栏 */
+.garden-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px 8px;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1.5px solid rgba(120,200,120,0.18);
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.garden-back-btn {
+  background: none;
+  border: none;
+  font-size: 17px;
+  color: #5a8a5a;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background .15s;
+  flex-shrink: 0;
+}
+.garden-back-btn:active { background: rgba(120,200,120,0.15); }
+
+.garden-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 1;
+  justify-content: center;
+}
+
+#garden-level-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2d5a2d;
+  letter-spacing: .04em;
+}
+
+.garden-level-badge {
+  background: linear-gradient(135deg, #7ecb7e, #4aab4a);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 2px 8px;
+  letter-spacing: .04em;
+}
+
+.garden-activity-btn {
+  background: none;
+  border: 1.5px solid rgba(120,200,120,0.5);
+  color: #5a8a5a;
+  font-size: 12px;
+  border-radius: 999px;
+  padding: 4px 11px;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition: background .15s;
+}
+.garden-activity-btn:active { background: rgba(120,200,120,0.15); }
+
+.garden-activity-dot {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 8px;
+  height: 8px;
+  background: #e06a4a;
+  border-radius: 50%;
+  display: none;
+}
+.garden-activity-dot.has-new { display: block; }
+
+/* 经验进度条 */
+.garden-exp-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 16px 5px;
+  background: rgba(255,255,255,0.7);
+  flex-shrink: 0;
+}
+
+.garden-exp-bar-bg {
+  flex: 1;
+  height: 6px;
+  background: rgba(120,200,120,0.18);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.garden-exp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #7ecb7e, #4aab4a);
+  border-radius: 999px;
+  transition: width .6s cubic-bezier(.4,0,.2,1);
+  width: 0%;
+}
+
+.garden-exp-text {
+  font-size: 10px;
+  color: #7aa07a;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* 地图滚动容器 */
+.garden-map-scroll {
+  flex: 1;
+  overflow: auto;
+  padding: 14px 10px 6px;
+  background: linear-gradient(160deg, #e8f5e8 0%, #dff0e0 100%);
+}
+
+/* 俯视地图主体 */
+.garden-map {
+  display: grid;
+  gap: 4px;
+  min-width: 280px;
+  margin: 0 auto;
+  max-width: 420px;
+}
+
+/* 房间格子 */
+.garden-room {
+  background: rgba(255,255,255,0.72);
+  border: 2px solid rgba(120,200,120,0.28);
+  border-radius: 14px;
+  padding: 10px 12px 10px;
+  position: relative;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 2px 10px rgba(80,160,80,0.08);
+}
+
+.garden-room.locked {
+  background: rgba(220,220,220,0.45);
+  border-color: rgba(160,160,160,0.22);
+  filter: grayscale(0.5);
+}
+
+.garden-room-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #4a7a4a;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.garden-room-label .room-emoji {
+  font-size: 15px;
+}
+
+.garden-room-locked-tip {
+  font-size: 10px;
+  color: #aaa;
+  margin-top: 4px;
+}
+
+/* 家具行 */
+.garden-furniture-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  min-height: 18px;
+}
+
+.garden-furniture {
+  font-size: 16px;
+  opacity: 0.7;
+  line-height: 1;
+}
+
+/* 角色头像Pin */
+.garden-char-pin {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,0.92);
+  border-radius: 999px;
+  padding: 3px 9px 3px 3px;
+  border: 1.5px solid rgba(120,200,120,0.35);
+  cursor: pointer;
+  box-shadow: 0 1px 6px rgba(80,160,80,0.13);
+  transition: box-shadow .15s, border-color .18s;
+  width: fit-content;
+  max-width: 100%;
+}
+.garden-char-pin:active {
+  border-color: #7ecb7e;
+  box-shadow: 0 2px 12px rgba(80,160,80,0.22);
+}
+
+.garden-char-pin img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(120,200,120,0.4);
+  background: #c8e6c8;
+}
+
+.garden-char-pin-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.garden-char-pin-name {
+  font-size: 10px;
+  font-weight: 600;
+  color: #2d5a2d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70px;
+}
+
+.garden-char-pin-status {
+  font-size: 9px;
+  color: #7aa07a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90px;
+}
+
+.garden-user-pin {
+  background: rgba(200,240,200,0.97);
+  border-color: #7ecb7e;
+}
+
+/* 底部角色状态栏 */
+.garden-status-bar {
+  display: flex;
+  overflow-x: auto;
+  gap: 10px;
+  padding: 8px 14px;
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1.5px solid rgba(120,200,120,0.16);
+  flex-shrink: 0;
+  scrollbar-width: none;
+}
+.garden-status-bar::-webkit-scrollbar { display: none; }
+
+.garden-status-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(240,252,240,0.95);
+  border: 1.5px solid rgba(120,200,120,0.22);
+  border-radius: 999px;
+  padding: 4px 11px 4px 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color .15s;
+}
+.garden-status-chip:active { border-color: #7ecb7e; }
+
+.garden-status-chip img {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid rgba(120,200,120,0.3);
+  background: #c8e6c8;
+}
+
+.garden-status-chip-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.garden-status-chip-name {
+  font-size: 10px;
+  font-weight: 600;
+  color: #2d5a2d;
+}
+
+.garden-status-chip-status {
+  font-size: 9px;
+  color: #7aa07a;
+  max-width: 80px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 活动面板遮罩 */
+.garden-panel-mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.28);
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+}
+
+.garden-panel {
+  width: 100%;
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  padding: 0 0 24px;
+  max-height: 65vh;
+  display: flex;
+  flex-direction: column;
+  animation: gardenSlideUp .28s cubic-bezier(.4,0,.2,1);
+}
+
+@keyframes gardenSlideUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+.garden-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #2d5a2d;
+  border-bottom: 1px solid rgba(120,200,120,0.15);
+  flex-shrink: 0;
+}
+
+.garden-panel-close {
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #aaa;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+.garden-panel-close:active { background: #f0f0f0; }
+
+.garden-activity-list {
+  overflow-y: auto;
+  padding: 10px 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.garden-activity-item {
+  background: linear-gradient(135deg, #f0faf0, #e8f5e8);
+  border: 1.5px solid rgba(120,200,120,0.25);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.garden-activity-item.done { opacity: 0.55; filter: grayscale(0.3); }
+
+.garden-activity-icon {
+  font-size: 26px;
+  flex-shrink: 0;
+  width: 36px;
+  text-align: center;
+}
+
+.garden-activity-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.garden-activity-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #2d5a2d;
+}
+
+.garden-activity-desc {
+  font-size: 11px;
+  color: #7aa07a;
+  margin-top: 2px;
+}
+
+.garden-activity-join-btn {
+  background: linear-gradient(135deg, #7ecb7e, #4aab4a);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity .15s;
+}
+.garden-activity-join-btn:active { opacity: 0.8; }
+.garden-activity-join-btn:disabled {
+  background: #c8e6c8;
+  color: #7aa07a;
+  cursor: default;
+}
+
+/* 临时对话弹窗 */
+.garden-chat-mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.32);
+  z-index: 60;
+  display: flex;
+  align-items: flex-end;
+}
+
+.garden-chat-popup {
+  width: 100%;
+  background: #fff;
+  border-radius: 22px 22px 0 0;
+  display: flex;
+  flex-direction: column;
+  max-height: 70vh;
+  animation: gardenSlideUp .25s cubic-bezier(.4,0,.2,1);
+}
+
+.garden-chat-popup-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px 11px;
+  border-bottom: 1px solid rgba(120,200,120,0.15);
+  flex-shrink: 0;
+}
+
+.garden-chat-popup-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(120,200,120,0.4);
+  background: #c8e6c8;
+  flex-shrink: 0;
+}
+
+.garden-chat-popup-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2d5a2d;
+  flex: 1;
+}
+
+.garden-chat-popup-scene {
+  font-size: 10px;
+  color: #7aa07a;
+  background: rgba(120,200,120,0.12);
+  border-radius: 999px;
+  padding: 2px 9px;
+  flex-shrink: 0;
+}
+
+.garden-chat-popup-close {
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #aaa;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.garden-chat-popup-close:active { background: #f0f0f0; }
+
+.garden-chat-popup-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 120px;
+}
+
+.garden-chat-msg {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.garden-chat-msg.user-msg {
+  flex-direction: row-reverse;
+}
+
+.garden-chat-msg img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #c8e6c8;
+}
+
+.garden-chat-bubble {
+  max-width: 70%;
+  background: #f0faf0;
+  border: 1.5px solid rgba(120,200,120,0.22);
+  border-radius: 4px 14px 14px 14px;
+  padding: 7px 11px;
+  font-size: 13px;
+  color: #2d5a2d;
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+.garden-chat-msg.user-msg .garden-chat-bubble {
+  background: linear-gradient(135deg, #d4f0d4, #c0e8c0);
+  border-color: rgba(100,180,100,0.3);
+  border-radius: 14px 4px 14px 14px;
+  color: #1a4a1a;
+}
+
+.garden-chat-tag {
+  font-size: 9px;
+  color: #7aa07a;
+  font-style: italic;
+  margin-bottom: 2px;
+  opacity: 0.8;
+}
+
+.garden-chat-popup-input-row {
+  display: flex;
+  gap: 8px;
+  padding: 10px 14px 16px;
+  border-top: 1px solid rgba(120,200,120,0.12);
+  flex-shrink: 0;
+}
+
+.garden-chat-popup-input {
+  flex: 1;
+  border: 1.5px solid rgba(120,200,120,0.35);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: #2d5a2d;
+  outline: none;
+  background: #f8fef8;
+  font-family: inherit;
+}
+.garden-chat-popup-input:focus { border-color: #7ecb7e; }
+
+.garden-chat-popup-send {
+  background: linear-gradient(135deg, #7ecb7e, #4aab4a);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity .15s;
+}
+.garden-chat-popup-send:active { opacity: 0.8; }
+
+/* AI叙事弹窗 */
+.garden-narrate-mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.40);
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.garden-narrate-box {
+  background: #fff;
+  border-radius: 22px;
+  padding: 28px 24px 22px;
+  max-width: 320px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+  animation: gardenPopIn .3s cubic-bezier(.4,0,.2,1);
+}
+
+@keyframes gardenPopIn {
+  from { transform: scale(0.88); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+.garden-narrate-icon {
+  font-size: 42px;
+  margin-bottom: 10px;
+}
+
+.garden-narrate-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2d5a2d;
+  margin-bottom: 10px;
+}
+
+.garden-narrate-text {
+  font-size: 13px;
+  color: #5a8a5a;
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.garden-narrate-close {
+  background: linear-gradient(135deg, #7ecb7e, #4aab4a);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 32px;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.garden-narrate-close:active { opacity: 0.8; }
+
+/* 升级庆典弹窗 */
+.garden-upgrade-mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.50);
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.garden-upgrade-box {
+  background: linear-gradient(160deg, #f0faf0, #e0f5e0);
+  border-radius: 24px;
+  padding: 32px 24px 24px;
+  max-width: 320px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 8px 48px rgba(80,160,80,0.22);
+  animation: gardenPopIn .3s cubic-bezier(.4,0,.2,1);
+}
+
+.garden-upgrade-anim {
+  font-size: 48px;
+  margin-bottom: 12px;
+  animation: gardenBounce 0.6s ease infinite alternate;
+}
+
+@keyframes gardenBounce {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-8px); }
+}
+
+.garden-upgrade-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #2d5a2d;
+  margin-bottom: 8px;
+}
+
+.garden-upgrade-desc {
+  font-size: 13px;
+  color: #5a8a5a;
+  line-height: 1.7;
+  margin-bottom: 22px;
+}
+
+.garden-upgrade-close {
+  background: linear-gradient(135deg, #7ecb7e, #4aab4a);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 32px;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.garden-upgrade-close:active { opacity: 0.8; }
+
+/* 加载中气泡 */
+.garden-chat-loading {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 8px 12px;
+}
+.garden-chat-loading span {
+  width: 6px;
+  height: 6px;
+  background: #7ecb7e;
+  border-radius: 50%;
+  animation: gardenDot 1.2s infinite;
+}
+.garden-chat-loading span:nth-child(2) { animation-delay: .2s; }
+.garden-chat-loading span:nth-child(3) { animation-delay: .4s; }
+@keyframes gardenDot {
+  0%,80%,100% { transform: scale(0.6); opacity: 0.4; }
+  40%         { transform: scale(1);   opacity: 1; }
+}

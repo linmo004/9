@@ -1,0 +1,82 @@
+<!-- 家园App全屏界面 -->
+<div id="garden-app" style="display:none;">
+
+  <!-- 顶部标题栏 -->
+  <div class="garden-header">
+    <button class="garden-back-btn" id="garden-back-btn">‹ 返回</button>
+    <div class="garden-title">
+      <span id="garden-level-name">温馨小屋</span>
+      <span class="garden-level-badge" id="garden-level-badge">Lv.1</span>
+    </div>
+    <button class="garden-activity-btn" id="garden-activity-btn">活动 <span class="garden-activity-dot" id="garden-activity-dot"></span></button>
+  </div>
+
+  <!-- 经验进度条 -->
+  <div class="garden-exp-bar-wrap">
+    <div class="garden-exp-bar-bg">
+      <div class="garden-exp-bar-fill" id="garden-exp-bar-fill"></div>
+    </div>
+    <span class="garden-exp-text" id="garden-exp-text">0 / 5 活动</span>
+  </div>
+
+  <!-- 俯视地图 -->
+  <div class="garden-map-scroll">
+    <div class="garden-map" id="garden-map">
+      <!-- 房间和角色由JS动态生成 -->
+    </div>
+  </div>
+
+  <!-- 底部角色状态栏 -->
+  <div class="garden-status-bar" id="garden-status-bar">
+    <!-- 由JS生成 -->
+  </div>
+
+  <!-- 活动面板 -->
+  <div class="garden-panel-mask" id="garden-activity-panel" style="display:none;">
+    <div class="garden-panel">
+      <div class="garden-panel-header">
+        <span>今日活动</span>
+        <button class="garden-panel-close" id="garden-activity-panel-close">✕</button>
+      </div>
+      <div class="garden-activity-list" id="garden-activity-list"></div>
+    </div>
+  </div>
+
+  <!-- 临时对话弹窗 -->
+  <div class="garden-chat-mask" id="garden-chat-mask" style="display:none;">
+    <div class="garden-chat-popup">
+      <div class="garden-chat-popup-header">
+        <img class="garden-chat-popup-avatar" id="garden-chat-popup-avatar" src="" alt="">
+        <div class="garden-chat-popup-name" id="garden-chat-popup-name"></div>
+        <div class="garden-chat-popup-scene" id="garden-chat-popup-scene"></div>
+        <button class="garden-chat-popup-close" id="garden-chat-popup-close">✕</button>
+      </div>
+      <div class="garden-chat-popup-messages" id="garden-chat-popup-messages"></div>
+      <div class="garden-chat-popup-input-row">
+        <input class="garden-chat-popup-input" id="garden-chat-popup-input" placeholder="在家园里说点什么…" />
+        <button class="garden-chat-popup-send" id="garden-chat-popup-send">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI叙事弹窗 -->
+  <div class="garden-narrate-mask" id="garden-narrate-mask" style="display:none;">
+    <div class="garden-narrate-box">
+      <div class="garden-narrate-icon" id="garden-narrate-icon">🎉</div>
+      <div class="garden-narrate-title" id="garden-narrate-title"></div>
+      <div class="garden-narrate-text" id="garden-narrate-text"></div>
+      <button class="garden-narrate-close" id="garden-narrate-close">好的</button>
+    </div>
+  </div>
+
+  <!-- 升级庆典弹窗 -->
+  <div class="garden-upgrade-mask" id="garden-upgrade-mask" style="display:none;">
+    <div class="garden-upgrade-box">
+      <div class="garden-upgrade-anim">🏠✨</div>
+      <div class="garden-upgrade-title" id="garden-upgrade-title">家园升级了！</div>
+      <div class="garden-upgrade-desc" id="garden-upgrade-desc"></div>
+      <button class="garden-upgrade-close" id="garden-upgrade-close">太好了！</button>
+    </div>
+  </div>
+
+</div>

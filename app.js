@@ -950,3 +950,15 @@ var p2CardUrls = load('page2Cards', ['', '', '', '']);
     });
   }
 })();
+
+/* ============================================================
+   Dock：家园App 入口
+   ============================================================ */
+document.addEventListener('click', function (e) {
+  const dockHome = e.target.closest('#dock-home');
+  if (dockHome) {
+    if (typeof window.GardenApp !== 'undefined') {
+      window.GardenApp.open();
+    }
+  }
+});

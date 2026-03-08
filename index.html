@@ -17,6 +17,7 @@
 <link rel="stylesheet" href="liao-special.css">
 <link rel="stylesheet" href="lockscreen.css">
 <link rel="stylesheet" href="worldbook.css">
+<link rel="stylesheet" href="garden.css">
 </head>
 <body>
 
@@ -41,6 +42,7 @@
     { id: 'partial-liao-chat',     file: 'liao-chat.html' },
     { id: 'partial-liao-modals',   file: 'liao-modals.html' },
     { id: 'partial-worldbook', file: 'worldbook.html' },
+    { id: 'partial-garden-app', file: 'garden.html' },
   ];
 
   async function loadAll() {
@@ -75,6 +77,7 @@
     await loadScript('liao-favorites.js');
     await loadScript('lockscreen.js');
     await loadScript('worldbook.js');
+    await loadScript('garden.js');
     initPrivacySettings();
   }
 
