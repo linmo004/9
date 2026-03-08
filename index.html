@@ -65,7 +65,7 @@
     });
   }
 
-  async function initScripts() {
+    async function initScripts() {
     await loadScript('app.js');
     await loadScript('settings.js');
     await loadScript('liao-core.js');
@@ -78,9 +78,12 @@
     await loadScript('liao-favorites.js');
     await loadScript('lockscreen.js');
     await loadScript('worldbook.js');
-    await loadScript('garden.js');
+    await loadScript('garden-core.js');   
+    await loadScript('garden-ui.js');     
+    await loadScript('garden-main.js');   
     initPrivacySettings();
   }
+
 
   function initPrivacySettings() {
     const gotoPrivacy = document.getElementById('goto-privacy');
