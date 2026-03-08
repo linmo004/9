@@ -543,20 +543,25 @@ function processAiResponse(rawContent, role, chat) {
   const lines           = rawContent.split('\n').map(l => l.trim()).filter(l => l.length > 0);
   const chatUserAvatar2 = chat.chatUserAvatar || liaoUserAvatar;
   let cumulativeDelay   = 0;
+  const baseTs          = Date.now();
 
   const processedLines = [];
   for (let i = 0; i < lines.length; i++) {
-    const quoteMatch = lines[i].match(/^\[QUOTE:ts:(\d+)\]$/);
+    /* 剥离 AI 回复里可能原样输出的 [ts:数字] 前缀 */
+    let line = lines[i].replace(/^\[ts:\d+\]\s*/, '');
+
+    const quoteMatch = line.match(/^\[QUOTE:ts:(\d+)\]$/);
     if (quoteMatch) {
       const ts           = parseInt(quoteMatch[1], 10);
       const foundMsg     = liaoChats[currentChatIdx].messages.find(m => m.ts === ts);
       const quoteContent = foundMsg ? (foundMsg.content || '') : '';
-      if (i + 1 < lines.length && !/^\[QUOTE:ts:\d+\]$/.test(lines[i + 1])) {
-        processedLines.push({ text: lines[i + 1].trim(), quoteContent });
+      let nextLine = (i + 1 < lines.length) ? lines[i + 1].replace(/^\[ts:\d+\]\s*/, '') : '';
+      if (nextLine && !/^\[QUOTE:ts:\d+\]$/.test(nextLine)) {
+        processedLines.push({ text: nextLine, quoteContent });
         i++;
       }
     } else {
-      processedLines.push({ text: lines[i], quoteContent: '' });
+      processedLines.push({ text: line, quoteContent: '' });
     }
   }
 
@@ -568,6 +573,10 @@ function processAiResponse(rawContent, role, chat) {
 
     setTimeout(() => {
       if (currentChatIdx < 0) return;
+
+      /* 每条消息用 baseTs + i 保证 ts 和 id 唯一，不同条消息不重复 */
+      const msgTs = baseTs + i;
+      const msgId = 'msg_' + msgTs + '_' + Math.random().toString(36).slice(2);
 
       let msgObj = null;
 
@@ -588,8 +597,8 @@ function processAiResponse(rawContent, role, chat) {
         msgObj = {
           role: 'assistant', type: 'text', content: cleanLine,
           quoteContent: quoteContent || undefined,
-          ts: Date.now(),
-          id: 'msg_' + Date.now() + '_' + Math.random().toString(36).slice(2)
+          ts: msgTs,
+          id: msgId
         };
       }
 
@@ -616,6 +625,7 @@ function processAiResponse(rawContent, role, chat) {
     }, cumulativeDelay);
   });
 }
+
 
 /* ============================================================
    随言 — 角色自主发布新随言
