@@ -125,7 +125,7 @@
   '꧁꧂ꆧꁒꁷꂔꃊ' +
   '𝕯𝖆𝖗𝖐𝖓𝖊𝖘𝖘' +
   'ψΩΞΔΦΣΛΘΓΨ' +
-  'Escapeandkillバトルロイヤル배틀로얄BattagliaRealeBatailleroyaleTrậnchiếnhoànggiaแบทเทิลรอยัลबैटलरॉयलКоролевскаябитваبیٹلرائلمعركةرويالব্যাটেলরয়্যালBitwakrólewska◑﹏◐←→↑↓↖↗↙↘↔↕＋－∷√≌≒≦≧≥≤∽∵∴╱╲∑∏∝∞∮∫∪∩⊆⊂⊇⊃∈∧∨∟|⊥∠∥⌒⊙⊕△Φ※Å￡₂¤ℓ‰²³₃½¼⅛⅜⅝⅞℅°′″℃℉￠㎎㎏㎜㎞㏄㎡molPalim㏒㏕㏑mllg%±≠≈÷×＝≡^≯≮￥$ⅠⅡⅢⅣⅥⅤⅦⅪⅧⅨⅫⅩ○●△▲◇◆□■☆★◎♪♂♀§€£©®™℡囍㊣㈱āáǎàōóǒòêéēěèīǐíìūúǔùǖǘǚüǜㄅㄆㄇㄏㄍㄖㄕㄓㄞㄡㄤかぇきげィォキΖΙΑΓΒΔΗΕΘΣΜΞΤΩΨΧΟαΡΤΠΛΚβγδεηζθιμκλξορυσφτχωАБВГЕДЁЗЙИКМЛНОПРСУФХЦЧШЩЪЫЬЭЮЯмнорстухцчшщъыьэюяÄÆÅÀÂÁÃÇÈÊÉËÐÌÎÍÏÖØÒÓÔÕÑÙÚÛÜÝÞæåâàáãçèéêëðìíîïöøòôõñúùûüýþ' +
+  'Escapeandkillバトルロイヤル배틀로얄ậnchiếnhoànggiaแบทเทิลรอยัลबैटलरॉयलКоролевскаябитваبیٹلرائلمعركةرويالব্যাটেলরয়্যালBitwakrólewska◑﹏◐←→↑↓↖↗↙↘↔↕＋－∷√≌≒≦≧≥≤∽∵∴╱╲∑∏∝∞∮∫∪∩⊆⊂⊇⊃∈∧∨∟|⊥∠∥⌒⊙⊕△Φ※Å￡₂¤ℓ≠≈÷×＝≡^≯≮￥$ⅠⅡⅢⅣⅥⅤⅦⅪⅧⅨⅫⅩ○●△▲◇◆□■☆★◎♪♂♀§€£©®™℡囍㊣㈱キΖΙΑΓΒΔΗΕΘΣΜΞΤΩΨΧΟα▒▓░█▄▀▌▐■□▪▫' +
   '⚠⛧†‡§¶©®™';
     const colors = ['#8b0000','#cc0000','#3a0000','#5a0000','#6a0000'];
 
@@ -234,13 +234,20 @@
      大厅
      ============================================================ */
   function btrUpdateContinueBtn() {
-    const btn   = document.getElementById('btr-continue-btn');
-    const saves = btrLoad(SAVES_KEY) || [];
-    if (btn) {
-      btn.disabled      = saves.length === 0;
-      btn.style.opacity = saves.length === 0 ? '0.35' : '';
+  const btn = document.getElementById('btr-continue-btn');
+  if (!btn) return;
+  let count = 0;
+  try {
+    const raw = localStorage.getItem(SAVES_KEY);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) count = arr.length;
     }
-  }
+  } catch (e) { count = 0; }
+  btn.disabled      = count === 0;
+  btn.style.opacity = count === 0 ? '0.35' : '';
+}
+
 
   document.getElementById('btr-start-btn').addEventListener('click', () => {
     btrShowScreen('batoru-user-setup');
@@ -253,11 +260,19 @@
   });
 
   document.getElementById('btr-continue-btn').addEventListener('click', () => {
-    const saves = btrLoad(SAVES_KEY) || [];
-    if (!saves.length) return;
-    btrRenderSavesList(saves);
-    document.getElementById('btr-saves-modal').style.display = 'flex';
-  });
+  let saves = [];
+  try {
+    const raw = localStorage.getItem(SAVES_KEY);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) saves = arr;
+    }
+  } catch (e) { saves = []; }
+  if (!saves.length) { alert('没有找到存档'); return; }
+  btrRenderSavesList(saves);
+  document.getElementById('btr-saves-modal').style.display = 'flex';
+});
+
 
   document.getElementById('btr-quit-lobby-btn').addEventListener('click', () => {
     btrShowExitWarning(() => window.BatoruApp.close());
@@ -466,7 +481,7 @@
       '8. 死亡有逻辑：体力耗尽、饥饿、受伤、人数劣势等。\n' +
       '9. 最终只剩一人。\n' +
       '10. 弹幕要求：每次生成5-8条，角度多样，有调侃、有惋惜、有惊呼、有剧透感、有戏谑、有粉丝、有磕cp、上帝视角、但不要太剧透。\n' +
-      '10. 最后单独一行：【场景：XXX】';
+      '11. 最后单独一行：【场景：XXX】';
 
     try {
       const raw = await btrCallAPI([
