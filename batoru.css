@@ -1039,3 +1039,47 @@
   scrollbar-width: none;
 }
 #batoru-app *::-webkit-scrollbar { display: none; }
+
+.btr-ending-outline-wrap {
+  margin: 0 18px 16px;
+  background: var(--btr-panel);
+  border: 1px solid var(--btr-border);
+  border-radius: 4px;
+  padding: 14px 16px;
+  max-height: 220px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.btr-ending-outline-wrap::-webkit-scrollbar { display: none; }
+
+.btr-ending-outline-title {
+  font-size: 11px;
+  color: var(--btr-red);
+  letter-spacing: 0.18em;
+  text-align: center;
+  margin-bottom: 10px;
+  text-shadow: 0 0 6px var(--btr-red);
+}
+
+.btr-ending-outline-item {
+  display: flex;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--btr-red-dim);
+  font-size: 11px;
+  line-height: 1.6;
+  letter-spacing: 0.03em;
+}
+
+.btr-ending-outline-item:last-child { border-bottom: none; }
+
+.btr-ending-outline-label {
+  color: var(--btr-red);
+  flex-shrink: 0;
+  font-weight: bold;
+  min-width: 52px;
+}
+
+.btr-ending-outline-text {
+  color: var(--btr-text-dim);
+}

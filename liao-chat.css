@@ -7,7 +7,8 @@
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 8px 0 80px;
+  padding: 8px 0 90px;
+  background: #fff;
 }
 
 .chat-list-item {
@@ -95,14 +96,15 @@
   font-weight: 600;
 }
 
+/* ---- 底部三个按键 ---- */
 .chat-bottom-bar {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
   display: flex;
-  gap: 8px;
-  padding: 10px 14px 14px;
+  gap: 10px;
+  padding: 10px 14px 18px;
   background: rgba(245,245,240,0.95);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
@@ -112,30 +114,38 @@
 
 .chat-bar-btn {
   flex: 1;
-  background: #fff;
-  border: 1.5px solid rgba(153,200,237,0.32);
+  background: rgba(153,200,237,0.15);
+  border: 1.5px solid rgba(153,200,237,0.35);
   border-radius: 14px;
-  padding: 9px 6px;
-  font-size: 11.5px;
-  color: var(--text-mid, #5a6a80);
+  padding: 10px 6px 8px;
+  color: var(--primary, #99C8ED);
   cursor: pointer;
   font-family: inherit;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   transition: background .15s;
   -webkit-appearance: none;
   box-shadow: 0 2px 8px rgba(100,140,190,0.07);
 }
 
 .chat-bar-btn:active {
-  background: rgba(153,200,237,0.15);
+  background: rgba(153,200,237,0.28);
 }
 
-.chat-bar-btn .bar-btn-icon {
-  font-size: 18px;
-  line-height: 1;
+.chat-bar-btn .liao-lucide-icon {
+  width: 20px;
+  height: 20px;
+  stroke: var(--primary, #99C8ED);
+  stroke-width: 1.8;
+}
+
+.bar-btn-label {
+  font-size: 10px;
+  color: var(--text-mid, #5a6a80);
+  letter-spacing: .02em;
+    line-height: 1;
 }
 
 /* ---- 聊天界面全屏 ---- */
@@ -230,7 +240,6 @@
   flex-direction: row;
   justify-content: flex-end;
 }
-
 
 .chat-msg-avatar {
   width: 32px;

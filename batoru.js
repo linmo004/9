@@ -207,14 +207,14 @@
      全局接口
      ============================================================ */
   window.BatoruApp = {
-    open() {
+        open() {
       const app = document.getElementById('batoru-app');
       if (app) app.style.display = 'flex';
       btrStopGlitch();
       btrShowScreen('batoru-lobby');
       btrStartGlitch();
       btrScheduleStatic();
-      btrUpdateContinueBtn();
+      setTimeout(() => { btrUpdateContinueBtn(); }, 50); // ← 改这里
     },
     close() {
       const app = document.getElementById('batoru-app');
@@ -233,20 +233,31 @@
   /* ============================================================
      大厅
      ============================================================ */
-  function btrUpdateContinueBtn() {
-  const btn = document.getElementById('btr-continue-btn');
-  if (!btn) return;
-  let count = 0;
-  try {
-    const raw = localStorage.getItem(SAVES_KEY);
-    if (raw) {
-      const arr = JSON.parse(raw);
-      if (Array.isArray(arr)) count = arr.length;
+    function btrUpdateContinueBtn() {
+    const btn = document.getElementById('btr-continue-btn');
+    if (!btn) return;
+    let count = 0;
+    try {
+      const raw = localStorage.getItem(SAVES_KEY);
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) count = arr.length;
+      }
+    } catch (e) { count = 0; }
+
+    if (count > 0) {
+      btn.disabled         = false;
+      btn.style.opacity    = '1';
+      btn.style.pointerEvents = 'auto';
+      btn.style.animation  = '';
+    } else {
+      btn.disabled         = true;
+      btn.style.opacity    = '0.35';
+      btn.style.pointerEvents = 'none';
+      btn.style.animation  = 'none';
     }
-  } catch (e) { count = 0; }
-  btn.disabled      = count === 0;
-  btn.style.opacity = count === 0 ? '0.35' : '';
-}
+  }
+
 
 
   document.getElementById('btr-start-btn').addEventListener('click', () => {
@@ -655,7 +666,7 @@ gs.participants.forEach(p => {
 
     const outlineEntry = gs.outline[gs.currentDayIndex] || '';
 
-    const systemPrompt =
+        const systemPrompt =
       '【参战者设定】\n' + participantsDesc + '\n' +
       '【本局大纲（必须严格遵守）】\n' + gs.outline.join('\n') + '\n\n' +
       '【当前时间段】\n' +
@@ -669,37 +680,77 @@ gs.participants.forEach(p => {
       '【近期叙事摘要】\n' + (histSummary || '游戏刚开始') + '\n\n' +
       '【写作要求——必须严格遵守】\n' +
       '1. 第一句话必须点明当前时间：如"第X天，' + PERIOD_LABELS[gs.currentDayIndex % 3] + '。"\n' +
-      '2. 严格按大纲事件推进，不得偏离。\n' +
-      '3. 节奏极快。150-250字。每个时间段必须有实质性事件发生，不能只是描述氛围。\n' +
-      '4. 各角色可以在不同地点行动，不需要凑在一起。明确写出每个人在哪、在做什么。\n' +
-      '5. 禁止比喻、禁止神化、禁止诗意描写。用直白的叙事语言。\n' +
-      '6. 有对话时直接写对话内容，格式：[角色名]："内容"\n' +
-      (isNight
-        ? '7. 这是夜晚时间段，选项中必须包含"睡觉休息"选项。\n'
-        : '') +
+      '2. 必须严格按大纲事件推进，本时间段大纲写了谁死谁就必须死，大纲写了什么事件就必须发生，不得以任何理由跳过或修改。\n' +
+      '3. 节奏极快。每个时间段必须有实质性事件发生，不能只描述氛围或心理活动。一个时间段内必须推进至少一件大纲事件。\n' +
+      '4. 各角色在不同地点行动，不需要凑在一起。明确写出每个存活角色在哪、在做什么。\n' +
+      '5. 禁止比喻、禁止神化、禁止诗意散文。用干净利落的叙事语言，像恐怖惊悚小说。\n' +
+      '6. 有对话时直接写，格式：[角色名]："内容"。对话要符合角色性格，紧张时短促，平静时克制。\n' +
+      '7. 分段写作：每个段落聚焦一个地点或角色，换地点或角色时另起一段。段落之间节奏要有轻重，行动段落要快，发现线索段落可以稍慢但不拖沓。\n' +
+      '8. 字数：200-350字，不超过350字，宁可短也不拖沓。\n' +
+      (isNight ? '9. 这是夜晚时间段，选项中必须包含"睡觉休息"选项。\n' : '') +
       (isPlayer
-        ? '8. 用第二人称描述用户视角，写清楚用户当前在哪、周围发生了什么。\n'
+        ? '10. 用第二人称描述用户视角，用户是有限视角，只能看到自己周围发生的事。\n' +
+          '    用户无法直接看到其他地点发生的死亡事件，但可以通过以下方式间接感知：\n' +
+          '    · 广播播报（全局可知）\n' +
+          '    · 听到远处的尖叫声、打斗声、物体倒地声\n' +
+          '    · 事后探索时发现血迹、破碎的痕迹、遗落的物品\n' +
+          '    · 发现尸体或带血的凶器\n' +
+          '    · 某角色突然消失不见，广播随后通报\n' +
+          '    这些线索要自然融入叙事，不要直接告知用户其他地点的完整经过。\n'
         : '') +
+      '\n【死亡强制规则——绝对不可违反】\n' +
+      '本时间段必须发生的事件：' + outlineEntry + '\n' +
+      '若此事件涉及死亡，该角色必须在叙事中死亡，且【游戏状态】存活列表必须移除该人。\n' +
+      '死亡必须写得真实合理，符合以下任意一种逻辑：\n' +
+      '· 被其他角色用具体武器或方式击杀（写清楚用什么、怎么打、死亡过程）\n' +
+      '· 受伤后失血过多、伤口感染、无力再战，独自死在角落\n' +
+      '· 饥饿或脱水导致体力耗尽，倒地不起\n' +
+      '· 被多人围攻、寡不敌众、无路可逃\n' +
+      '· 试图偷袭他人反被反杀，凶手冷静离开\n' +
+      '· 背刺盟友被盟友察觉并反击\n' +
+      '· 意外受伤（坠落、踩到陷阱、被困住），无人救援\n' +
+      '死亡描写要求：\n' +
+      '· 有具体动作和过程，不能一笔带过\n' +
+      '· 有该角色最后一刻的反应（挣扎、求饶、沉默、倒下）\n' +
+      '· 如果是用户有限视角，可以不直接描写死亡过程，改为线索式呈现\n' +
+      '禁止让所有人都活到游戏结束。这是大逃杀，最终只能有一人存活。\n' +
+      '若当前是最后一个时间段，存活列表必须只剩一人，其余全部死亡。\n' +
+      '\n【属性变化规则】\n' +
+      '每个时间段结束后，用户属性必须根据实际发生的事件合理变化：\n' +
+      '· 睡觉休息：体力+20至+35，饥饿-5\n' +
+      '· 剧烈行动（奔跑、战斗、逃跑）：体力-15至-25，饥饿-15\n' +
+      '· 普通探索、移动：体力-8至-12，饥饿-10\n' +
+      '· 静止潜伏、守夜：体力-5，饥饿-8\n' +
+      '· 使用食物/水：饥饿+30至+40\n' +
+      '· 受到攻击或受伤：血量-20至-40\n' +
+      '· 使用急救物品：血量+20至+35\n' +
+      '· 饥饿值≤20时：每段自动扣血-5，状态变为"饥饿"\n' +
+      '· 体力≤20时：状态变为"疲惫"，行动效率下降\n' +
+      '· 血量≤30时：状态变为"受伤"，每段自动扣血-3\n' +
+      '· 血量≤0：用户死亡\n' +
+      '位置字段必须更新为用户当前所在的具体地点（如"三楼走廊"、"地下室入口"、"废弃手术室"等）。\n' +
+      '状态标签根据上述条件叠加，可以同时有多个状态。\n' +
       '\n【输出格式——严格按此格式，不得省略任何块】\n\n' +
       '【叙事】\n' +
-      '（150-250字的叙事正文）\n\n' +
+      '（200-350字，恐怖惊悚小说风格，合理分段，快节奏）\n\n' +
       (isPlayer
         ? '【选项】\n' +
-          'A. （行动选项A）\n' +
-          'B. （行动选项B）\n' +
-          'C. （行动选项C，夜晚必须有睡觉选项）\n\n' +
+          'A. （根据当前处境生成的具体可行行动）\n' +
+          'B. （另一个方向或策略不同的行动）\n' +
+          'C. （' + (isNight ? '睡觉休息相关选项' : '第三个差异化选项') + '）\n\n' +
           '【属性变化】\n' +
-          '血量:+0 饥饿:-10 体力:-8\n\n'
+          '血量:+0 饥饿:-10 体力:-8 位置:当前具体地点\n\n'
         : '') +
       '【广播】\n' +
-      '（本时间段死亡通报或重要事件，一句话，无事件则写"暂无新消息"）\n\n' +
+      '（本时间段有死亡则写死亡通报如"[名字]已离开游戏"，无死亡则写场景内发生的重要事件，一句话）\n\n' +
       '【弹幕】\n' +
       '弹幕1|弹幕2|弹幕3|弹幕4|弹幕5|弹幕6|弹幕7\n\n' +
       '【物品】\n' +
-      '（用户捡到物品则写：名称:emoji:数量。否则写：无）\n\n' +
+      '（用户本时间段捡到物品则写：名称:emoji:数量。未捡到则写：无）\n\n' +
       '【游戏状态】\n' +
-      '存活:（存活者名字逗号分隔）\n' +
-      '结束:否';
+      '存活:（存活者名字逗号分隔，死亡者必须从列表移除）\n' +
+      '结束:否/是';
+
 
     const userContent = isPlayer
       ? '当前：' + dayLabel + '\n行动：' + (userAction || '观察周围') +
@@ -714,9 +765,25 @@ gs.participants.forEach(p => {
         { role: 'user',   content: userContent }
       ]);
       btrParseAndApplySegment(raw);
-    } catch (err) {
-      btrAppendNarrative('\n【通信中断】' + err.message + '\n', true);
-      /* 解锁交互 */
+        } catch (err) {
+      btrAppendNarrative('\n【通信中断】' + err.message + '\n继续游戏请点击下方选项，或点击"重试"重新请求。\n', true);
+
+      /* 在叙事区追加一个重试按钮 */
+      const area = document.getElementById('btr-narrative-area');
+      if (area) {
+        const retryBtn = document.createElement('button');
+        retryBtn.className = 'btr-choice-btn';
+        retryBtn.style.cssText = 'margin:8px 0;border-color:#cc0000;color:#cc0000;';
+        retryBtn.textContent = '↺ 重试（重新请求AI）';
+        retryBtn.addEventListener('click', () => {
+          if (area.contains(retryBtn)) area.removeChild(retryBtn);
+          btrRunSegment(userAction);
+        });
+        area.appendChild(retryBtn);
+        area.scrollTop = area.scrollHeight;
+      }
+
+      /* 同时恢复选项/下一段按钮，让用户可以跳过继续 */
       if (isPlayer) {
         btrRenderDefaultChoices();
         const ca = document.getElementById('btr-choices-area');
@@ -726,6 +793,7 @@ gs.participants.forEach(p => {
         if (nextBtn) nextBtn.disabled = false;
       }
     }
+
   }
 
   /* ============================================================
@@ -1241,7 +1309,7 @@ gs.participants.forEach(p => {
   /* ============================================================
      存档（修复：确保序列化完整，写入前验证）
      ============================================================ */
-  function btrDoSave() {
+      function btrDoSave() {
     if (!gs) { alert('当前无游戏进度'); return; }
 
     const now = new Date();
@@ -1250,11 +1318,35 @@ gs.participants.forEach(p => {
       now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) +
       ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
 
-    /* 序列化并验证 */
+    const gsMin = {
+      mode:            gs.mode,
+      userSetup:       gs.userSetup,
+      /* 角色不存设定，只存身份识别信息，ai会根据角色名自动代入 */
+      participants:    gs.participants.map(p => ({
+        id:     p.id,
+        name:   p.name,
+        avatar: p.avatar,
+        isUser: p.isUser
+      })),
+      outline:          gs.outline,
+      scene:            gs.scene,
+      totalDays:        gs.totalDays,
+      currentDayIndex:  gs.currentDayIndex,
+      aliveList:        gs.aliveList,
+      userStats:        gs.userStats,
+      inventory:        gs.inventory,
+      narrativeHistory: gs.narrativeHistory.slice(-1),
+      broadcastQueue:   gs.broadcastQueue.slice(-3),
+      danmakuHistory:   [],
+      pendingChat:      '',
+      isUserDead:       gs.isUserDead,
+      gameOver:         gs.gameOver,
+      winner:           gs.winner,
+    };
+
     let serialized;
     try {
-      serialized = JSON.stringify(gs);
-      JSON.parse(serialized); /* 验证可反序列化 */
+      serialized = JSON.stringify(gsMin);
     } catch (e) {
       alert('存档序列化失败：' + e.message);
       return;
@@ -1270,35 +1362,39 @@ gs.participants.forEach(p => {
 
     let saves = [];
     try {
-      saves = btrLoad(SAVES_KEY) || [];
-      if (!Array.isArray(saves)) saves = [];
+      const raw = localStorage.getItem(SAVES_KEY);
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) saves = arr;
+      }
     } catch (e) { saves = []; }
 
     saves.push(record);
     if (saves.length > MAX_SAVES) saves = saves.slice(-MAX_SAVES);
 
-    try {
-      localStorage.setItem(SAVES_KEY, JSON.stringify(saves));
-    } catch (e) {
-      alert('存档写入失败：' + e.message);
-      return;
+    /* 写入失败则逐步缩减存档数量直到成功 */
+    let written = false;
+    for (let keep = saves.length; keep >= 1 && !written; keep--) {
+      try {
+        localStorage.setItem(SAVES_KEY, JSON.stringify(saves.slice(-keep)));
+        written = true;
+      } catch (e) { /* 继续缩减 */ }
     }
 
-    /* 写入后立即验证 */
-    const verify = localStorage.getItem(SAVES_KEY);
-    if (!verify) {
-      alert('存档验证失败，数据未能写入');
+    if (!written) {
+      alert('设备存储空间严重不足，无法存档');
       return;
     }
 
     btrUpdateContinueBtn();
-    btrAppendNarrative('【存档成功】' + time + ' · ' + btrDayLabel(gs.currentDayIndex), false);
+    btrAppendNarrative('【存档成功】' + time, false);
   }
+
 
   /* ============================================================
      退出警告弹窗（修复：叠加式，疯批恐怖文案）
      ============================================================ */
-  const EXIT_WARN_TEXTS = [
+    const EXIT_WARN_TEXTS = [
     {
       title: '⚠ 你要离开了吗',
       text:  '退出将丢失未存档的进度。\n你确定要离开这里吗？'
@@ -1321,15 +1417,15 @@ gs.participants.forEach(p => {
     },
     {
       title: '哈哈哈哈哈哈哈',
-      text:  '继续点确定吧。\n弹窗会一直出现的。\n点取消才能真正退出。'
+      text:  '继续点确定吧。\n弹窗会一直出现的。\n你是出不去的。'
     },
     {
       title: '已记录你的位置',
-      text:  '我们知道你在哪里。\n点取消。现在就点。'
+      text:  '我们知道你在哪里。\n…别以为你能逃走。'
     },
     {
       title: '╔═══ 最终警告 ═══╗',
-      text:  '你已触发第' + '∞' + '层确认协议。\n点击取消以终止序列。'
+      text:  '你已触发第∞层确认协议。\n永远留在这里吧…我会一直盯着你的👁️。'
     }
   ];
 
@@ -1343,20 +1439,18 @@ gs.participants.forEach(p => {
 
     const mask = document.createElement('div');
     mask.className = 'btr-warn-mask';
-
-    /* 随着深度增加，弹窗位置略微偏移，营造叠加感 */
-    const offsetX = (depth % 2 === 0 ? 1 : -1) * Math.min(depth * 8, 60);
-    const offsetY = Math.min(depth * 6, 80);
+    mask.style.cssText =
+      'position:absolute;inset:0;z-index:' + (100 + depth) + ';' +
+      'display:flex;align-items:center;justify-content:center;' +
+      'background:rgba(0,0,0,0.35);';
 
     const box = document.createElement('div');
     box.className = 'btr-warn-box';
-    box.style.transform = 'translate(' + offsetX + 'px, -' + offsetY + 'px)';
-    box.style.transition = 'transform 0.15s';
-    /* 越深越红 */
-    if (depth >= 3) {
-      box.style.borderColor = '#ff0000';
-      box.style.boxShadow   = '0 0 ' + (20 + depth * 8) + 'px rgba(255,0,0,0.7)';
-    }
+    box.style.cssText =
+      'position:relative;' +
+      'border-color:' + (depth >= 3 ? '#ff0000' : '#cc8800') + ';' +
+      'box-shadow:0 0 ' + (20 + depth * 6) + 'px rgba(255,' +
+      Math.max(0, 100 - depth * 15) + ',0,0.75);';
 
     box.innerHTML =
       '<div class="btr-warn-title">' + info.title + '</div>' +
@@ -1369,25 +1463,23 @@ gs.participants.forEach(p => {
     mask.appendChild(box);
     layer.appendChild(mask);
 
-    /* 点击遮罩空白处：关闭所有弹窗，回到游戏 */
     mask.addEventListener('click', function (e) {
       if (e.target !== mask) return;
       while (layer.firstChild) layer.removeChild(layer.firstChild);
       layer.style.display = 'none';
     });
 
-    /* 确定：叠加新弹窗（不关闭旧的） */
     box.querySelector('.btr-warn-confirm').addEventListener('click', () => {
       btrShowExitWarning(onExit, depth + 1);
     });
 
-    /* 取消：真正退出，清空所有弹窗 */
     box.querySelector('.btr-warn-cancel').addEventListener('click', () => {
       while (layer.firstChild) layer.removeChild(layer.firstChild);
       layer.style.display = 'none';
       onExit();
     });
   }
+
 
   /* ============================================================
      用户被淘汰
@@ -1428,6 +1520,24 @@ gs.participants.forEach(p => {
     const statsEl = document.getElementById('btr-ending-stats');
     if (statsEl) statsEl.textContent =
       '游戏历时 ' + totalDays + ' 天  ·  共淘汰 ' + eliminated + ' 人';
+
+    /* 渲染大纲回顾 */
+    const outlineListEl = document.getElementById('btr-ending-outline-list');
+    if (outlineListEl && gs.outline && gs.outline.length) {
+      outlineListEl.innerHTML = '';
+      gs.outline.forEach(line => {
+        /* 解析格式：第X天早：事件 */
+        const colonIdx = line.indexOf('：');
+        const label = colonIdx > -1 ? line.slice(0, colonIdx) : line;
+        const text  = colonIdx > -1 ? line.slice(colonIdx + 1).trim() : '';
+        const item  = document.createElement('div');
+        item.className = 'btr-ending-outline-item';
+        item.innerHTML =
+          '<span class="btr-ending-outline-label">' + label + '</span>' +
+          '<span class="btr-ending-outline-text">' + text + '</span>';
+        outlineListEl.appendChild(item);
+      });
+    }
 
     const lastWordsEl = document.getElementById('btr-ending-last-words');
     if (lastWordsEl) {

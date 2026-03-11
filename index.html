@@ -24,6 +24,8 @@
 <link rel="stylesheet" href="page3.css">
 <link rel="stylesheet" href="chess-app.css">
 <link rel="stylesheet" href="batoru.css">
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
 
@@ -119,6 +121,7 @@
     await loadScript('rolephone.js');
     await loadScript('page3.js');
     await loadScript('batoru.js');
+    if (typeof lucide !== 'undefined') lucide.createIcons();
     if (typeof window.initSettings === 'function') window.initSettings();
   }
 
