@@ -1,5 +1,5 @@
 /* ============================================================
-   batoru.js — 大逃杀 App 逻辑层
+   batoru.js — 大逃杀 App 逻辑层（v3 修复版）
    ============================================================ */
 
 (function () {
@@ -45,7 +45,7 @@
   async function btrCallAPI(messages) {
     const cfg   = btrGetApiConfig();
     const model = btrGetApiModel();
-    if (!cfg || !cfg.url || !model) throw new Error('未配置API');
+    if (!cfg || !cfg.url || !model) throw new Error('未配置API，请在设置中配置');
     const endpoint = cfg.url.replace(/\/$/, '') + '/chat/completions';
     const headers  = { 'Content-Type': 'application/json' };
     if (cfg.key) headers['Authorization'] = 'Bearer ' + cfg.key;
@@ -63,37 +63,43 @@
      ============================================================ */
   const SAVES_KEY = 'halo9_batoru_saves';
   const MAX_SAVES = 5;
-
-  let gs = null; // 当前游戏状态对象
+  let gs = null;
 
   function btrNewGameState() {
     return {
       mode:             'player',
       userSetup:        { name: '幸存者', setting: '', mode: 'player' },
-      participants:     [],   // [{id, name, avatar, setting, isUser}]
-      outline:          [],   // 大纲行数组
+      participants:     [],
+      outline:          [],
       scene:            '',
       totalDays:        4,
-      currentDayIndex:  0,   // 0..totalDays*3-1
-      aliveList:        [],   // 存活者 id 列表
+      currentDayIndex:  0,
+      aliveList:        [],
       userStats:        { hp: 100, hunger: 100, stamina: 100, location: '未知', statusTags: ['正常'] },
-      inventory:        [],   // [{emoji, name, qty}]
-      narrativeHistory: [],   // 最近6段叙事文字],
+      inventory:        [],
+      narrativeHistory: [],
       broadcastQueue:   [],
       danmakuHistory:   [],
-      pendingChat:      '',   // 用户对话框输入（等待下次行动时注入）
+      pendingChat:      '',
       isUserDead:       false,
       gameOver:         false,
       winner:           '',
     };
   }
 
-  /* ── 天数/时段标签 ── */
   const PERIOD_LABELS = ['早', '午', '晚'];
   function btrDayLabel(idx) {
     const day    = Math.floor(idx / 3) + 1;
     const period = PERIOD_LABELS[idx % 3];
     return '第' + day + '天 ' + period;
+  }
+
+  /* 时间段对应的环境描述，注入给AI */
+  function btrPeriodContext(idx) {
+    const period = idx % 3;
+    if (period === 0) return '现在是清晨。天刚亮，光线昏暗，气温低，能见度有限。';
+    if (period === 1) return '现在是正午。太阳高悬，光线充足，但消耗体力更快，饥饿感加剧。';
+    return '现在是夜晚。周围黑暗，危险系数上升，可选择睡觉休息或继续冒险。';
   }
 
   /* ============================================================
@@ -104,16 +110,24 @@
   function btrStartGlitch() {
     const canvas = document.getElementById('batoru-glitch-canvas');
     if (!canvas) return;
-    const ctx    = canvas.getContext('2d');
     canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
-
-    const cols    = Math.floor(canvas.width / 14);
-    const drops   = Array(cols).fill(1);
-    const chars   = '▒▓░█▄▀ЖФЦЧШЩЪЫЬЭЮЯабвгдеёжзийкл' +
-                    'アイウエオカキクケコサシスセソタチツテトナニヌネノ' +
-                    '囧囗囝囡囚囤囥囦囧囨囩囪囫囬园囮囯';
-    const colors  = ['#8b0000','#cc0000','#3a0000','#5a0000','#6a0000'];
+    const ctx   = canvas.getContext('2d');
+    const cols  = Math.floor(canvas.width / 14);
+    const drops = Array(cols).fill(1);
+    const chars =
+  '▒▓░█▄▀▌▐■□▪▫' +
+  'ЖФЦЧШЩЪЫЬЭЮЯабвгдеёжзийкл' +
+  'アイウエオカキクケコサシスセソタチツテト' +
+  '囧囗囡囚囤囦囧囨囩囪囫囬园囮囯' +
+  '░▒▓╔╗╚╝╠╣╦╩╬═║' +
+  '①②③④⑤⑥⑦⑧⑨⑩⑪⑫' +
+  '꧁꧂ꆧꁒꁷꂔꃊ' +
+  '𝕯𝖆𝖗𝖐𝖓𝖊𝖘𝖘' +
+  'ψΩΞΔΦΣΛΘΓΨ' +
+  'Escapeandkillバトルロイヤル배틀로얄BattagliaRealeBatailleroyaleTrậnchiếnhoànggiaแบทเทิลรอยัลबैटलरॉयलКоролевскаябитваبیٹلرائلمعركةرويالব্যাটেলরয়্যালBitwakrólewska◑﹏◐←→↑↓↖↗↙↘↔↕＋－∷√≌≒≦≧≥≤∽∵∴╱╲∑∏∝∞∮∫∪∩⊆⊂⊇⊃∈∧∨∟|⊥∠∥⌒⊙⊕△Φ※Å￡₂¤ℓ‰²³₃½¼⅛⅜⅝⅞℅°′″℃℉￠㎎㎏㎜㎞㏄㎡molPalim㏒㏕㏑mllg%±≠≈÷×＝≡^≯≮￥$ⅠⅡⅢⅣⅥⅤⅦⅪⅧⅨⅫⅩ○●△▲◇◆□■☆★◎♪♂♀§€£©®™℡囍㊣㈱āáǎàōóǒòêéēěèīǐíìūúǔùǖǘǚüǜㄅㄆㄇㄏㄍㄖㄕㄓㄞㄡㄤかぇきげィォキΖΙΑΓΒΔΗΕΘΣΜΞΤΩΨΧΟαΡΤΠΛΚβγδεηζθιμκλξορυσφτχωАБВГЕДЁЗЙИКМЛНОПРСУФХЦЧШЩЪЫЬЭЮЯмнорстухцчшщъыьэюяÄÆÅÀÂÁÃÇÈÊÉËÐÌÎÍÏÖØÒÓÔÕÑÙÚÛÜÝÞæåâàáãçèéêëðìíîïöøòôõñúùûüýþ' +
+  '⚠⛧†‡§¶©®™';
+    const colors = ['#8b0000','#cc0000','#3a0000','#5a0000','#6a0000'];
 
     function draw() {
       ctx.fillStyle = 'rgba(10,0,0,0.06)';
@@ -150,14 +164,14 @@
     if (staticTimer) clearTimeout(staticTimer);
     const delay = (10 + Math.random() * 15) * 1000;
     staticTimer = setTimeout(() => {
-      const el  = document.getElementById('batoru-static');
+      const el = document.getElementById('batoru-static');
       if (!el) return;
-      el.style.display  = 'block';
-      el.style.opacity  = String(0.3 + Math.random() * 0.5);
-      const dur = 200 + Math.random() * 400;
+      el.style.display   = 'block';
+      el.style.opacity   = String(0.3 + Math.random() * 0.5);
+      const dur    = 200 + Math.random() * 400;
       const shakeX = (Math.random() * 4 - 2).toFixed(1) + 'px';
       const shakeY = (Math.random() * 4 - 2).toFixed(1) + 'px';
-      el.style.transform = `translate(${shakeX},${shakeY})`;
+      el.style.transform = 'translate(' + shakeX + ',' + shakeY + ')';
       setTimeout(() => {
         el.style.opacity   = '0';
         el.style.transform = 'translate(0,0)';
@@ -185,11 +199,7 @@
     BTR_SCREENS.forEach(sid => {
       const el = document.getElementById(sid);
       if (!el) return;
-      if (sid === id) {
-        el.style.display = 'flex';
-      } else {
-        el.style.display = 'none';
-      }
+      el.style.display = (sid === id) ? 'flex' : 'none';
     });
   }
 
@@ -200,6 +210,7 @@
     open() {
       const app = document.getElementById('batoru-app');
       if (app) app.style.display = 'flex';
+      btrStopGlitch();
       btrShowScreen('batoru-lobby');
       btrStartGlitch();
       btrScheduleStatic();
@@ -214,7 +225,6 @@
     }
   };
 
-  /* ── 入口点击 ── */
   document.addEventListener('click', function (e) {
     const item = e.target.closest('.app-item[data-app="batoru"]');
     if (item && window.BatoruApp) window.BatoruApp.open();
@@ -227,16 +237,19 @@
     const btn   = document.getElementById('btr-continue-btn');
     const saves = btrLoad(SAVES_KEY) || [];
     if (btn) {
-      btn.disabled = saves.length === 0;
+      btn.disabled      = saves.length === 0;
       btn.style.opacity = saves.length === 0 ? '0.35' : '';
     }
   }
 
   document.getElementById('btr-start-btn').addEventListener('click', () => {
     btrShowScreen('batoru-user-setup');
-    document.getElementById('btr-user-name-input').value    = '';
-    document.getElementById('btr-user-setting-input').value = '';
-    document.querySelector('input[name="btr-mode"][value="player"]').checked = true;
+    const ni = document.getElementById('btr-user-name-input');
+    const si = document.getElementById('btr-user-setting-input');
+    if (ni) ni.value = '';
+    if (si) si.value = '';
+    const pr = document.querySelector('input[name="btr-mode"][value="player"]');
+    if (pr) pr.checked = true;
   });
 
   document.getElementById('btr-continue-btn').addEventListener('click', () => {
@@ -260,6 +273,7 @@
 
   function btrRenderSavesList(saves) {
     const container = document.getElementById('btr-saves-list');
+    if (!container) return;
     container.innerHTML = '';
     saves.slice().reverse().forEach((save, revIdx) => {
       const realIdx = saves.length - 1 - revIdx;
@@ -289,15 +303,15 @@
   document.getElementById('btr-setup-back2').addEventListener('click', () => btrShowScreen('batoru-lobby'));
 
   document.getElementById('btr-setup-next').addEventListener('click', () => {
-    const name    = document.getElementById('btr-user-name-input').value.trim()
-                 || btrLoad('liao_userName') || '幸存者';
-    const setting = document.getElementById('btr-user-setting-input').value.trim();
-    const mode    = document.querySelector('input[name="btr-mode"]:checked').value;
-
-    gs = btrNewGameState();
-    gs.mode            = mode;
-    gs.userSetup       = { name, setting, mode };
-
+    const ni   = document.getElementById('btr-user-name-input');
+    const si   = document.getElementById('btr-user-setting-input');
+    const mr   = document.querySelector('input[name="btr-mode"]:checked');
+    const name    = (ni ? ni.value.trim() : '') || btrLoad('liao_userName') || '幸存者';
+    const setting = si ? si.value.trim() : '';
+    const mode    = mr ? mr.value : 'player';
+    gs           = btrNewGameState();
+    gs.mode      = mode;
+    gs.userSetup = { name, setting, mode };
     btrRenderRoleSelect();
     btrShowScreen('batoru-select');
   });
@@ -315,12 +329,15 @@
     const grid  = document.getElementById('btr-role-grid');
     const hint  = document.getElementById('btr-select-hint');
     const roles = btrGetRoles();
+    if (!grid) return;
     grid.innerHTML = '';
 
     const isPlayer = gs.userSetup.mode === 'player';
+    if (hint) hint.textContent = isPlayer
+      ? '点击角色选择对手（可多选，你已固定参战）'
+      : '旁观模式：至少选择2个角色';
 
     if (isPlayer) {
-      hint.textContent = '点击角色选择对手（可多选，你已固定参战）';
       const userCard = document.createElement('div');
       userCard.className = 'btr-role-card is-user selected';
       userCard.innerHTML =
@@ -328,14 +345,20 @@
         '<div class="btr-role-name">' + gs.userSetup.name + '</div>' +
         '<div class="btr-role-tag">（你）</div>';
       grid.appendChild(userCard);
-    } else {
-      hint.textContent = '旁观模式：至少选择2个角色';
+    }
+
+    if (!roles.length) {
+      const tip = document.createElement('div');
+      tip.style.cssText = 'grid-column:1/-1;text-align:center;color:#9a8880;font-size:12px;padding:20px 0;letter-spacing:.06em;';
+      tip.textContent = '角色库为空，请先在了了中添加角色';
+      grid.appendChild(tip);
+      return;
     }
 
     roles.forEach(role => {
       const id   = String(role.id || role.realname || role.nickname || role.name || Math.random());
       const card = document.createElement('div');
-      card.className = 'btr-role-card';
+      card.className      = 'btr-role-card';
       card.dataset.roleId = id;
       card.innerHTML =
         '<img class="btr-role-avatar" src="' + btrGetRoleAvatar(role) + '" alt="">' +
@@ -355,8 +378,8 @@
 
   document.getElementById('btr-random-select').addEventListener('click', () => {
     const roles = btrGetRoles();
-    if (!roles.length) { alert('角色库为空，请先在了了中添加角色'); return; }
-    const count   = 2 + Math.floor(Math.random() * 4);
+    if (!roles.length) { alert('角色库为空'); return; }
+    const count    = 2 + Math.floor(Math.random() * 4);
     const shuffled = roles.slice().sort(() => Math.random() - 0.5);
     const picked   = shuffled.slice(0, Math.min(count, shuffled.length));
     selectedRoleIds = new Set();
@@ -372,8 +395,8 @@
   });
 
   document.getElementById('btr-select-start').addEventListener('click', async () => {
-    const roles     = btrGetRoles();
-    const isPlayer  = gs.userSetup.mode === 'player';
+    const roles    = btrGetRoles();
+    const isPlayer = gs.userSetup.mode === 'player';
     const minSelect = isPlayer ? 1 : 2;
 
     if (selectedRoleIds.size < minSelect) {
@@ -381,26 +404,19 @@
       return;
     }
 
-    /* 构建参战者列表 */
     gs.participants = [];
     if (isPlayer) {
       gs.participants.push({
-        id:      'user',
-        name:    gs.userSetup.name,
-        avatar:  btrGetUserAvatar(),
-        setting: gs.userSetup.setting,
-        isUser:  true
+        id: 'user', name: gs.userSetup.name,
+        avatar: btrGetUserAvatar(), setting: gs.userSetup.setting, isUser: true
       });
     }
     roles.forEach(role => {
       const id = String(role.id || role.realname || role.nickname || role.name || '');
       if (selectedRoleIds.has(id)) {
         gs.participants.push({
-          id,
-          name:    btrGetRoleName(role),
-          avatar:  btrGetRoleAvatar(role),
-          setting: btrGetRoleSetting(role),
-          isUser:  false
+          id, name: btrGetRoleName(role),
+          avatar: btrGetRoleAvatar(role), setting: btrGetRoleSetting(role), isUser: false
         });
       }
     });
@@ -420,7 +436,6 @@
     const progressBar = document.getElementById('btr-progress-bar');
     const subText     = document.getElementById('btr-loading-sub');
 
-    /* 进度条假跑 */
     let fakeProgress = 0;
     const fakeTick = setInterval(() => {
       fakeProgress = Math.min(fakeProgress + 1.2, 90);
@@ -428,39 +443,30 @@
     }, 300);
 
     const isPlayer = gs.userSetup.mode === 'player';
-
     let participantsDesc = '';
     gs.participants.forEach(p => {
-      if (p.isUser) {
-        participantsDesc += p.name + '（用户，' + (p.setting || '普通人') + '）\n';
-      } else {
-        participantsDesc += p.name + '（' + (p.setting || '普通人') + '）\n';
-      }
+      participantsDesc += (p.isUser
+        ? p.name + '（用户，' + (p.setting || '普通人') + '）'
+        : p.name + '（' + (p.setting || '普通人') + '）') + '\n';
     });
 
     const systemPrompt =
-`你是一个文字大逃杀游戏的剧本编剧，请根据以下信息生成本局游戏的完整大纲。
-
-【参战者信息】
-${participantsDesc}
-
-【场景】
-从以下场景中随机选择一个：废旧居民楼、废弃医院、废旧游乐场、废弃工厂、荒废学校。
-
-【大纲要求】
-1. 游戏天数根据人数决定：2-3人共4天，4-5人共6天，6人及以上共8天，每天分早午晚三段
-2. 严格按照以下格式输出，每行一个事件，不输出任何其他内容：
-   第X天早：事件描述
-   第X天午：事件描述
-   第X天晚：事件描述
-3. 事件描述最简短直接，例如："角色A用铁管击杀角色B""用户在三楼发现急救包""角色C与角色D结盟"
-4. 禁止阴谋论，禁止科幻元素，所有事件必须符合现实逻辑
-5. 考虑每个参战者的设定和能力，生成符合其性格的行为
-6. 所有参战者互为陌生人${isPlayer ? '（包括用户）' : '（如果两个角色设定中明确提到认识对方则可以有相识互动）'}
-7. 必须包含：至少一次结盟、至少一次背刺、至少一次出人意料的反转${isPlayer ? '、至少一次用户与角色的正面相遇' : ''}
-8. 死亡必须有逻辑（体力耗尽、物资断绝、人数劣势、受伤后遗症等）
-9. 最终只有一名存活者
-10. 结尾另起一行输出场景名称，格式：【场景：XXX】`;
+      '你是一个文字大逃杀游戏的剧本编剧，根据以下信息生成本局游戏的完整大纲。\n\n' +
+      '【参战者信息】\n' + participantsDesc + '\n' +
+      '【场景】从以下中随机选一个：废旧居民楼、废弃医院、废旧游乐场、废弃工厂、荒废学校。\n\n' +
+      '【大纲要求】\n' +
+      '1. 天数：2-3人4天，4-5人6天，6人以上8天，每天分早午晚三段。\n' +
+      '2. 严格按格式输出，每行一个事件，不输出任何其他内容：\n' +
+      '   第X天早：事件\n   第X天午：事件\n   第X天晚：事件\n' +
+      '3. 事件极度简短直接。例：张三用砖头砸死李四。王五和赵六在二楼结盟。用户三楼发现急救包。\n' +
+      '4. 禁止阴谋论、科幻、神化、比喻。纯粹写实白描。\n' +
+      '5. 符合每个角色的性格和能力。\n' +
+      '6. 所有人互为陌生人' + (isPlayer ? '（含用户）' : '') + '。\n' +
+      '7. 必须有：结盟、背刺、反转' + (isPlayer ? '、用户与某角色的正面遭遇' : '') + '。\n' +
+      '8. 死亡有逻辑：体力耗尽、饥饿、受伤、人数劣势等。\n' +
+      '9. 最终只剩一人。\n' +
+      '10. 弹幕要求：每次生成5-8条，角度多样，有调侃、有惋惜、有惊呼、有剧透感、有戏谑、有粉丝、有磕cp、上帝视角、但不要太剧透。\n' +
+      '10. 最后单独一行：【场景：XXX】';
 
     try {
       const raw = await btrCallAPI([
@@ -471,22 +477,17 @@ ${participantsDesc}
       clearInterval(fakeTick);
       if (progressBar) progressBar.style.width = '100%';
 
-      /* 解析大纲 */
-      const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
       const sceneMatch = raw.match(/【场景[：:]\s*(.+?)】/);
       gs.scene   = sceneMatch ? sceneMatch[1].trim() : '废弃建筑';
-      gs.outline = lines.filter(l => /^第\d+天[早午晚]/.test(l));
+      gs.outline = raw.split('\n').map(l => l.trim()).filter(l => /^第\d+天[早午晚]/.test(l));
 
       if (subText) subText.textContent = '大纲生成完毕，进入游戏……';
-
-      setTimeout(() => {
-        btrEnterMainGame(false);
-      }, 800);
+      setTimeout(() => { btrEnterMainGame(false); }, 800);
 
     } catch (err) {
       clearInterval(fakeTick);
       if (progressBar) progressBar.style.width = '0%';
-      if (subText) subText.textContent = '生成失败：' + err.message + '，请检查API配置后重试';
+      if (subText) subText.textContent = '生成失败：' + err.message;
       alert('大纲生成失败：' + err.message);
       btrShowScreen('batoru-select');
     }
@@ -500,150 +501,195 @@ ${participantsDesc}
     btrUpdateDayLabel();
     btrUpdateBroadcast();
     btrUpdateAttrPanel();
+    btrRenderBag();
 
-    /* 模式相关UI */
     const choicesArea = document.getElementById('btr-choices-area');
     const nextWrap    = document.getElementById('btr-next-btn-wrap');
     const chatWrap    = document.getElementById('btr-chat-input-wrap');
+    const isSpectator = gs.mode === 'spectator' || gs.isUserDead;
 
-    if (gs.mode === 'spectator' || gs.isUserDead) {
-      if (choicesArea) choicesArea.style.display = 'none';
-      if (nextWrap)    nextWrap.style.display    = 'block';
-      if (chatWrap)    chatWrap.style.display    = 'none';
-    } else {
-      if (choicesArea) choicesArea.style.display = 'block';
-      if (nextWrap)    nextWrap.style.display    = 'none';
-      if (chatWrap)    chatWrap.style.display    = 'block';
-    }
+    if (choicesArea) choicesArea.style.display = 'none'; /* 默认收起，等AI返回后展开 */
+    if (nextWrap)    nextWrap.style.display    = isSpectator ? 'block' : 'none';
+    if (chatWrap)    chatWrap.style.display    = isSpectator ? 'none'  : 'block';
+
+    const narrativeArea = document.getElementById('btr-narrative-area');
+    if (narrativeArea) narrativeArea.innerHTML = '';
 
     if (fromSave) {
-      /* 恢复最后一段叙事 */
-      const narrativeArea = document.getElementById('btr-narrative-area');
-      if (narrativeArea && gs.narrativeHistory.length) {
-        const last = gs.narrativeHistory[gs.narrativeHistory.length - 1];
-        btrAppendNarrative(last, false);
-      }
-      /* 恢复广播 */
-      btrRefreshBroadcast();
+  if (gs.narrativeHistory.length) {
+    btrAppendNarrative(
+      '═══ 读取存档：' + btrDayLabel(gs.currentDayIndex) + ' ═══\n\n' +
+      gs.narrativeHistory[gs.narrativeHistory.length - 1],
+      false
+    );
+  }
+  btrRefreshBroadcast();
+  if (!isSpectator) {
+    btrRenderDefaultChoices();
+    if (choicesArea) choicesArea.style.display = 'block';
+    btrSetChoicesEnabled(true);   // ← 加这一行
+  } else {
+    if (nextWrap) nextWrap.style.display = 'block';
+    const nb = document.getElementById('btr-next-segment');
+    if (nb) nb.disabled = false;
+  }
+  } else {
+    btrRunOpeningAndFirstSegment();
+  }
+
+} // 关闭 btrEnterMainGame 函数
+
+  /* ============================================================
+     默认选项（存档恢复时或AI选项解析失败时使用）
+     ============================================================ */
+  function btrRenderDefaultChoices() {
+    const periodIdx = gs.currentDayIndex % 3;
+    let defaults;
+    if (periodIdx === 2) {
+      /* 夜晚有睡觉选项 */
+      defaults = [
+        { label: 'A', text: '找隐蔽处睡觉，恢复体力（风险：可能被偷袭）' },
+        { label: 'B', text: '在附近区域继续探索，寻找物资' },
+        { label: 'C', text: '警戒守夜，观察周围动静' }
+      ];
+    } else if (periodIdx === 0) {
+      defaults = [
+        { label: 'A', text: '趁早搜索附近区域，寻找食物和武器' },
+        { label: 'B', text: '找高处观察全局，确认其他人位置' },
+        { label: 'C', text: '悄悄跟踪观察到的其他人' }
+      ];
     } else {
-      /* 开场白 */
-      btrRunOpeningAndFirstSegment();
+      defaults = [
+        { label: 'A', text: '主动出击，搜索物资补给' },
+        { label: 'B', text: '在当前位置埋伏等待' },
+        { label: 'C', text: '尝试接近附近的其他幸存者' }
+      ];
     }
+    btrRenderChoices(defaults);
   }
 
   /* ============================================================
-     开场白 + 第一段叙事
+     开场白
      ============================================================ */
   async function btrRunOpeningAndFirstSegment() {
     const narrativeArea = document.getElementById('btr-narrative-area');
-    if (!narrativeArea) return;
+    if (narrativeArea) narrativeArea.innerHTML = '';
 
+    const participantNames = gs.participants.map(p => p.name).join('、');
     const opening =
-      '【系统广播】\n' +
-      '恭喜各位进入「生存游戏」。\n' +
-      '地点：' + gs.scene + '。\n' +
-      '游戏规则：最后一名存活者方可离开。禁止外部求援。\n' +
-      '物资有限，信任危险。\n' +
-      '游戏即将开始……\n' +
-      '—— 祝各位好运。';
+      '═══ 游戏开始 ═══\n\n' +
+      '地点：' + gs.scene + '\n' +
+      '参战者：' + participantNames + '\n' +
+      '规则：最后一名存活者方可离开。\n\n' +
+      '【系统】只能有一人活着走出去。';
 
     btrAppendNarrative(opening, true);
 
-    /* 隐藏选项，等待开场结束 */
     const choicesArea = document.getElementById('btr-choices-area');
     if (choicesArea) choicesArea.style.display = 'none';
 
     setTimeout(async () => {
       await btrRunSegment(null);
-    }, 1800);
+    }, 1500);
   }
 
   /* ============================================================
      核心：运行一个时间段
+     修复：注入时间上下文、强制快节奏、禁止比喻神化
      ============================================================ */
   async function btrRunSegment(userAction) {
     if (!gs || gs.gameOver) return;
 
-    /* 锁定选项 */
     btrSetChoicesEnabled(false);
     const nextBtn = document.getElementById('btr-next-segment');
     if (nextBtn) nextBtn.disabled = true;
 
-    const isPlayer  = gs.mode === 'player' && !gs.isUserDead;
-    const dayLabel  = btrDayLabel(gs.currentDayIndex);
-    const outlineEntry = gs.outline[gs.currentDayIndex] || '';
+    /* 收起选项区，等AI返回后展开 */
+    const choicesArea = document.getElementById('btr-choices-area');
+    if (choicesArea) choicesArea.style.display = 'none';
 
-    /* 构建历史摘要 */
-    const histSummary = gs.narrativeHistory.slice(-4).join('\n\n---\n\n');
+    const isPlayer    = gs.mode === 'player' && !gs.isUserDead;
+    const dayLabel    = btrDayLabel(gs.currentDayIndex);
+    const periodCtx   = btrPeriodContext(gs.currentDayIndex);
+    const isNight     = gs.currentDayIndex % 3 === 2;
+    const histSummary = gs.narrativeHistory.slice(-3).join('\n---\n');
 
-    /* 构建参战者信息 */
     let participantsDesc = '';
-    gs.participants.forEach(p => {
-      participantsDesc += (p.isUser ? p.name + '（用户）' : p.name) +
-        '：' + (p.setting || '普通人') + '\n';
-    });
+gs.participants.forEach(p => {
+  participantsDesc += (p.isUser ? p.name + '（用户）' : p.name) +
+    '：' + (p.setting || '普通人') + '\n';
+});
 
-    /* 存活者 */
+
     const aliveNames = gs.aliveList.map(id => {
       const p = gs.participants.find(x => x.id === id);
       return p ? p.name : id;
     }).join('、');
 
-    /* 用户属性 */
+    const deadNames = gs.participants
+      .filter(p => !gs.aliveList.includes(p.id))
+      .map(p => p.name).join('、') || '无';
+
     const statsDesc = isPlayer
-      ? `用户当前状态：血量${gs.userStats.hp}，饥饿值${gs.userStats.hunger}，体力${gs.userStats.stamina}，位置：${gs.userStats.location}，状态：${gs.userStats.statusTags.join('/')}`
+      ? '用户血量:' + gs.userStats.hp +
+        ' 饥饿:' + gs.userStats.hunger +
+        ' 体力:' + gs.userStats.stamina +
+        ' 位置:' + gs.userStats.location +
+        ' 状态:' + gs.userStats.statusTags.join('/')
       : '';
 
+    const outlineEntry = gs.outline[gs.currentDayIndex] || '';
+
     const systemPrompt =
-`【参战者设定】
-${participantsDesc}
-
-【本局大纲（必须严格遵守）】
-${gs.outline.join('\n')}
-
-【当前游戏状态】
-时间段：${dayLabel}
-场景：${gs.scene}
-存活者：${aliveNames}
-${statsDesc}
-
-【历史叙事摘要（最近4段）】
-${histSummary || '（游戏刚开始）'}
-
-【输出格式要求】
-请严格按照以下格式输出，每个标签单独一行：
-
-【叙事】
-本时间段的详细叙事（300-500字，恐怖悬疑风格，${isPlayer ? '用第二人称描述用户视角' : '第三人称全局视角'}）
-
-【对话】
-[角色名]："对话内容"
-（如无对话可省略此块）
-
-${isPlayer ? `【选项】
-A. 选项A
-B. 选项B
-C. 选项C
-
-【属性变化】
-血量:±数值 饥饿:-数值 体力:±数值
-
-` : ''}【广播】
-本时间段广播内容（简短）
-
-【弹幕】
-弹幕1|弹幕2|弹幕3
-
-【物品】
-（如用户捡到物品则写：物品名称:emoji:数量，否则省略此块）
-
-【游戏状态】
-存活:存活者名字用逗号分隔
-结束:否/是`;
+      '【参战者设定】\n' + participantsDesc + '\n' +
+      '【本局大纲（必须严格遵守）】\n' + gs.outline.join('\n') + '\n\n' +
+      '【当前时间段】\n' +
+      dayLabel + '。' + periodCtx + '\n' +
+      '本时间段大纲事件：' + outlineEntry + '\n\n' +
+      '【当前状态】\n' +
+      '场景：' + gs.scene + '\n' +
+      '存活：' + aliveNames + '\n' +
+      '已淘汰：' + deadNames + '\n' +
+      statsDesc + '\n\n' +
+      '【近期叙事摘要】\n' + (histSummary || '游戏刚开始') + '\n\n' +
+      '【写作要求——必须严格遵守】\n' +
+      '1. 第一句话必须点明当前时间：如"第X天，' + PERIOD_LABELS[gs.currentDayIndex % 3] + '。"\n' +
+      '2. 严格按大纲事件推进，不得偏离。\n' +
+      '3. 节奏极快。150-250字。每个时间段必须有实质性事件发生，不能只是描述氛围。\n' +
+      '4. 各角色可以在不同地点行动，不需要凑在一起。明确写出每个人在哪、在做什么。\n' +
+      '5. 禁止比喻、禁止神化、禁止诗意描写。用直白的叙事语言。\n' +
+      '6. 有对话时直接写对话内容，格式：[角色名]："内容"\n' +
+      (isNight
+        ? '7. 这是夜晚时间段，选项中必须包含"睡觉休息"选项。\n'
+        : '') +
+      (isPlayer
+        ? '8. 用第二人称描述用户视角，写清楚用户当前在哪、周围发生了什么。\n'
+        : '') +
+      '\n【输出格式——严格按此格式，不得省略任何块】\n\n' +
+      '【叙事】\n' +
+      '（150-250字的叙事正文）\n\n' +
+      (isPlayer
+        ? '【选项】\n' +
+          'A. （行动选项A）\n' +
+          'B. （行动选项B）\n' +
+          'C. （行动选项C，夜晚必须有睡觉选项）\n\n' +
+          '【属性变化】\n' +
+          '血量:+0 饥饿:-10 体力:-8\n\n'
+        : '') +
+      '【广播】\n' +
+      '（本时间段死亡通报或重要事件，一句话，无事件则写"暂无新消息"）\n\n' +
+      '【弹幕】\n' +
+      '弹幕1|弹幕2|弹幕3|弹幕4|弹幕5|弹幕6|弹幕7\n\n' +
+      '【物品】\n' +
+      '（用户捡到物品则写：名称:emoji:数量。否则写：无）\n\n' +
+      '【游戏状态】\n' +
+      '存活:（存活者名字逗号分隔）\n' +
+      '结束:否';
 
     const userContent = isPlayer
-      ? `当前时间段：${dayLabel}\n用户选择的行动：${userAction || '观察周围环境'}\n${gs.pendingChat ? '用户说的话：' + gs.pendingChat : ''}`
-      : `当前时间段：${dayLabel}\n请生成本时间段所有角色的行动和互动叙事。`;
+      ? '当前：' + dayLabel + '\n行动：' + (userAction || '观察周围') +
+        (gs.pendingChat ? '\n对话：' + gs.pendingChat : '')
+      : '当前：' + dayLabel + '\n生成本时间段叙事。';
 
     gs.pendingChat = '';
 
@@ -652,55 +698,55 @@ C. 选项C
         { role: 'system', content: systemPrompt },
         { role: 'user',   content: userContent }
       ]);
-
-      btrParseAndApplySegment(raw, dayLabel);
-
+      btrParseAndApplySegment(raw);
     } catch (err) {
-      btrAppendNarrative('【通信中断】……信号异常……请稍后再试（' + err.message + '）', true);
-      btrSetChoicesEnabled(true);
-      if (nextBtn) nextBtn.disabled = false;
+      btrAppendNarrative('\n【通信中断】' + err.message + '\n', true);
+      /* 解锁交互 */
+      if (isPlayer) {
+        btrRenderDefaultChoices();
+        const ca = document.getElementById('btr-choices-area');
+        if (ca) ca.style.display = 'block';
+        btrSetChoicesEnabled(true);
+      } else {
+        if (nextBtn) nextBtn.disabled = false;
+      }
     }
   }
 
   /* ============================================================
-     解析 AI 返回并应用
+     解析 AI 返回
      ============================================================ */
-  function btrParseAndApplySegment(raw, dayLabel) {
-    /* ── 提取各块 ── */
+  function btrParseAndApplySegment(raw) {
     function extract(tag) {
-      const re  = new RegExp('【' + tag + '】\\s*([\\s\\S]*?)(?=\\n【|$)', 'i');
-      const m   = raw.match(re);
+      const re = new RegExp('【' + tag + '】[^\\S\\n]*\\n?([\\s\\S]*?)(?=\\n【|$)');
+      const m  = raw.match(re);
       return m ? m[1].trim() : '';
     }
 
-    const narrative   = extract('叙事');
-    const dialogue    = extract('对话');
-    const optionsRaw  = extract('选项');
-    const attrRaw     = extract('属性变化');
-    const broadcast   = extract('广播');
-    const danmakuRaw  = extract('弹幕');
-    const itemRaw     = extract('物品');
-    const statusRaw   = extract('游戏状态');
+    const narrative  = extract('叙事');
+    const optionsRaw = extract('选项');
+    const attrRaw    = extract('属性变化');
+    const broadcast  = extract('广播');
+    const danmakuRaw = extract('弹幕');
+    const itemRaw    = extract('物品');
+    const statusRaw  = extract('游戏状态');
 
-    /* ── 叙事 + 对话渲染 ── */
-    let fullNarrative = narrative;
-    if (dialogue) {
-      fullNarrative += '\n\n' + dialogue;
+    /* ── 叙事渲染 ── */
+    if (narrative) {
+      btrAppendNarrative('\n' + narrative, true);
+      gs.narrativeHistory.push(narrative);
+      if (gs.narrativeHistory.length > 6) gs.narrativeHistory.shift();
     }
-    btrAppendNarrative(fullNarrative, true);
-    gs.narrativeHistory.push(fullNarrative);
-    if (gs.narrativeHistory.length > 6) gs.narrativeHistory.shift();
 
     /* ── 广播 ── */
-    if (broadcast) {
+    if (broadcast && broadcast !== '暂无新消息') {
       gs.broadcastQueue.push(broadcast);
       btrRefreshBroadcast();
     }
 
     /* ── 弹幕 ── */
     if (danmakuRaw) {
-      const items = danmakuRaw.split('|').map(s => s.trim()).filter(Boolean);
-      items.forEach(t => {
+      danmakuRaw.split('|').map(s => s.trim()).filter(Boolean).forEach(t => {
         gs.danmakuHistory.push(t);
         if (btrDanmakuEnabled) btrLaunchDanmaku(t, 'btr-danmaku-layer');
       });
@@ -708,26 +754,23 @@ C. 选项C
 
     /* ── 属性变化 ── */
     if (attrRaw && gs.mode === 'player' && !gs.isUserDead) {
-      const hpM  = attrRaw.match(/血量[:：]\s*([+-]?\d+)/);
-      const huM  = attrRaw.match(/饥饿[:：]\s*([+-]?\d+)/);
-      const stM  = attrRaw.match(/体力[:：]\s*([+-]?\d+)/);
+      const hpM = attrRaw.match(/血量[：:]\s*([+-]?\d+)/);
+      const huM = attrRaw.match(/饥饿[：:]\s*([+-]?\d+)/);
+      const stM = attrRaw.match(/体力[：:]\s*([+-]?\d+)/);
       if (hpM) gs.userStats.hp      = Math.min(100, Math.max(0, gs.userStats.hp      + parseInt(hpM[1])));
       if (huM) gs.userStats.hunger  = Math.min(100, Math.max(0, gs.userStats.hunger  + parseInt(huM[1])));
       if (stM) gs.userStats.stamina = Math.min(100, Math.max(0, gs.userStats.stamina + parseInt(stM[1])));
-      /* 饥饿=0 扣血 */
       if (gs.userStats.hunger <= 0) gs.userStats.hp = Math.max(0, gs.userStats.hp - 5);
-      btrUpdateAttrPanel();
     }
-
-    /* ── 自然饥饿递减（每段 -10） ── */
+    /* 固定自然衰减（叠加在AI属性变化之上） */
     if (gs.mode === 'player' && !gs.isUserDead) {
-      gs.userStats.hunger = Math.max(0, gs.userStats.hunger - 10);
-      gs.userStats.stamina = Math.max(0, gs.userStats.stamina - 8);
+      gs.userStats.hunger  = Math.max(0, gs.userStats.hunger  - 8);
+      gs.userStats.stamina = Math.max(0, gs.userStats.stamina - 6);
       btrUpdateAttrPanel();
     }
 
     /* ── 物品 ── */
-    if (itemRaw && gs.mode === 'player' && !gs.isUserDead) {
+    if (itemRaw && itemRaw !== '无' && gs.mode === 'player' && !gs.isUserDead) {
       const parts = itemRaw.split(':');
       if (parts.length >= 2 && gs.inventory.length < 12) {
         gs.inventory.push({
@@ -741,24 +784,23 @@ C. 选项C
 
     /* ── 存活者列表 ── */
     if (statusRaw) {
-      const aliveMatch = statusRaw.match(/存活[:：]\s*(.+)/);
+      const aliveMatch = statusRaw.match(/存活[：:]\s*(.+)/);
       if (aliveMatch) {
         const aliveNames = aliveMatch[1].split(/[,，]/).map(s => s.trim()).filter(Boolean);
-        gs.aliveList = gs.participants
-          .filter(p => aliveNames.some(n => p.name.includes(n) || n.includes(p.name)))
-          .map(p => p.id);
+        gs.aliveList = gs.participants.filter(p =>
+          aliveNames.some(n => {
+            const pn = p.name.trim(), nn = n.trim();
+            return pn === nn || pn.includes(nn) || nn.includes(pn);
+          })
+        ).map(p => p.id);
       }
-
-      const endMatch = statusRaw.match(/结束[:：]\s*(是|否)/);
-      if (endMatch && endMatch[1] === '是') {
-        gs.gameOver = true;
-      }
+      const endMatch = statusRaw.match(/结束[：:]\s*(是|否)/);
+      if (endMatch && endMatch[1] === '是') gs.gameOver = true;
     }
 
     /* ── 检测用户死亡 ── */
     if (gs.mode === 'player' && !gs.isUserDead) {
-      const userAlive = gs.aliveList.includes('user');
-      if (!userAlive || gs.userStats.hp <= 0) {
+      if (!gs.aliveList.includes('user') || gs.userStats.hp <= 0) {
         gs.isUserDead = true;
         setTimeout(() => btrShowScreen('batoru-dead'), 1200);
         return;
@@ -768,35 +810,51 @@ C. 选项C
     /* ── 游戏结束 ── */
     if (gs.gameOver || gs.currentDayIndex >= gs.totalDays * 3 - 1) {
       gs.gameOver = true;
-      const winner = gs.aliveList.length > 0
-        ? (gs.participants.find(p => p.id === gs.aliveList[0]) || { name: '不明' }).name
-        : '无人';
-      gs.winner = winner;
+      const wp = gs.aliveList.length > 0
+        ? (gs.participants.find(p => p.id === gs.aliveList[0]) || { name: '不明' })
+        : { name: '无人' };
+      gs.winner = wp.name;
       setTimeout(() => btrTriggerEnding(), 1500);
       return;
     }
 
-    /* ── 推进到下一个时间段 ── */
+    /* ── 推进时间 ── */
     gs.currentDayIndex++;
     btrUpdateDayLabel();
 
-    /* ── 渲染选项 ── */
-    if (gs.mode === 'player' && !gs.isUserDead) {
-      const labels  = ['A', 'B', 'C'];
-      const optLines = optionsRaw.split('\n')
-        .map(l => l.trim())
-        .filter(l => /^[ABC][.。]/.test(l));
+    /* ── 渲染选项或下一段 ── */
+    const isPlayer    = gs.mode === 'player' && !gs.isUserDead;
+    const choicesArea = document.getElementById('btr-choices-area');
+    const nextWrap    = document.getElementById('btr-next-btn-wrap');
 
-      const choices = optLines.map((l, i) => ({
+    if (isPlayer) {
+      const labels   = ['A', 'B', 'C'];
+      const optLines = optionsRaw.split('\n').map(l => l.trim()).filter(l => /^[ABC][.。]/.test(l));
+      let choices    = optLines.map((l, i) => ({
         label: labels[i] || String.fromCharCode(65 + i),
         text:  l.replace(/^[ABC][.。]\s*/, '')
       }));
 
-      btrRenderChoices(choices);
+      /* 如果AI未返回选项或夜晚缺少睡觉选项，补充 */
+      if (!choices.length) {
+        btrRenderDefaultChoices();
+      } else {
+        const isNight = gs.currentDayIndex % 3 === 0 && gs.currentDayIndex > 0
+          ? false
+          : (gs.currentDayIndex - 1) % 3 === 2;
+        const hasSleep = choices.some(c => c.text.includes('睡') || c.text.includes('休息'));
+        if (isNight && !hasSleep) {
+          choices[2] = { label: 'C', text: '找隐蔽处睡觉，恢复体力（风险：可能被偷袭）' };
+        }
+        btrRenderChoices(choices);
+      }
+
+      if (choicesArea) choicesArea.style.display = 'block';
       btrSetChoicesEnabled(true);
     } else {
-      const nextBtn = document.getElementById('btr-next-segment');
-      if (nextBtn) { nextBtn.disabled = false; }
+      if (nextWrap) nextWrap.style.display = 'block';
+      const nb = document.getElementById('btr-next-segment');
+      if (nb) nb.disabled = false;
     }
   }
 
@@ -805,26 +863,25 @@ C. 选项C
      ============================================================ */
   function btrAppendNarrative(text, scroll) {
     const area = document.getElementById('btr-narrative-area');
-    if (!area) return;
+    if (!area || !text) return;
 
-    const lines = text.split('\n');
-    lines.forEach(line => {
+    text.split('\n').forEach(line => {
       const trimmed = line.trim();
       if (!trimmed) return;
 
-      /* 对话行 */
-      const dialogueMatch = trimmed.match(/^\[(.+?)\][：:][""](.+)[""]$/);
-      if (dialogueMatch) {
-        const div  = document.createElement('div');
+      const dlg = trimmed.match(/^\[(.+?)\][：:][""](.+?)[""]?$/) ||
+                  trimmed.match(/^\[(.+?)\]："(.+)"$/);
+      if (dlg) {
+        const div = document.createElement('div');
         div.className = 'btr-dialogue-line';
-        const name = document.createElement('span');
-        name.className   = 'btr-dialogue-name';
-        name.textContent = '[' + dialogueMatch[1] + ']：';
-        const content = document.createElement('span');
-        content.className   = 'btr-dialogue-text';
-        content.textContent = '"' + dialogueMatch[2] + '"';
-        div.appendChild(name);
-        div.appendChild(content);
+        const nm = document.createElement('span');
+        nm.className   = 'btr-dialogue-name';
+        nm.textContent = '[' + dlg[1] + ']：';
+        const ct = document.createElement('span');
+        ct.className   = 'btr-dialogue-text';
+        ct.textContent = '"' + dlg[2] + '"';
+        div.appendChild(nm);
+        div.appendChild(ct);
         area.appendChild(div);
       } else {
         const p = document.createElement('p');
@@ -834,17 +891,15 @@ C. 选项C
       }
     });
 
-    if (scroll) {
-      area.scrollTop = area.scrollHeight;
-    }
+    if (scroll) requestAnimationFrame(() => { area.scrollTop = area.scrollHeight; });
   }
 
   /* ============================================================
-     选项渲染
+     选项渲染（修复：可折叠，选项收起默认）
      ============================================================ */
   function btrRenderChoices(choices) {
-    const list = document.getElementById('btr-choices-list');
-    const area = document.getElementById('btr-choices-area');
+    const list       = document.getElementById('btr-choices-list');
+    const area       = document.getElementById('btr-choices-area');
     const customWrap = document.getElementById('btr-custom-input-wrap');
     if (!list) return;
 
@@ -857,7 +912,9 @@ C. 选项C
       btn.innerHTML =
         '<span class="btr-choice-label">' + choice.label + '.</span>' + choice.text;
       btn.addEventListener('click', () => {
+        if (btn.disabled) return;
         btrSetChoicesEnabled(false);
+        if (area) area.style.display = 'none';
         btrRunSegment(choice.text);
       });
       list.appendChild(btn);
@@ -868,56 +925,51 @@ C. 选项C
     customBtn.className = 'btr-choice-btn';
     customBtn.innerHTML = '<span class="btr-choice-label">D.</span>✎ 自行输入行动';
     customBtn.addEventListener('click', () => {
-      if (customWrap) {
-        customWrap.style.display = customWrap.style.display === 'none' ? 'flex' : 'none';
-      }
+      if (!customWrap) return;
+      customWrap.style.display = customWrap.style.display === 'none' ? 'flex' : 'none';
     });
     list.appendChild(customBtn);
-
-    if (area) area.style.display = 'block';
   }
 
   function btrSetChoicesEnabled(enabled) {
     document.querySelectorAll('.btr-choice-btn').forEach(btn => {
-      btn.disabled = !enabled;
-      btn.style.opacity = enabled ? '1' : '0.5';
+      btn.disabled      = !enabled;
+      btn.style.opacity = enabled ? '1' : '0.55';
     });
   }
 
-  /* 自定义行动确认 */
   document.getElementById('btr-custom-action-confirm').addEventListener('click', () => {
     const input = document.getElementById('btr-custom-action-input');
     const val   = input ? input.value.trim() : '';
     if (!val) return;
     if (input) input.value = '';
-    const customWrap = document.getElementById('btr-custom-input-wrap');
-    if (customWrap) customWrap.style.display = 'none';
+    const cw = document.getElementById('btr-custom-input-wrap');
+    if (cw) cw.style.display = 'none';
+    const area = document.getElementById('btr-choices-area');
+    if (area) area.style.display = 'none';
     btrSetChoicesEnabled(false);
     btrRunSegment(val);
   });
 
   document.getElementById('btr-custom-action-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-      document.getElementById('btr-custom-action-confirm').click();
-    }
+    if (e.key === 'Enter') document.getElementById('btr-custom-action-confirm').click();
   });
 
-  /* 旁观模式下一段 */
   document.getElementById('btr-next-segment').addEventListener('click', () => {
+    if (!gs || gs.gameOver) return;
+    const nb = document.getElementById('btr-next-segment');
+    if (nb) nb.disabled = true;
     btrRunSegment(null);
   });
 
-  /* 对话框输入记录（不立即发送，等下次行动注入） */
   document.getElementById('btr-chat-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-      const input = document.getElementById('btr-chat-input');
-      const val   = input ? input.value.trim() : '';
-      if (!val) return;
-      gs.pendingChat = val;
-      if (input) input.value = '';
-      /* 在叙事区显示用户说话 */
-      btrAppendNarrative('[你低声说]："' + val + '"', true);
-    }
+    if (e.key !== 'Enter') return;
+    const input = document.getElementById('btr-chat-input');
+    const val   = input ? input.value.trim() : '';
+    if (!val) return;
+    if (gs) gs.pendingChat = val;
+    if (input) input.value = '';
+    btrAppendNarrative('[你]："' + val + '"', true);
   });
 
   /* ============================================================
@@ -926,12 +978,11 @@ C. 选项C
   function btrRefreshBroadcast() {
     const inner = document.getElementById('btr-broadcast-inner');
     if (!inner || !gs) return;
-    const base   = '大逃杀游戏进行中……' + gs.scene + '……';
-    const recent = gs.broadcastQueue.slice(-5).join(' …… ');
-    inner.textContent = base + (recent ? ' …… ' + recent : '');
-    /* 重启动画 */
+    const base   = '大逃杀进行中 · ' + (gs.scene || '') + ' · ';
+    const recent = gs.broadcastQueue.slice(-8).join(' · ');
+    inner.textContent = base + (recent || '祝各位好运……只有一人能活着走出去……');
     inner.style.animation = 'none';
-    inner.offsetHeight;
+    void inner.offsetHeight;
     inner.style.animation = '';
   }
 
@@ -953,11 +1004,11 @@ C. 选项C
     const s = gs.userStats;
     const setBar = (id, val) => {
       const el = document.getElementById(id);
-      if (el) el.style.width = Math.max(0, Math.min(100, val)) + '%';
+      if (el) el.style.width = Math.min(100, Math.max(0, val)) + '%';
     };
     const setVal = (id, val) => {
       const el = document.getElementById(id);
-      if (el) el.textContent = Math.round(val);
+      if (el) el.textContent = Math.round(Math.max(0, val));
     };
     setBar('btr-bar-hp',      s.hp);
     setBar('btr-bar-hunger',  s.hunger);
@@ -981,9 +1032,8 @@ C. 选项C
     const count = document.getElementById('btr-bag-count');
     const hint  = document.getElementById('btr-bag-full-hint');
     if (!grid || !gs) return;
-
     grid.innerHTML = '';
-    const inv = gs.inventory;
+    const inv = gs.inventory || [];
     if (count) count.textContent = inv.length + '/12';
     if (hint)  hint.style.display = inv.length >= 12 ? 'block' : 'none';
 
@@ -1001,8 +1051,6 @@ C. 选项C
       }
       grid.appendChild(cell);
     }
-
-    /* 隐藏操作菜单 */
     const menu = document.getElementById('btr-item-action-menu');
     if (menu) menu.style.display = 'none';
     btrSelectedItemIdx = -1;
@@ -1012,26 +1060,27 @@ C. 选项C
     btrSelectedItemIdx = idx;
     const item = gs.inventory[idx];
     if (!item) return;
-    const menu    = document.getElementById('btr-item-action-menu');
-    const nameEl  = document.getElementById('btr-item-action-name');
+    const menu     = document.getElementById('btr-item-action-menu');
+    const nameEl   = document.getElementById('btr-item-action-name');
     const giveWrap = document.getElementById('btr-give-target-wrap');
-    if (nameEl)  nameEl.textContent = item.emoji + ' ' + item.name;
+    if (nameEl)   nameEl.textContent     = (item.emoji || '📦') + ' ' + item.name;
     if (giveWrap) giveWrap.style.display = 'none';
-    if (menu) menu.style.display = 'flex';
+    if (menu)     menu.style.display     = 'flex';
   }
 
   document.getElementById('btr-item-use').addEventListener('click', () => {
     if (btrSelectedItemIdx < 0 || !gs) return;
     const item = gs.inventory[btrSelectedItemIdx];
     if (!item) return;
-    /* 简单效果：急救包恢复血量 */
-    if (item.name.includes('急救') || item.name.includes('药')) {
+    const n = item.name;
+    if (n.includes('急救') || n.includes('药') || n.includes('绷带')) {
       gs.userStats.hp = Math.min(100, gs.userStats.hp + 30);
-      btrUpdateAttrPanel();
-    } else if (item.name.includes('食物') || item.name.includes('水') || item.name.includes('罐头')) {
+    } else if (n.includes('食') || n.includes('水') || n.includes('罐头') || n.includes('饼')) {
       gs.userStats.hunger = Math.min(100, gs.userStats.hunger + 40);
-      btrUpdateAttrPanel();
+    } else if (n.includes('能量') || n.includes('体力')) {
+      gs.userStats.stamina = Math.min(100, gs.userStats.stamina + 35);
     }
+    btrUpdateAttrPanel();
     gs.inventory.splice(btrSelectedItemIdx, 1);
     btrRenderBag();
   });
@@ -1043,33 +1092,32 @@ C. 选项C
   });
 
   document.getElementById('btr-item-give').addEventListener('click', () => {
-    const giveWrap = document.getElementById('btr-give-target-wrap');
+    const giveWrap   = document.getElementById('btr-give-target-wrap');
     const targetList = document.getElementById('btr-give-target-list');
     if (!giveWrap || !targetList || !gs) return;
-
     targetList.innerHTML = '';
-    const aliveOthers = gs.participants.filter(
-      p => !p.isUser && gs.aliveList.includes(p.id)
-    );
-    if (!aliveOthers.length) {
-      giveWrap.style.display = 'block';
-      targetList.innerHTML = '<div style="font-size:11px;color:#9a8880;">附近无可赠送对象</div>';
+    const others = gs.participants.filter(p => !p.isUser && gs.aliveList.includes(p.id));
+    giveWrap.style.display = 'block';
+    if (!others.length) {
+      targetList.innerHTML = '<div style="font-size:11px;color:#9a8880;padding:4px 0;">附近无可赠送对象</div>';
       return;
     }
-    aliveOthers.forEach(p => {
+    others.forEach(p => {
       const btn = document.createElement('button');
       btn.className   = 'btr-btn btr-btn-ghost';
       btn.textContent = p.name;
-      btn.style.cssText = 'margin-top:6px;width:100%;font-size:12px;';
+      btn.style.cssText = 'margin-top:6px;width:100%;font-size:12px;padding:7px;';
       btn.addEventListener('click', () => {
-        if (btrSelectedItemIdx < 0) return;
+        if (btrSelectedItemIdx < 0 || !gs) return;
+        const item = gs.inventory[btrSelectedItemIdx];
+        const nm   = item ? item.name : '物品';
         gs.inventory.splice(btrSelectedItemIdx, 1);
         btrRenderBag();
-        btrAppendNarrative('你将物品赠送给了' + p.name + '。', true);
+        btrAppendNarrative('你将【' + nm + '】赠送给了' + p.name + '。', true);
+        document.getElementById('btr-bag-modal').style.display = 'none';
       });
       targetList.appendChild(btn);
     });
-    giveWrap.style.display = 'block';
   });
 
   document.getElementById('btr-item-action-cancel').addEventListener('click', () => {
@@ -1079,6 +1127,7 @@ C. 选项C
   });
 
   document.getElementById('btr-bag-btn').addEventListener('click', () => {
+    if (!gs) return;
     btrRenderBag();
     document.getElementById('btr-bag-modal').style.display = 'flex';
   });
@@ -1095,14 +1144,13 @@ C. 选项C
      属性弹窗
      ============================================================ */
   document.getElementById('btr-attr-btn').addEventListener('click', () => {
+    if (!gs) return;
     btrUpdateAttrPanel();
     document.getElementById('btr-attr-modal').style.display = 'flex';
   });
-
   document.getElementById('btr-attr-close').addEventListener('click', () => {
     document.getElementById('btr-attr-modal').style.display = 'none';
   });
-
   document.getElementById('btr-attr-modal').addEventListener('click', function (e) {
     if (e.target === this) this.style.display = 'none';
   });
@@ -1116,10 +1164,9 @@ C. 选项C
     btrDanmakuEnabled = !btrDanmakuEnabled;
     const btn = document.getElementById('btr-danmaku-btn');
     if (btn) btn.classList.toggle('active', btrDanmakuEnabled);
-    if (btrDanmakuEnabled && gs) {
-      /* 回放历史弹幕 */
-      gs.danmakuHistory.slice(-5).forEach((t, i) => {
-        setTimeout(() => btrLaunchDanmaku(t, 'btr-danmaku-layer'), i * 600);
+    if (btrDanmakuEnabled && gs && gs.danmakuHistory.length) {
+      gs.danmakuHistory.slice(-14).forEach((t, i) => {
+        setTimeout(() => btrLaunchDanmaku(t, 'btr-danmaku-layer'), i * 700);
       });
     }
   });
@@ -1127,12 +1174,12 @@ C. 选项C
   function btrLaunchDanmaku(text, layerId) {
     const layer = document.getElementById(layerId);
     if (!layer) return;
-    const el = document.createElement('div');
-    el.className  = 'btr-danmaku-item';
+    const el       = document.createElement('div');
+    el.className   = 'btr-danmaku-item';
     el.textContent = text;
-    const topPct  = 10 + Math.random() * 75;
-    const duration = 6 + Math.random() * 4;
-    el.style.top      = topPct + '%';
+    const topPct   = 10 + Math.random() * 75;
+    const duration = 6 + Math.random() * 5;
+    el.style.top               = topPct + '%';
     el.style.animationDuration = duration + 's';
     layer.appendChild(el);
     setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, (duration + 1) * 1000);
@@ -1149,28 +1196,26 @@ C. 选项C
     this.classList.toggle('open', !isOpen);
   });
 
-  /* 点击其他地方关闭菜单 */
   document.addEventListener('click', function (e) {
-    if (!e.target.closest('#btr-menu-trigger') && !e.target.closest('#btr-side-menu')) {
-      const menu = document.getElementById('btr-side-menu');
-      const trigger = document.getElementById('btr-menu-trigger');
-      if (menu) menu.style.display = 'none';
-      if (trigger) trigger.classList.remove('open');
-    }
+    if (e.target.closest('#btr-menu-trigger') || e.target.closest('#btr-side-menu')) return;
+    const menu    = document.getElementById('btr-side-menu');
+    const trigger = document.getElementById('btr-menu-trigger');
+    if (menu)    menu.style.display = 'none';
+    if (trigger) trigger.classList.remove('open');
   });
 
   document.getElementById('btr-save-game').addEventListener('click', () => {
     btrDoSave();
-    const menu = document.getElementById('btr-side-menu');
-    if (menu) menu.style.display = 'none';
+    const menu    = document.getElementById('btr-side-menu');
     const trigger = document.getElementById('btr-menu-trigger');
+    if (menu)    menu.style.display = 'none';
     if (trigger) trigger.classList.remove('open');
   });
 
   document.getElementById('btr-exit-game').addEventListener('click', () => {
-    const menu = document.getElementById('btr-side-menu');
-    if (menu) menu.style.display = 'none';
+    const menu    = document.getElementById('btr-side-menu');
     const trigger = document.getElementById('btr-menu-trigger');
+    if (menu)    menu.style.display = 'none';
     if (trigger) trigger.classList.remove('open');
     btrShowExitWarning(() => {
       btrShowScreen('batoru-lobby');
@@ -1179,43 +1224,95 @@ C. 选项C
   });
 
   /* ============================================================
-     存档
+     存档（修复：确保序列化完整，写入前验证）
      ============================================================ */
   function btrDoSave() {
-    if (!gs) return;
-    const now  = new Date();
-    const pad  = n => String(n).padStart(2, '0');
-    const time = now.getFullYear() + '-' + pad(now.getMonth()+1) + '-' + pad(now.getDate()) +
-                 ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
+    if (!gs) { alert('当前无游戏进度'); return; }
+
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    const time =
+      now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) +
+      ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
+
+    /* 序列化并验证 */
+    let serialized;
+    try {
+      serialized = JSON.stringify(gs);
+      JSON.parse(serialized); /* 验证可反序列化 */
+    } catch (e) {
+      alert('存档序列化失败：' + e.message);
+      return;
+    }
 
     const record = {
       id:         'save_' + Date.now(),
       saveTime:   time,
       dayLabel:   btrDayLabel(gs.currentDayIndex),
       aliveCount: gs.aliveList.length,
-      gameState:  JSON.parse(JSON.stringify(gs))
+      gameState:  JSON.parse(serialized)
     };
 
-    let saves = btrLoad(SAVES_KEY) || [];
+    let saves = [];
+    try {
+      saves = btrLoad(SAVES_KEY) || [];
+      if (!Array.isArray(saves)) saves = [];
+    } catch (e) { saves = []; }
+
     saves.push(record);
     if (saves.length > MAX_SAVES) saves = saves.slice(-MAX_SAVES);
-    btrSave(SAVES_KEY, saves);
-    btrAppendNarrative('【存档成功】' + time, false);
+
+    try {
+      btrSave(SAVES_KEY, saves);
+    } catch (e) {
+      alert('存档写入失败：' + e.message);
+      return;
+    }
+
+    btrUpdateContinueBtn();
+    btrAppendNarrative('【存档成功】' + time + ' · ' + btrDayLabel(gs.currentDayIndex), false);
   }
 
   /* ============================================================
-     退出警告弹窗（递进式）
+     退出警告弹窗（修复：叠加式，疯批恐怖文案）
      ============================================================ */
   const EXIT_WARN_TEXTS = [
-    { title: '⚠ 确认退出', text: '退出将丢失未存档的进度，确定要退出吗？' },
-    { title: '⚠ 真的要退出吗？', text: '你确定……？游戏进度将无法恢复。' },
-    { title: '⚠ 你确定吗？', text: '最后一次确认！真的要离开吗？' },
-    { title: '⚠ 警告！警告！警告！', text: '……好吧。点取消，真正退出。' },
-    { title: '⚠ ！！！', text: '好的我知道了……点取消退出，点确定继续劝你。' }
+    {
+      title: '⚠ 你要离开了吗',
+      text:  '退出将丢失未存档的进度。\n你确定要离开这里吗？'
+    },
+    {
+      title: '不……不要走',
+      text:  '已经有人在等你了。\n你真的要走吗？'
+    },
+    {
+      title: '它注意到你了',
+      text:  '有什么东西盯着你。\n它不希望你离开。'
+    },
+    {
+      title: '门——锁上了',
+      text:  '你以为你能出去吗？\n没有人能离开这里。'
+    },
+    {
+      title: '▒▓░ 错误 ░▓▒',
+      text:  '退出进程已损坏。\n你无法离开。\n你永远无法离开。'
+    },
+    {
+      title: '哈哈哈哈哈哈哈',
+      text:  '继续点确定吧。\n弹窗会一直出现的。\n点取消才能真正退出。'
+    },
+    {
+      title: '已记录你的位置',
+      text:  '我们知道你在哪里。\n点取消。现在就点。'
+    },
+    {
+      title: '╔═══ 最终警告 ═══╗',
+      text:  '你已触发第' + '∞' + '层确认协议。\n点击取消以终止序列。'
+    }
   ];
 
-  function btrShowExitWarning(onConfirmFinal, depth) {
-    depth = depth || 0;
+  function btrShowExitWarning(onExit, depth) {
+    depth = (depth || 0);
     const layer = document.getElementById('btr-exit-warnings');
     if (!layer) return;
     layer.style.display = 'block';
@@ -1225,11 +1322,23 @@ C. 选项C
     const mask = document.createElement('div');
     mask.className = 'btr-warn-mask';
 
+    /* 随着深度增加，弹窗位置略微偏移，营造叠加感 */
+    const offsetX = (depth % 2 === 0 ? 1 : -1) * Math.min(depth * 8, 60);
+    const offsetY = Math.min(depth * 6, 80);
+
     const box = document.createElement('div');
     box.className = 'btr-warn-box';
+    box.style.transform = 'translate(' + offsetX + 'px, -' + offsetY + 'px)';
+    box.style.transition = 'transform 0.15s';
+    /* 越深越红 */
+    if (depth >= 3) {
+      box.style.borderColor = '#ff0000';
+      box.style.boxShadow   = '0 0 ' + (20 + depth * 8) + 'px rgba(255,0,0,0.7)';
+    }
+
     box.innerHTML =
       '<div class="btr-warn-title">' + info.title + '</div>' +
-      '<div class="btr-warn-text">' + info.text + '</div>' +
+      '<div class="btr-warn-text" style="white-space:pre-line;">' + info.text + '</div>' +
       '<div class="btr-warn-btns">' +
         '<button class="btr-warn-confirm">确定退出</button>' +
         '<button class="btr-warn-cancel">取消</button>' +
@@ -1238,30 +1347,23 @@ C. 选项C
     mask.appendChild(box);
     layer.appendChild(mask);
 
-    /* 点击遮罩关闭（取消退出） */
+    /* 点击遮罩空白处：关闭所有弹窗，回到游戏 */
     mask.addEventListener('click', function (e) {
-      if (e.target === mask) {
-        layer.removeChild(mask);
-        if (!layer.children.length) layer.style.display = 'none';
-      }
-    });
-
-    box.querySelector('.btr-warn-confirm').addEventListener('click', () => {
-      layer.removeChild(mask);
-      /* 继续加深警告，或者已经到最深层 */
-      if (depth >= EXIT_WARN_TEXTS.length - 1) {
-        /* 最深层确定依然加一层 */
-        btrShowExitWarning(onConfirmFinal, depth);
-      } else {
-        btrShowExitWarning(onConfirmFinal, depth + 1);
-      }
-    });
-
-    box.querySelector('.btr-warn-cancel').addEventListener('click', () => {
-      /* 取消 = 真正退出 */
+      if (e.target !== mask) return;
       while (layer.firstChild) layer.removeChild(layer.firstChild);
       layer.style.display = 'none';
-      onConfirmFinal();
+    });
+
+    /* 确定：叠加新弹窗（不关闭旧的） */
+    box.querySelector('.btr-warn-confirm').addEventListener('click', () => {
+      btrShowExitWarning(onExit, depth + 1);
+    });
+
+    /* 取消：真正退出，清空所有弹窗 */
+    box.querySelector('.btr-warn-cancel').addEventListener('click', () => {
+      while (layer.firstChild) layer.removeChild(layer.firstChild);
+      layer.style.display = 'none';
+      onExit();
     });
   }
 
@@ -1269,9 +1371,9 @@ C. 选项C
      用户被淘汰
      ============================================================ */
   document.getElementById('btr-dead-watch').addEventListener('click', () => {
-    /* 切换为旁观模式继续 */
-    gs.mode        = 'spectator';
-    gs.isUserDead  = true;
+    if (!gs) return;
+    gs.mode       = 'spectator';
+    gs.isUserDead = true;
     btrShowScreen('batoru-main');
     const choicesArea = document.getElementById('btr-choices-area');
     const nextWrap    = document.getElementById('btr-next-btn-wrap');
@@ -1279,7 +1381,9 @@ C. 选项C
     if (choicesArea) choicesArea.style.display = 'none';
     if (nextWrap)    nextWrap.style.display    = 'block';
     if (chatWrap)    chatWrap.style.display    = 'none';
-    btrAppendNarrative('……你的意识飘离了身体，化作一缕幽魂，继续旁观这场游戏……', true);
+    const nb = document.getElementById('btr-next-segment');
+    if (nb) nb.disabled = false;
+    btrAppendNarrative('\n你已死亡。意识飘离身体，继续旁观……\n', true);
   });
 
   document.getElementById('btr-dead-exit').addEventListener('click', () => {
@@ -1299,15 +1403,14 @@ C. 选项C
 
     const winnerEl = document.getElementById('btr-ending-winner');
     if (winnerEl) winnerEl.textContent = '存活者：' + winner;
-
     const statsEl = document.getElementById('btr-ending-stats');
     if (statsEl) statsEl.textContent =
       '游戏历时 ' + totalDays + ' 天  ·  共淘汰 ' + eliminated + ' 人';
 
-    /* 生成最后一句话 */
     const lastWordsEl = document.getElementById('btr-ending-last-words');
     if (lastWordsEl) {
-      lastWordsEl.innerHTML = '<div style="color:#9a8880;font-size:11px;padding:10px 0;">正在生成最终遗言……</div>';
+      lastWordsEl.innerHTML =
+        '<div style="color:#9a8880;font-size:11px;padding:10px 0;letter-spacing:.06em;">正在生成最终遗言……</div>';
     }
 
     try {
@@ -1316,73 +1419,87 @@ C. 选项C
         (gs.aliveList.includes(p.id) ? '存活' : '已淘汰') + '）'
       ).join('\n');
 
-      const outlineSum = gs.outline.join('\n');
-
       const systemPrompt =
-        '根据以下大逃杀游戏的角色信息和剧情大纲，为每位参战者生成一句简短有力的最后遗言或胜利感言（不超过30字），符合其性格和经历。\n' +
-        '格式：角色真实姓名："遗言内容"\n只输出遗言，每人一行，不输出其他文字。\n\n' +
-        '【参战者信息】\n' + participantsDesc + '\n\n【剧情大纲】\n' + outlineSum + '\n\n' +
-        '同时在最后另起一行输出10-15条上帝视角的弹幕点评，格式：【弹幕】弹幕1|弹幕2|弹幕3...';
+        '根据以下大逃杀游戏的角色信息和剧情大纲，为每位参战者生成一句简短有力的最后遗言或胜利感言（不超过30字）。\n' +
+        '格式：角色真实姓名："遗言内容"\n' +
+        '每人一行，只输出遗言，不输出其他文字。\n' +
+        '最后另起一行输出10-15条上帝视角弹幕点评，格式：【弹幕】弹幕1|弹幕2|弹幕3\n\n' +
+        '【参战者信息】\n' + participantsDesc + '\n\n' +
+        '【剧情大纲】\n' + gs.outline.join('\n');
 
       const raw = await btrCallAPI([
         { role: 'system', content: systemPrompt },
         { role: 'user',   content: '请生成遗言和弹幕。' }
       ]);
 
-      /* 解析遗言 */
       if (lastWordsEl) {
         lastWordsEl.innerHTML = '';
-        const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
-        lines.forEach(line => {
+        raw.split('\n').map(l => l.trim()).filter(Boolean).forEach(line => {
+          /* 弹幕行 */
           if (line.startsWith('【弹幕】')) {
-            /* 处理弹幕 */
-            const danmakuPart = line.replace('【弹幕】', '');
-            danmakuPart.split('|').forEach((t, i) => {
+            line.replace('【弹幕】', '').split('|').forEach((t, i) => {
               const text = t.trim();
               if (!text) return;
-              setTimeout(() => btrLaunchDanmaku(text, 'btr-ending-danmaku-layer'), i * 500);
+              setTimeout(() => btrLaunchDanmaku(text, 'btr-ending-danmaku-layer'), i * 600);
             });
             return;
           }
-          const match = line.match(/^(.+?)[：:""](.+)[""]?$/);
+          /* 遗言行 */
+          const match = line.match(/^(.+?)[：""](.+?)[""]?$/) ||
+                        line.match(/^(.+?):"(.+)"$/);
           if (!match) return;
-          const name = match[1].trim();
-          const word = match[2].replace(/[""]$/, '').trim();
+          const roleName = match[1].replace(/[：""\s]+$/, '').trim();
+          const word     = match[2].replace(/[""]$/, '').trim();
           const item = document.createElement('div');
           item.className = 'btr-last-word-item';
           item.innerHTML =
-            '<span class="btr-last-word-name">' + name + '</span>' +
+            '<span class="btr-last-word-name">' + roleName + '</span>' +
             '<span class="btr-last-word-text">"' + word + '"</span>';
           lastWordsEl.appendChild(item);
         });
+        if (!lastWordsEl.children.length) {
+          lastWordsEl.innerHTML =
+            '<div style="color:#9a8880;font-size:11px;padding:10px 0;">未能解析遗言。</div>';
+        }
       }
-
     } catch (err) {
       if (lastWordsEl) {
-        lastWordsEl.innerHTML = '<div style="color:#9a8880;font-size:11px;padding:10px 0;">遗言生成失败：' + err.message + '</div>';
+        lastWordsEl.innerHTML =
+          '<div style="color:#9a8880;font-size:11px;padding:10px 0;">遗言生成失败：' + err.message + '</div>';
       }
     }
   }
 
   document.getElementById('btr-ending-restart').addEventListener('click', () => {
     gs = null;
-    btrShowScreen('batoru-user-setup');
-    document.getElementById('btr-user-name-input').value    = '';
-    document.getElementById('btr-user-setting-input').value = '';
-    document.querySelector('input[name="btr-mode"][value="player"]').checked = true;
-    /* 清空叙事区 */
+    /* 清空所有状态 */
     const narrativeArea = document.getElementById('btr-narrative-area');
     if (narrativeArea) narrativeArea.innerHTML = '';
-    /* 清空结局弹幕 */
     const endLayer = document.getElementById('btr-ending-danmaku-layer');
     if (endLayer) endLayer.innerHTML = '';
+    const mainLayer = document.getElementById('btr-danmaku-layer');
+    if (mainLayer) mainLayer.innerHTML = '';
+    btrDanmakuEnabled = false;
+    const danmakuBtn  = document.getElementById('btr-danmaku-btn');
+    if (danmakuBtn) danmakuBtn.classList.remove('active');
+    const choicesList = document.getElementById('btr-choices-list');
+    if (choicesList) choicesList.innerHTML = '';
+
+    const ni = document.getElementById('btr-user-name-input');
+    const si = document.getElementById('btr-user-setting-input');
+    if (ni) ni.value = '';
+    if (si) si.value = '';
+    const pr = document.querySelector('input[name="btr-mode"][value="player"]');
+    if (pr) pr.checked = true;
+
+    btrShowScreen('batoru-user-setup');
   });
 
   document.getElementById('btr-ending-exit').addEventListener('click', () => {
-    btrShowScreen('batoru-lobby');
-    btrUpdateContinueBtn();
     const endLayer = document.getElementById('btr-ending-danmaku-layer');
     if (endLayer) endLayer.innerHTML = '';
+    btrShowScreen('batoru-lobby');
+    btrUpdateContinueBtn();
   });
 
 })();
