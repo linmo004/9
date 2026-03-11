@@ -1263,9 +1263,16 @@ gs.participants.forEach(p => {
     if (saves.length > MAX_SAVES) saves = saves.slice(-MAX_SAVES);
 
     try {
-      btrSave(SAVES_KEY, saves);
+      localStorage.setItem(SAVES_KEY, JSON.stringify(saves));
     } catch (e) {
       alert('存档写入失败：' + e.message);
+      return;
+    }
+
+    /* 写入后立即验证 */
+    const verify = localStorage.getItem(SAVES_KEY);
+    if (!verify) {
+      alert('存档验证失败，数据未能写入');
       return;
     }
 
