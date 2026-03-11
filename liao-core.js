@@ -107,23 +107,32 @@ document.getElementById('liao-close-btn').addEventListener('click', closeLiaoApp
 
 /* ---------- 标签切换 ---------- */
 function switchLiaoTab(tabId) {
+  /* 切换任何标签时先关闭卡册 */
+  if (typeof LiaoCardBook !== 'undefined' && tabId !== 'rolelib') {
+    LiaoCardBook.close();
+  }
+
   document.querySelectorAll('.liao-tab-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.tab === tabId);
   });
   document.querySelectorAll('.liao-panel').forEach(panel => {
     panel.classList.toggle('active', panel.dataset.panel === tabId);
   });
+
   if (tabId === 'chatlist') renderChatList();
   if (tabId === 'rolelib') {
     if (typeof LiaoCardBook !== 'undefined') {
       LiaoCardBook.open();
+      return; /* 不执行后续的 renderSuiyan 等 */
     } else if (typeof renderRoleLib === 'function') {
       renderRoleLib();
     }
   }
+  if (tabId === 'myhome') { /* 我的面板无需额外渲染 */ }
   if (tabId === 'suiyan') renderSuiyan();
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
+
 
 
 /* ---------- 弹窗遮罩点击关闭 ---------- */

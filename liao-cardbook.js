@@ -20,10 +20,12 @@
   }
 
   function closeCardBook() {
-    const view = document.getElementById('liao-cardbook-view');
-    if (view) view.style.display = 'none';
-    hidePreview();
-  }
+  const view = document.getElementById('liao-cardbook-view');
+  if (view) view.style.display = 'none';
+  hidePreview();
+  /* 关闭卡册后不自动切换标签，由调用方决定 */
+}
+
 
   /* ── 封面 ── */
   function showCover() {
