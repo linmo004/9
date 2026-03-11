@@ -114,17 +114,17 @@ function switchLiaoTab(tabId) {
     panel.classList.toggle('active', panel.dataset.panel === tabId);
   });
   if (tabId === 'chatlist') renderChatList();
-  if (tabId === 'rolelib')  { if (typeof renderRoleLib === 'function') renderRoleLib(); }
-  if (tabId === 'suiyan')   renderSuiyan();
+  if (tabId === 'rolelib') {
+    if (typeof LiaoCardBook !== 'undefined') {
+      LiaoCardBook.open();
+    } else if (typeof renderRoleLib === 'function') {
+      renderRoleLib();
+    }
+  }
+  if (tabId === 'suiyan') renderSuiyan();
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
-document.querySelectorAll('.liao-tab-btn').forEach(btn => {
-  btn.addEventListener('click', function () {
-    if (this.id === 'liao-close-btn') return;
-    switchLiaoTab(this.dataset.tab);
-  });
-});
 
 /* ---------- 弹窗遮罩点击关闭 ---------- */
 [

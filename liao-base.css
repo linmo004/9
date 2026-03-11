@@ -6,7 +6,6 @@
   position: fixed;
   inset: 0;
   z-index: 450;
-  /* 整体透明浅蓝背景，有朦胧感 */
   background: rgba(220,238,252,0.55);
   -webkit-backdrop-filter: blur(18px);
   backdrop-filter: blur(18px);
@@ -349,82 +348,4 @@
   font-weight: 600;
   color: var(--primary, #99C8ED);
   margin-right: 5px;
-}
-
-/* ── 角色库面板：卡册入口 ── */
-.lcb-entry-wrap {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
-  gap: 16px;
-}
-
-.lcb-entry-card {
-  width: min(72vw, 260px);
-  aspect-ratio: 63 / 100;
-  border-radius: 18px;
-  overflow: hidden;
-  cursor: pointer;
-  background: linear-gradient(145deg, rgba(180,218,248,0.82) 0%, rgba(210,235,255,0.72) 100%);
-  border: 1.5px solid rgba(255,255,255,0.65);
-  box-shadow:
-    0 8px 32px rgba(100,160,220,0.20),
-    inset 0 1px 0 rgba(255,255,255,0.7);
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.18s, box-shadow 0.18s;
-  position: relative;
-}
-
-.lcb-entry-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, transparent 55%);
-  pointer-events: none;
-}
-
-.lcb-entry-card:active {
-  transform: scale(0.96);
-  box-shadow: 0 4px 16px rgba(100,160,220,0.15);
-}
-
-.lcb-entry-glass {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  z-index: 1;
-}
-
-
-.lcb-entry-icon {
-  font-size: 36px;
-  color: rgba(60,100,170,0.7);
-}
-
-.lcb-entry-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: rgba(40,80,140,0.85);
-  letter-spacing: 0.14em;
-}
-
-.lcb-entry-sub {
-  font-size: 10px;
-  color: rgba(80,130,190,0.65);
-  letter-spacing: 0.18em;
-}
-
-.lcb-entry-count {
-  font-size: 11px;
-  color: var(--text-light, #9aafc4);
-  letter-spacing: 0.06em;
 }
