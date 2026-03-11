@@ -116,6 +116,7 @@ function switchLiaoTab(tabId) {
   if (tabId === 'chatlist') renderChatList();
   if (tabId === 'rolelib')  { if (typeof renderRoleLib === 'function') renderRoleLib(); }
   if (tabId === 'suiyan')   renderSuiyan();
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 document.querySelectorAll('.liao-tab-btn').forEach(btn => {
