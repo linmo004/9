@@ -14,10 +14,16 @@
 <link rel="stylesheet" href="liao-myhome.css">
 <link rel="stylesheet" href="liao-suiyan.css">
 <link rel="stylesheet" href="liao-settings.css">
-<link rel="stylesheet" href="liao-special.css">
+<link rel="stylesheet" href="liao-special-1.css">
+<link rel="stylesheet" href="liao-special-2.css">
 <link rel="stylesheet" href="lockscreen.css">
 <link rel="stylesheet" href="worldbook.css">
 <link rel="stylesheet" href="garden.css">
+<link rel="stylesheet" href="rolephone.css">
+<link rel="stylesheet" href="rolephone-statusbar.css">
+<link rel="stylesheet" href="page3.css">
+<link rel="stylesheet" href="chess-app.css">
+<link rel="stylesheet" href="batoru.css">
 </head>
 <body>
 
@@ -30,20 +36,26 @@
 <div id="partial-liao-chat"></div>
 <div id="partial-liao-modals"></div>
 <div id="partial-worldbook"></div>
-<div id="partial-garden-app"></div>   <!-- 加上这行 -->
+<div id="partial-garden-app"></div>
+<div id="partial-rolephone"></div>
+<div id="partial-chess-app"></div>
+<div id="partial-batoru"></div>
 
 <script>
 (function () {
   const partials = [
-    { id: 'partial-lockscreen',    file: 'lockscreen.html' },
-    { id: 'partial-main-ui',       file: 'main-ui.html' },
-    { id: 'partial-home-modals',   file: 'home-modals.html' },
-    { id: 'partial-settings-app',  file: 'settings-app.html' },
-    { id: 'partial-liao-app',      file: 'liao-app.html' },
-    { id: 'partial-liao-chat',     file: 'liao-chat.html' },
-    { id: 'partial-liao-modals',   file: 'liao-modals.html' },
-    { id: 'partial-worldbook', file: 'worldbook.html' },
-    { id: 'partial-garden-app', file: 'garden.html' },
+    { id: 'partial-lockscreen',   file: 'lockscreen.html' },
+    { id: 'partial-main-ui',      file: 'main-ui.html' },
+    { id: 'partial-home-modals',  file: 'home-modals.html' },
+    { id: 'partial-settings-app', file: 'settings-app.html' },
+    { id: 'partial-liao-app',     file: 'liao-app.html' },
+    { id: 'partial-liao-chat',    file: 'liao-chat.html' },
+    { id: 'partial-liao-modals',  file: 'liao-modals.html' },
+    { id: 'partial-worldbook',    file: 'worldbook.html' },
+    { id: 'partial-garden-app',   file: 'garden.html' },
+    { id: 'partial-rolephone',    file: 'rolephone.html' },
+    { id: 'partial-chess-app',    file: 'chess-app.html' },
+    { id: 'partial-batoru', file: 'batoru.html' },
   ];
 
   async function loadAll() {
@@ -52,7 +64,25 @@
       const html = await res.text();
       document.getElementById(p.id).innerHTML = html;
     }
-    initScripts();
+
+    /* main-ui.html 加载完后，page3/page4 挂载点已在 DOM 里，现在注入内容 */
+    await injectPagePartials();
+
+    await initScripts();
+  }
+
+  async function injectPagePartials() {
+    const subPartials = [
+      { id: 'partial-page3', file: 'page3.html' },
+      { id: 'partial-page4', file: 'page4.html' },
+    ];
+    for (const p of subPartials) {
+      const el = document.getElementById(p.id);
+      if (!el) continue;
+      const res  = await fetch(p.file);
+      const html = await res.text();
+      el.innerHTML = html;
+    }
   }
 
   function loadScript(src) {
@@ -65,9 +95,11 @@
     });
   }
 
-        async function initScripts() {
+  async function initScripts() {
     await loadScript('app.js');
-    await loadScript('settings.js');
+    await loadScript('settings-1.js');
+    await loadScript('settings-2.js');
+    await loadScript('settings-3.js');
     await loadScript('liao-core.js');
     await loadScript('liao-rolelib.js');
     await loadScript('liao-myhome.js');
@@ -83,48 +115,11 @@
     await loadScript('garden-core.js');
     await loadScript('garden-ui.js');
     await loadScript('garden-main.js');
-    initPrivacySettings();
-  }
-
-
-
-  function initPrivacySettings() {
-    const gotoPrivacy = document.getElementById('goto-privacy');
-    if (gotoPrivacy) {
-      gotoPrivacy.addEventListener('click', function () {
-        document.getElementById('settings-root').style.display = 'none';
-        document.getElementById('settings-privacy').style.display = 'flex';
-      });
-    }
-    const privacyBack = document.querySelector('#settings-privacy .settings-back-btn');
-    if (privacyBack) {
-      privacyBack.addEventListener('click', function () {
-        document.getElementById('settings-privacy').style.display = 'none';
-        document.getElementById('settings-root').style.display = 'flex';
-      });
-    }
-    const pinSaveBtn = document.getElementById('privacy-pin-save-btn');
-    if (pinSaveBtn) {
-      pinSaveBtn.addEventListener('click', function () {
-        const msgEl   = document.getElementById('privacy-pin-msg');
-        const oldVal  = document.getElementById('privacy-old-pin').value;
-        const newVal  = document.getElementById('privacy-new-pin').value;
-        const confVal = document.getElementById('privacy-confirm-pin').value;
-        msgEl.style.color = '#e07a7a';
-        if (!oldVal || !newVal || !confVal) { msgEl.textContent = '请填写全部字段'; return; }
-        if (!/^\d{6}$/.test(newVal)) { msgEl.textContent = '新密码必须为6位数字'; return; }
-        if (newVal !== confVal) { msgEl.textContent = '两次输入的新密码不一致'; return; }
-        if (!window.LockScreen) { msgEl.textContent = '锁屏模块未加载'; return; }
-        const ok = window.LockScreen.changePin(oldVal, newVal);
-        if (!ok) { msgEl.textContent = '当前密码错误'; return; }
-        msgEl.style.color = '#5aaa7a';
-        msgEl.textContent = '密码已更新';
-        document.getElementById('privacy-old-pin').value    = '';
-        document.getElementById('privacy-new-pin').value    = '';
-        document.getElementById('privacy-confirm-pin').value = '';
-        setTimeout(() => { msgEl.textContent = ''; }, 2000);
-      });
-    }
+    await loadScript('chess-app.js');
+    await loadScript('rolephone.js');
+    await loadScript('page3.js');
+    await loadScript('batoru.js');
+    if (typeof window.initSettings === 'function') window.initSettings();
   }
 
   loadAll().catch(err => { console.error('[Partial Loader] 加载失败：', err); });

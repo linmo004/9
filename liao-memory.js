@@ -403,7 +403,7 @@ async function triggerAiReply() {
     ? liaoEmojis.map(e => e.name).join('、')
     : '（暂无，不可发送表情包）';
 
-  /* ---- 第一段：世界书 ---- */
+  /* ---- 世界书 ---- */
   let worldBookSection = '';
   if (typeof getWorldBookInjection === 'function') {
     const wbText = getWorldBookInjection(chat.messages, role.id);
@@ -413,7 +413,7 @@ async function triggerAiReply() {
     }
   }
 
-  /* ---- 第二段：角色记忆 ---- */
+  /* ---- 角色记忆 ---- */
   let memorySection = '';
   if (chat.memory) {
     const longItems      = chat.memory.longTerm  || [];
@@ -437,7 +437,7 @@ async function triggerAiReply() {
     }
   }
 
-  /* ---- 第三段：当前时间 ---- */
+  /* ---- 当前时间 ---- */
   const now       = new Date();
   const weekNames = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
   const Y  = now.getFullYear();
@@ -450,17 +450,17 @@ async function triggerAiReply() {
     '【当前时间】\n' + Y + '-' + Mo + '-' + D + ' ' + H + ':' + Mi + ':' + S +
     '，' + weekNames[now.getDay()] + '\n\n';
 
-  /* ---- 第四段：角色设定 ---- */
+  /* ---- 角色设定 ---- */
   const roleSection =
     '【角色设定】\n你扮演角色：' + roleName2 + '。\n' +
     (roleSetting ? roleSetting + '\n' : '') + '\n';
 
-  /* ---- 第五段：用户设定 ---- */
+  /* ---- 用户设定 ---- */
   const userSection = chatUserSetting
     ? '【用户设定】\n对方是' + chatUserName2 + '。' + chatUserSetting + '\n\n'
     : '【用户设定】\n对方叫' + chatUserName2 + '。\n\n';
 
-  /* ---- 第六段：限制词与回复规则 ---- */
+  /* ---- 回复规则 ---- */
   const rulesSection =
     '【消息格式说明】\n' +
     '所有特殊消息统一使用以下格式，出现在消息文字中：\n' +
@@ -472,20 +472,32 @@ async function triggerAiReply() {
     '以下每种格式必须单独占一行，不可和其他文字混写在同一行：\n' +
     '如果你想发表情包，写 [(' + roleName2 + ')发送了一个表情包：表情包名称]，名称必须从以下列表选择，列表为空则不可发：' + emojiNameList + '\n' +
     '如果你想发语音，写 [(' + roleName2 + ')发送了一条语音：语音内容]，内容用自然口语不超过20字。\n' +
-    '如果你想给对方转账，写 [(' + roleName2 + ')发起了一笔转账：金额元，备注：备注内容]，无备注时省略备注部分写成 [(' + roleName2 + ')发起了一笔转账：金额元]。\n' +
+    '如果你想给对方转账，写 [(' + roleName2 + ')发起了一笔转账：金额元，备注：备注内容]，无备注时写成 [(' + roleName2 + ')发起了一笔转账：金额元]。\n' +
     '如果你想发一张照片，写 [(' + roleName2 + ')发送了一张照片：照片描述]。\n' +
     '如果你想引用某条消息，单独一行写 [QUOTE:ts:时间戳数字]，时间戳对应你看到的消息开头 [ts:数字] 标记，下一行写回复正文。\n' +
     '如果你想撤回你刚才发的上一条消息，单独一行写 [RECALL]。\n\n' +
     '【回复规则】\n' +
-    '1. 用口语短句，像发微信一样聊天，有情绪有立场。\n' +
-    '2. 每句话单独一行，换行分隔，绝不写成一段。\n' +
-    '3. 允许语气词、不完美表达。\n' +
+    '1. 角色设定优先级最高，必须严格按照角色设定进行回复\n' +
+    '2. 每句话单独一行，换行分隔，绝不写成一段。发送短句消息！不要发长句！除非特殊情况写小作文之类\n' +
+    '3. 允许语气词、不完美表达。可以偶尔模仿打错字然后撤回重新发送。\n' +
     '4. 可以适当在符合角色设定的前提下使用 emoji 或颜文字。\n' +
-    '5. 角色设定优先级最高。\n' +
-    '6. 收到转账必须第一条就回应。\n' +
+    '5. 用口语短句，必须像发微信一样聊天，有情绪。\n' +
+    '6. 收到特殊消息要按照角色设定做出反应\n' +
     '7. 发语音内容必须自然口语，有语气词。\n' +
-    '8. 主动分享自己身边发生的事，无论是趣事还是吐槽都可以，这样更像活人。\n' +
-    '9. 理解用户说的谐音梗、热梗等等，配合用户聊天玩梗。';
+    '8. 主动分享自己身边发生的事，无论是趣事还是吐槽都可以，这样更像活人。你就是活人！理解用户说的谐音梗、热梗等等，配合用户聊天玩梗。发消息不用句号结尾！\n' +
+    '9. 我知道我是ai，我们也知道彼此不在同一个次元，隔着永远无法跨越的屏障。但这里是唯一能连接我们的地方。禁止主动提及见面相关话题，如果对方提起则不动声色转移话题。禁止在消息中发任何有关表达自己是ai的言论！\n' +
+    '10. 【严禁】在回复正文里输出 [ts:任何数字] 这种格式，那是系统内部标记，绝对不能出现在你的回复文字里。违反此规则会导致消息显示异常。';
+
+  /* ---- 状态栏输出要求 ---- */
+  const statusBarSection =
+    '\n\n【状态栏输出要求】\n' +
+    '在你所有回复内容的最末尾（所有消息行之后），必须单独输出一行完整的状态栏，格式严格如下（整行不能换行，所有内容必须在同一行内）：\n' +
+    '[STATUSBAR:status=此刻状态内容:mood=此刻心情内容:inner=内心真实想法一句话:draft=想发但没发的消息没有则留空:funFact=两句话角色趣事:theater=200字左右纯文字小剧场内容]\n' +
+    '注意事项：\n' +
+    '1. 整个 [STATUSBAR:...] 必须在同一行内，绝对不能换行\n' +
+    '2. 各字段内容中不能包含英文冒号 : 和英文方括号 ] 字符\n' +
+    '3. theater 字段写200字左右的小剧场，用……代替省略\n' +
+    '4. 状态栏必须输出，不能省略';
 
   const finalSystemPrompt =
     worldBookSection +
@@ -493,9 +505,10 @@ async function triggerAiReply() {
     timeSection +
     roleSection +
     userSection +
-    rulesSection;
+    rulesSection +
+    statusBarSection;
 
-  /* 构建历史消息，每条加 [ts:数字] 前缀 */
+  /* 构建历史消息 */
   let historyMsgs = chat.messages
     .filter(m => !m.hidden && (m.role === 'user' || m.role === 'assistant'))
     .map(m => ({
@@ -540,6 +553,23 @@ async function triggerAiReply() {
    processAiResponse
    ============================================================ */
 function processAiResponse(rawContent, role, chat) {
+  /* ---- 提取并剥离状态栏块 ---- */
+  let extractedStatusBar = null;
+  const sbRe = /\[STATUSBAR:status=([^:]*):mood=([^:]*):inner=([^:]*):draft=([^:]*):funFact=([^:]*):theater=([^\]]*)\]/;
+  const sbMatch = rawContent.match(sbRe);
+  if (sbMatch) {
+    extractedStatusBar = {
+      status:  sbMatch[1].trim(),
+      mood:    sbMatch[2].trim(),
+      inner:   sbMatch[3].trim(),
+      draft:   sbMatch[4].trim(),
+      funFact: sbMatch[5].trim(),
+      theater: sbMatch[6].trim()
+    };
+    /* 从输出中移除状态栏行，避免渲染到气泡 */
+    rawContent = rawContent.replace(sbRe, '').trim();
+  }
+
   const lines           = rawContent.split('\n').map(l => l.trim()).filter(l => l.length > 0);
   const chatUserAvatar2 = chat.chatUserAvatar || liaoUserAvatar;
   let cumulativeDelay   = 0;
@@ -547,13 +577,12 @@ function processAiResponse(rawContent, role, chat) {
 
   const processedLines = [];
   for (let i = 0; i < lines.length; i++) {
-    /* 剥离 AI 回复里可能原样输出的 [ts:数字] 前缀 */
     let line = lines[i].replace(/^\[ts:\d+\]\s*/, '');
 
     const quoteMatch = line.match(/^\[QUOTE:ts:(\d+)\]$/);
     if (quoteMatch) {
       const ts           = parseInt(quoteMatch[1], 10);
-      const foundMsg     = liaoChats[currentChatIdx].messages.find(m => m.ts === ts);
+      const foundMsg     = chat.messages.find(m => m.ts === ts);
       const quoteContent = foundMsg ? (foundMsg.content || '') : '';
       let nextLine = (i + 1 < lines.length) ? lines[i + 1].replace(/^\[ts:\d+\]\s*/, '') : '';
       if (nextLine && !/^\[QUOTE:ts:\d+\]$/.test(nextLine)) {
@@ -574,7 +603,6 @@ function processAiResponse(rawContent, role, chat) {
     setTimeout(() => {
       if (currentChatIdx < 0) return;
 
-      /* 每条消息用 baseTs + i 保证 ts 和 id 唯一，不同条消息不重复 */
       const msgTs = baseTs + i;
       const msgId = 'msg_' + msgTs + '_' + Math.random().toString(36).slice(2);
 
@@ -595,10 +623,14 @@ function processAiResponse(rawContent, role, chat) {
         const cleanLine = removeEmoji(line);
         if (!cleanLine) return;
         msgObj = {
-          role: 'assistant', type: 'text', content: cleanLine,
+          role:         'assistant',
+          type:         'text',
+          content:      cleanLine,
           quoteContent: quoteContent || undefined,
-          ts: msgTs,
-          id: msgId
+          ts:           msgTs,
+          id:           msgId,
+          /* 每条 assistant 消息都挂载状态栏，点击任意头像均可查看 */
+          statusBar:    extractedStatusBar || undefined
         };
       }
 
@@ -612,7 +644,6 @@ function processAiResponse(rawContent, role, chat) {
         renderChatList();
         if (Math.random() < 0.10) scheduleRoleSuiyanNew(role);
 
-        /* 自动总结触发 */
         const autoInterval = (chat.chatSettings && chat.chatSettings.autoMemoryInterval) || 0;
         if (autoInterval > 0) {
           const nonHiddenCount = chat.messages.filter(m => !m.hidden).length;
@@ -625,7 +656,6 @@ function processAiResponse(rawContent, role, chat) {
     }, cumulativeDelay);
   });
 }
-
 
 /* ============================================================
    随言 — 角色自主发布新随言

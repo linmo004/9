@@ -19,6 +19,7 @@
 
 /* 在设置层（z-index:400）内使用的弹窗，需高于设置层 */
 #wallpaper-url-modal,
+#wallpaper2-url-modal,
 #icon-replace-modal {
   z-index: 500;
 }
