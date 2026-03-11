@@ -207,14 +207,14 @@
      全局接口
      ============================================================ */
   window.BatoruApp = {
-        open() {
+    open() {
       const app = document.getElementById('batoru-app');
       if (app) app.style.display = 'flex';
       btrStopGlitch();
       btrShowScreen('batoru-lobby');
       btrStartGlitch();
       btrScheduleStatic();
-      setTimeout(() => { btrUpdateContinueBtn(); }, 50); // ← 改这里
+      btrUpdateContinueBtn();
     },
     close() {
       const app = document.getElementById('batoru-app');
@@ -233,31 +233,20 @@
   /* ============================================================
      大厅
      ============================================================ */
-    function btrUpdateContinueBtn() {
-    const btn = document.getElementById('btr-continue-btn');
-    if (!btn) return;
-    let count = 0;
-    try {
-      const raw = localStorage.getItem(SAVES_KEY);
-      if (raw) {
-        const arr = JSON.parse(raw);
-        if (Array.isArray(arr)) count = arr.length;
-      }
-    } catch (e) { count = 0; }
-
-    if (count > 0) {
-      btn.disabled         = false;
-      btn.style.opacity    = '1';
-      btn.style.pointerEvents = 'auto';
-      btn.style.animation  = '';
-    } else {
-      btn.disabled         = true;
-      btn.style.opacity    = '0.35';
-      btn.style.pointerEvents = 'none';
-      btn.style.animation  = 'none';
+  function btrUpdateContinueBtn() {
+  const btn = document.getElementById('btr-continue-btn');
+  if (!btn) return;
+  let count = 0;
+  try {
+    const raw = localStorage.getItem(SAVES_KEY);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) count = arr.length;
     }
-  }
-
+  } catch (e) { count = 0; }
+  btn.disabled      = count === 0;
+  btn.style.opacity = count === 0 ? '0.35' : '';
+}
 
 
   document.getElementById('btr-start-btn').addEventListener('click', () => {
@@ -725,25 +714,9 @@ gs.participants.forEach(p => {
         { role: 'user',   content: userContent }
       ]);
       btrParseAndApplySegment(raw);
-        } catch (err) {
-      btrAppendNarrative('\n【通信中断】' + err.message + '\n继续游戏请点击下方选项，或点击"重试"重新请求。\n', true);
-
-      /* 在叙事区追加一个重试按钮 */
-      const area = document.getElementById('btr-narrative-area');
-      if (area) {
-        const retryBtn = document.createElement('button');
-        retryBtn.className = 'btr-choice-btn';
-        retryBtn.style.cssText = 'margin:8px 0;border-color:#cc0000;color:#cc0000;';
-        retryBtn.textContent = '↺ 重试（重新请求AI）';
-        retryBtn.addEventListener('click', () => {
-          if (area.contains(retryBtn)) area.removeChild(retryBtn);
-          btrRunSegment(userAction);
-        });
-        area.appendChild(retryBtn);
-        area.scrollTop = area.scrollHeight;
-      }
-
-      /* 同时恢复选项/下一段按钮，让用户可以跳过继续 */
+    } catch (err) {
+      btrAppendNarrative('\n【通信中断】' + err.message + '\n', true);
+      /* 解锁交互 */
       if (isPlayer) {
         btrRenderDefaultChoices();
         const ca = document.getElementById('btr-choices-area');
@@ -753,7 +726,6 @@ gs.participants.forEach(p => {
         if (nextBtn) nextBtn.disabled = false;
       }
     }
-
   }
 
   /* ============================================================
@@ -1269,7 +1241,7 @@ gs.participants.forEach(p => {
   /* ============================================================
      存档（修复：确保序列化完整，写入前验证）
      ============================================================ */
-    function btrDoSave() {
+  function btrDoSave() {
     if (!gs) { alert('当前无游戏进度'); return; }
 
     const now = new Date();
@@ -1278,15 +1250,11 @@ gs.participants.forEach(p => {
       now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) +
       ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
 
-    /* 裁剪大字段，避免超出localStorage限制 */
-    const gsToSave = JSON.parse(JSON.stringify(gs));
-    gsToSave.narrativeHistory = gs.narrativeHistory.slice(-2);
-    gsToSave.danmakuHistory   = gs.danmakuHistory.slice(-10);
-    gsToSave.broadcastQueue   = gs.broadcastQueue.slice(-10);
-
+    /* 序列化并验证 */
     let serialized;
     try {
-      serialized = JSON.stringify(gsToSave);
+      serialized = JSON.stringify(gs);
+      JSON.parse(serialized); /* 验证可反序列化 */
     } catch (e) {
       alert('存档序列化失败：' + e.message);
       return;
@@ -1302,11 +1270,8 @@ gs.participants.forEach(p => {
 
     let saves = [];
     try {
-      const raw = localStorage.getItem(SAVES_KEY);
-      if (raw) {
-        const arr = JSON.parse(raw);
-        if (Array.isArray(arr)) saves = arr;
-      }
+      saves = btrLoad(SAVES_KEY) || [];
+      if (!Array.isArray(saves)) saves = [];
     } catch (e) { saves = []; }
 
     saves.push(record);
@@ -1315,19 +1280,20 @@ gs.participants.forEach(p => {
     try {
       localStorage.setItem(SAVES_KEY, JSON.stringify(saves));
     } catch (e) {
-      /* 如果还是超限，尝试只保留1条存档再写 */
-      try {
-        localStorage.setItem(SAVES_KEY, JSON.stringify([record]));
-      } catch (e2) {
-        alert('存档写入失败，设备存储空间不足：' + e2.message);
-        return;
-      }
+      alert('存档写入失败：' + e.message);
+      return;
+    }
+
+    /* 写入后立即验证 */
+    const verify = localStorage.getItem(SAVES_KEY);
+    if (!verify) {
+      alert('存档验证失败，数据未能写入');
+      return;
     }
 
     btrUpdateContinueBtn();
-    btrAppendNarrative('【存档成功】' + time, false);
+    btrAppendNarrative('【存档成功】' + time + ' · ' + btrDayLabel(gs.currentDayIndex), false);
   }
-
 
   /* ============================================================
      退出警告弹窗（修复：叠加式，疯批恐怖文案）
