@@ -1211,6 +1211,14 @@ function renderRoleLib() {
   if (count) count.textContent = '共 ' + liaoRoles.length + ' 个角色';
 }
 
+  /* 卡册入口绑定 */
+  const entryBtn = document.getElementById('lcb-entry-open');
+  if (entryBtn) {
+    entryBtn.onclick = () => {
+      if (typeof LiaoCardBook !== 'undefined') LiaoCardBook.open();
+    };
+  }
+
 /* ============================================================
    从人设库导入到用户设置
    ============================================================ */

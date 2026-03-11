@@ -118,6 +118,18 @@
           <label class="liao-modal-label">角色设定</label>
           <textarea class="liao-modal-textarea" id="cs-role-setting"
             placeholder="角色性格、背景、说话方式…" style="min-height:100px;"></textarea>
+                      <label class="liao-modal-label">角色图片（展示在卡册中，可上传全身/半身图）</label>
+          <div class="liao-avatar-preview-row" style="margin-top:6px;">
+            <img class="liao-avatar-preview" id="cs-role-cardimage-preview"
+              src="" alt=""
+              style="border-radius:8px;object-fit:cover;background:var(--light-blue,#B3D8F4);">
+            <div class="liao-avatar-upload-btns">
+              <input class="liao-modal-input" id="cs-role-cardimage-url" placeholder="图片 URL…">
+              <button class="liao-avatar-btn" id="cs-role-cardimage-local-btn">本地上传</button>
+              <input type="file" id="cs-role-cardimage-file" accept="image/*" style="display:none;">
+            </div>
+          </div>
+
           <div style="margin-top:12px;">
             <button class="liao-btn-primary" id="cs-role-save-btn" style="width:100%;">保存角色设置</button>
           </div>

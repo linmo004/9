@@ -413,6 +413,13 @@ function openChatSettings() {
   document.getElementById('cs-role-realname').value     = role.realname || '';
   document.getElementById('cs-role-setting').value      = role.setting  || '';
 
+  csRoleCardImageSrc = '';
+  const cardImgPreview = document.getElementById('cs-role-cardimage-preview');
+  const cardImgUrl     = document.getElementById('cs-role-cardimage-url');
+  if (cardImgPreview) cardImgPreview.src = role.cardImage || '';
+  if (cardImgUrl)     cardImgUrl.value   = '';
+
+
   const chatUserAvatar3  = chat.chatUserAvatar  || liaoUserAvatar;
   const chatUserName3    = chat.chatUserName    || liaoUserName;
   const chatUserSetting3 = chat.chatUserSetting || '';
@@ -499,6 +506,32 @@ document.querySelectorAll('.memory-sub-tab-btn').forEach(btn => {
 /* ---------- 角色设置 ---------- */
 let csRoleAvatarSrc = '';
 let csUserAvatarSrc = '';
+let csRoleCardImageSrc = '';
+
+
+document.getElementById('cs-role-cardimage-url').addEventListener('input', function () {
+  const url = this.value.trim();
+  if (url) {
+    csRoleCardImageSrc = url;
+    document.getElementById('cs-role-cardimage-preview').src = url;
+  }
+});
+
+document.getElementById('cs-role-cardimage-local-btn').addEventListener('click', () => {
+  document.getElementById('cs-role-cardimage-file').click();
+});
+
+document.getElementById('cs-role-cardimage-file').addEventListener('change', function () {
+  const file = this.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    csRoleCardImageSrc = e.target.result;
+    document.getElementById('cs-role-cardimage-preview').src = csRoleCardImageSrc;
+  };
+  reader.readAsDataURL(file);
+  this.value = '';
+});
+
 
 document.getElementById('cs-role-avatar-local-btn').addEventListener('click', () => {
   document.getElementById('cs-role-avatar-file').click();
@@ -534,6 +567,8 @@ document.getElementById('cs-role-save-btn').addEventListener('click', () => {
   if (nn) role.nickname = nn;
   if (rn) role.realname = rn;
   role.setting = st;
+    if (csRoleCardImageSrc) role.cardImage = csRoleCardImageSrc;
+
 
   lSave('roles', liaoRoles);
   csRoleAvatarSrc = '';

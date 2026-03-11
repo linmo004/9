@@ -1,0 +1,48 @@
+<!-- 卡册界面（全屏覆盖，挂载在 liao-app 内部） -->
+<div id="liao-cardbook-view" style="display:none;position:fixed;inset:0;z-index:465;flex-direction:column;">
+
+  <!-- 封面页 -->
+  <div id="liao-cardbook-cover" class="lcb-cover">
+    <div class="lcb-cover-glass">
+      <div class="lcb-cover-title">角色册</div>
+      <div class="lcb-cover-sub">ROLE COLLECTION</div>
+      <div class="lcb-cover-count" id="lcb-cover-count">0 位角色</div>
+    </div>
+    <div class="lcb-cover-flip-hint" id="lcb-cover-flip-btn">
+      <div class="lcb-flip-arrow">▶</div>
+      <div class="lcb-flip-label">翻开</div>
+    </div>
+    <button class="lcb-back-btn" id="lcb-cover-back">←</button>
+  </div>
+
+  <!-- 内页 -->
+  <div id="liao-cardbook-inner" class="lcb-inner" style="display:none;">
+    <div class="lcb-inner-topbar">
+      <button class="lcb-back-btn lcb-inner-back" id="lcb-inner-back">←</button>
+      <div class="lcb-inner-title">角色册</div>
+      <div class="lcb-page-indicator" id="lcb-page-indicator">1 / 1</div>
+    </div>
+
+    <!-- 卡册页容器（翻页） -->
+    <div class="lcb-pages-wrap" id="lcb-pages-wrap"></div>
+
+    <!-- 翻页按键（不遮卡） -->
+    <div class="lcb-page-nav">
+      <button class="lcb-page-btn" id="lcb-prev-page">‹</button>
+      <button class="lcb-page-btn" id="lcb-next-page">›</button>
+    </div>
+  </div>
+
+  <!-- 抽卡预览层（点击角色卡抽出后显示） -->
+  <div id="lcb-card-preview" class="lcb-card-preview" style="display:none;">
+    <div class="lcb-preview-backdrop" id="lcb-preview-backdrop"></div>
+    <div class="lcb-preview-card" id="lcb-preview-card">
+      <img class="lcb-preview-img" id="lcb-preview-img" src="" alt="">
+    </div>
+    <div class="lcb-preview-actions">
+      <button class="lcb-preview-chat-btn" id="lcb-preview-chat-btn">进入聊天设置</button>
+      <button class="lcb-preview-close-btn" id="lcb-preview-close-btn">放回</button>
+    </div>
+  </div>
+
+</div>

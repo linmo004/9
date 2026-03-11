@@ -24,6 +24,7 @@
 <link rel="stylesheet" href="page3.css">
 <link rel="stylesheet" href="chess-app.css">
 <link rel="stylesheet" href="batoru.css">
+<link rel="stylesheet" href="liao-cardbook.css">
 
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
@@ -42,6 +43,7 @@
 <div id="partial-rolephone"></div>
 <div id="partial-chess-app"></div>
 <div id="partial-batoru"></div>
+<div id="partial-liao-cardbook"></div>
 
 <script>
 (function () {
@@ -58,6 +60,8 @@
     { id: 'partial-rolephone',    file: 'rolephone.html' },
     { id: 'partial-chess-app',    file: 'chess-app.html' },
     { id: 'partial-batoru', file: 'batoru.html' },
+    { id: 'partial-liao-cardbook', file: 'liao-cardbook.html' },
+
   ];
 
   async function loadAll() {
@@ -121,6 +125,7 @@
     await loadScript('rolephone.js');
     await loadScript('page3.js');
     await loadScript('batoru.js');
+    await loadScript('liao-cardbook.js');
     if (typeof lucide !== 'undefined') lucide.createIcons();
     if (typeof window.initSettings === 'function') window.initSettings();
   }

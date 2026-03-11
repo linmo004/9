@@ -7,33 +7,38 @@
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 8px 0 90px;
-  background: #fff;
+  padding: 6px 10px 72px;
+  background: transparent;
 }
+
 
 .chat-list-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 10px 16px;
+  margin-bottom: 8px;
   cursor: pointer;
-  transition: background .15s;
+  transition: background .15s, transform .15s;
   position: relative;
+  background: rgba(255,255,255,0.60);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-radius: 999px;
+  border: 1px solid rgba(153,200,237,0.22);
+  box-shadow: 0 2px 8px rgba(100,140,190,0.07);
 }
 
 .chat-list-item:active {
-  background: rgba(153,200,237,0.10);
+  background: rgba(255,255,255,0.80);
+  transform: scale(0.98);
 }
 
+
 .chat-list-item::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 72px;
-  right: 16px;
-  height: 1px;
-  background: rgba(153,200,237,0.14);
+  display: none;
 }
+
 
 .chat-item-avatar {
   width: 46px;
@@ -96,56 +101,62 @@
   font-weight: 600;
 }
 
-/* ---- 底部三个按键 ---- */
+/* ---- 底部三个图标按键：无背景无边框无底栏，只有图标浮在列表上 ---- */
 .chat-bottom-bar {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
   display: flex;
-  gap: 10px;
-  padding: 10px 14px 18px;
-  background: rgba(245,245,240,0.95);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  border-top: 1px solid rgba(153,200,237,0.18);
+  gap: 0;
+  padding: 8px 24px 16px;
+  background: transparent;
+  border: none;
   z-index: 10;
+  justify-content: space-around;
+  align-items: flex-end;
+  pointer-events: none;
 }
 
 .chat-bar-btn {
-  flex: 1;
-  background: rgba(153,200,237,0.15);
-  border: 1.5px solid rgba(153,200,237,0.35);
-  border-radius: 14px;
-  padding: 10px 6px 8px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 6px;
   color: var(--primary, #99C8ED);
   cursor: pointer;
   font-family: inherit;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
-  transition: background .15s;
+  gap: 0;
+  transition: opacity .15s, transform .15s;
   -webkit-appearance: none;
-  box-shadow: 0 2px 8px rgba(100,140,190,0.07);
+  box-shadow: none;
+  pointer-events: auto;
 }
 
 .chat-bar-btn:active {
-  background: rgba(153,200,237,0.28);
+  opacity: 0.6;
+  transform: scale(0.9);
 }
 
 .chat-bar-btn .liao-lucide-icon {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   stroke: var(--primary, #99C8ED);
   stroke-width: 1.8;
+  filter: drop-shadow(0 1px 4px rgba(100,160,220,0.28));
 }
 
+/* 隐藏文字标签 */
 .bar-btn-label {
-  font-size: 10px;
-  color: var(--text-mid, #5a6a80);
-  letter-spacing: .02em;
-    line-height: 1;
+  display: none;
+}
+
+/* 隐藏旧的图标文字 */
+.chat-bar-btn .bar-btn-icon {
+  display: none;
 }
 
 /* ---- 聊天界面全屏 ---- */
