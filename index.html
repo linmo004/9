@@ -25,8 +25,9 @@
 <link rel="stylesheet" href="chess-app.css">
 <link rel="stylesheet" href="batoru.css">
 <link rel="stylesheet" href="liao-cardbook.css">
-
+<link rel="stylesheet" href="storage-manager.css">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://unpkg.com/dexie@3/dist/dexie.js"></script>
 </head>
 <body>
 
@@ -43,7 +44,7 @@
 <div id="partial-rolephone"></div>
 <div id="partial-chess-app"></div>
 <div id="partial-batoru"></div>
-
+<div id="partial-storage-manager"></div>
 <script>
 (function () {
   const partials = [
@@ -59,7 +60,7 @@
     { id: 'partial-rolephone',    file: 'rolephone.html' },
     { id: 'partial-chess-app',    file: 'chess-app.html' },
     { id: 'partial-batoru', file: 'batoru.html' },
-     
+     { id: 'partial-storage-manager', file: 'storage-manager.html' },
   ];
 
   async function loadAll() {
@@ -100,6 +101,7 @@
   }
 
   async function initScripts() {
+    await loadScript('db-images.js');
     await loadScript('app.js');
     await loadScript('settings-1.js');
     await loadScript('settings-2.js');
@@ -124,6 +126,7 @@
     await loadScript('page3.js');
     await loadScript('batoru.js');
     await loadScript('liao-cardbook.js');
+    await loadScript('storage-manager.js');
     if (typeof lucide !== 'undefined') lucide.createIcons();
     if (typeof window.initSettings === 'function') window.initSettings();
   }
