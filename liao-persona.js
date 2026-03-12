@@ -11,12 +11,19 @@ document.getElementById('menu-persona-lib').addEventListener('click', openPerson
 
 function openPersonaLib() {
   renderPersonaLib();
-  document.getElementById('liao-persona-lib-view').style.display = 'flex';
+  const view = document.getElementById('liao-persona-lib-view');
+  if (view) {
+    view.style.display = 'flex';
+    view.style.flexDirection = 'column';
+  }
 }
 
+
 document.getElementById('persona-lib-back').addEventListener('click', () => {
-  document.getElementById('liao-persona-lib-view').style.display = 'none';
+  const view = document.getElementById('liao-persona-lib-view');
+  if (view) view.style.display = 'none';
 });
+
 
 /* ---------- 渲染 ---------- */
 function renderPersonaLib() {
