@@ -21,22 +21,52 @@
   }
 
   /* ── 封面 ── */
-  function showCover() {
+    function showCover() {
     const cover = document.getElementById('liao-cardbook-cover');
     const inner = document.getElementById('liao-cardbook-inner');
-    if (cover) cover.style.display = 'flex';
-    if (inner) inner.style.display = 'none';
+
+    /* 翻回封面动画 */
+    if (inner && inner.style.display !== 'none') {
+      inner.classList.add('page-flip-out');
+      setTimeout(() => {
+        inner.style.display = 'none';
+        inner.classList.remove('page-flip-out');
+        if (cover) {
+          cover.style.display = 'flex';
+          cover.classList.add('page-flip-in');
+          setTimeout(() => cover.classList.remove('page-flip-in'), 460);
+        }
+      }, 440);
+    } else {
+      if (cover) cover.style.display = 'flex';
+      if (inner) inner.style.display = 'none';
+    }
 
     const count = typeof liaoRoles !== 'undefined' ? liaoRoles.length : 0;
     const el    = document.getElementById('lcb-cover-count');
     if (el) el.textContent = count + ' 位角色';
   }
 
-  function showInner() {
+
+    function showInner() {
     const cover = document.getElementById('liao-cardbook-cover');
     const inner = document.getElementById('liao-cardbook-inner');
-    if (cover) cover.style.display = 'none';
-    if (inner) inner.style.display = 'flex';
+
+    /* 翻页动画 */
+    if (cover) {
+      cover.classList.add('page-flip-out');
+      setTimeout(() => {
+        cover.style.display = 'none';
+        cover.classList.remove('page-flip-out');
+        if (inner) {
+          inner.style.display = 'flex';
+          inner.classList.add('page-flip-in');
+          setTimeout(() => inner.classList.remove('page-flip-in'), 460);
+        }
+      }, 440);
+    } else {
+      if (inner) inner.style.display = 'flex';
+    }
 
     lcbCurrentPage = 0;
     buildPages();
@@ -187,15 +217,20 @@
     if (backdrop) backdrop.addEventListener('click', hidePreview);
 
     /* 进入聊天设置 */
-    const chatBtn = document.getElementById('lcb-preview-chat-btn');
+        const chatBtn = document.getElementById('lcb-preview-chat-btn');
     if (chatBtn) chatBtn.addEventListener('click', () => {
       if (!lcbSelectedRole) return;
       hidePreview();
 
-      if (lcbSelectedChatIdx >= 0) {
-        if (typeof currentChatIdx !== 'undefined') {
-          currentChatIdx = lcbSelectedChatIdx;
-        }
+      /* 先尝试已有的 lcbSelectedChatIdx，再fallback搜索 ---- */
+      let targetIdx = lcbSelectedChatIdx;
+      if (targetIdx < 0) {
+        const chats = typeof liaoChats !== 'undefined' ? liaoChats : [];
+        targetIdx   = chats.findIndex(c => c.roleId === lcbSelectedRole.id);
+      }
+
+      if (targetIdx >= 0) {
+        if (typeof currentChatIdx !== 'undefined') currentChatIdx = targetIdx;
         const csCloseBtn = document.getElementById('cs-close-btn');
         if (csCloseBtn) csCloseBtn.dataset.returnTo = 'rolelib';
         if (typeof openChatSettings === 'function') openChatSettings();

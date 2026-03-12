@@ -169,7 +169,7 @@
   align-items: center;
   height: 52px;
   padding: 0 14px;
-  background: rgba(190,220,255,0.55);
+  background: rgba(190,220,255,0.72);
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(140,190,255,0.35);
@@ -260,35 +260,49 @@
   align-self: flex-start;
 }
 
-/* ---- 角色气泡：拟态玻璃 ---- */
+/* ---- 角色气泡：胶囊圆润，自适应宽度 ---- */
 .chat-msg-row:not(.user-row) .chat-msg-bubble {
-  background: rgba(210,230,255,0.55) !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
-  border: 1px solid rgba(140,190,255,0.40) !important;
-  box-shadow: 0 2px 12px rgba(80,140,220,0.10), inset 0 1px 0 rgba(255,255,255,0.55) !important;
-  border-radius: 999px !important;
-  padding: 6px 14px !important;
-  font-size: 12px !important;
-  line-height: 1.55 !important;
-  color: #1a3a6a !important;
+  max-width: 80vw;
+  width: fit-content;
+  padding: 5px 16px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: #1a3a6a;
+  background: rgba(210,230,255,0.55);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(140,190,255,0.40);
+  box-shadow: 0 2px 12px rgba(80,140,220,0.10), inset 0 1px 0 rgba(255,255,255,0.55);
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  position: relative;
+  box-sizing: border-box;
 }
 
-/* ---- 用户气泡：拟态玻璃深蓝 ---- */
+/* ---- 用户气泡：胶囊圆润，自适应宽度 ---- */
 .chat-msg-row.user-row .chat-msg-bubble {
-  background: rgba(70,130,220,0.68) !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
-  border: 1px solid rgba(100,160,255,0.35) !important;
-  box-shadow: 0 2px 12px rgba(50,100,200,0.18), inset 0 1px 0 rgba(255,255,255,0.22) !important;
-  border-radius: 999px !important;
-  padding: 6px 14px !important;
-  font-size: 12px !important;
-  line-height: 1.55 !important;
-  color: #fff !important;
+  max-width: 80vw;
+  width: fit-content;
+  padding: 5px 16px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 1.55;
+  background: rgba(70,130,220,0.68);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(100,160,255,0.35);
+  box-shadow: 0 2px 12px rgba(50,100,200,0.18), inset 0 1px 0 rgba(255,255,255,0.22);
+  color: #fff;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  position: relative;
+  box-sizing: border-box;
 }
 
-/* ---- 特殊消息气泡透明（语音、转账、假图片等） ---- */
+/* ---- 特殊消息气泡透明 ---- */
 .bubble-emoji-only,
 .bubble-transfer-only {
   background: transparent !important;
@@ -299,7 +313,7 @@
   -webkit-backdrop-filter: none !important;
 }
 
-/* ---- 时间戳缩小 ---- */
+/* ---- 时间戳：视觉隐藏但可点击 ---- */
 .chat-msg-timestamp {
   font-size: 8px;
   opacity: 0.38;
@@ -312,24 +326,24 @@
   line-height: 1.2;
   flex-shrink: 0;
   transition: opacity .15s;
-  color: var(--text-light, #9aafc4);
+  color: #7a9abf;
 }
 
 .chat-msg-timestamp:hover { opacity: 0.75; }
 .chat-msg-row.user-row .chat-msg-timestamp { order: -1; }
 
+/* 时间戳隐藏时视觉不可见但仍可点击 */
 body.timestamp-hidden .chat-msg-timestamp {
   opacity: 0 !important;
-  pointer-events: none;
 }
 
-/* ---- 输入栏：拟态玻璃蓝 ---- */
+/* ---- 输入栏：拟态玻璃蓝，与功能栏颜色一致 ---- */
 .chat-view-inputbar {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 7px 10px 14px;
-  background: rgba(190,220,255,0.55);
+  background: rgba(190,220,255,0.72);
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   border-top: 1px solid rgba(140,190,255,0.35);
@@ -364,7 +378,7 @@ body.timestamp-hidden .chat-msg-timestamp {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: var(--primary, #99C8ED);
+  background: rgba(90,150,230,0.85);
   border: none;
   color: #fff;
   font-size: 13px;
@@ -376,7 +390,7 @@ body.timestamp-hidden .chat-msg-timestamp {
   flex-shrink: 0;
   -webkit-appearance: none;
   transition: opacity .18s;
-  box-shadow: 0 2px 8px rgba(153,200,237,0.35);
+  box-shadow: 0 2px 8px rgba(100,140,220,0.30);
   font-family: inherit;
 }
 
@@ -388,7 +402,7 @@ body.timestamp-hidden .chat-msg-timestamp {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: rgba(90,150,230,0.80);
+  background: rgba(90,150,230,0.85);
   border: none;
   color: #fff;
   font-size: 14px;
@@ -398,13 +412,14 @@ body.timestamp-hidden .chat-msg-timestamp {
   cursor: pointer;
   flex-shrink: 0;
   -webkit-appearance: none;
+  transition: opacity .15s;
 }
 
 .chat-view-placeholder-btn:active { opacity: 0.7; }
 
-/* ---- 特殊功能栏：拟态玻璃蓝 ---- */
+/* ---- 特殊功能栏：与输入栏颜色完全一致 ---- */
 .chat-special-bar {
-  background: rgba(190,220,255,0.50);
+  background: rgba(190,220,255,0.72);
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   border-top: 1px solid rgba(140,190,255,0.28);
@@ -424,7 +439,7 @@ body.timestamp-hidden .chat-msg-timestamp {
 
 .chat-special-bar-inner::-webkit-scrollbar { display: none; }
 
-/* ---- 特殊功能按钮：无文字只图标 ---- */
+/* ---- 特殊功能按钮 ---- */
 .csb-btn {
   display: flex;
   flex-direction: column;
@@ -446,11 +461,9 @@ body.timestamp-hidden .chat-msg-timestamp {
 .csb-btn:active { background: rgba(100,160,255,0.18); }
 .csb-btn.active { background: rgba(100,160,255,0.18); }
 
-/* 隐藏旧的文字图标 */
 .csb-icon { display: none; }
 .csb-label { display: none; }
 
-/* SVG图标颜色 */
 .csb-svg {
   stroke: #2a5fa8;
   display: block;
