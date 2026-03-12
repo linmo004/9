@@ -260,12 +260,12 @@
   align-self: flex-start;
 }
 
-/* ---- 角色气泡：拟态玻璃，自适应宽度，非圆形 ---- */
+/* ---- 角色气泡：胶囊圆润 ---- */
 .chat-msg-row:not(.user-row) .chat-msg-bubble {
   max-width: 80vw;
   width: fit-content;
-  padding: 6px 14px;
-  border-radius: 4px 18px 18px 18px;
+  padding: 5px 16px;
+  border-radius: 999px;
   font-size: 12px;
   line-height: 1.55;
   color: #1a3a6a;
@@ -280,12 +280,12 @@
   box-sizing: border-box;
 }
 
-/* ---- 用户气泡：拟态玻璃深蓝，自适应宽度，非圆形 ---- */
+/* ---- 用户气泡：胶囊圆润 ---- */
 .chat-msg-row.user-row .chat-msg-bubble {
   max-width: 80vw;
   width: fit-content;
-  padding: 6px 14px;
-  border-radius: 18px 4px 18px 18px;
+  padding: 5px 16px;
+  border-radius: 999px;
   font-size: 12px;
   line-height: 1.55;
   background: rgba(70,130,220,0.68);
@@ -299,6 +299,7 @@
   position: relative;
   box-sizing: border-box;
 }
+
 
 /* ---- 特殊消息气泡透明（语音、转账、假图片等） ---- */
 .bubble-emoji-only,
