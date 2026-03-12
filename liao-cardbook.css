@@ -3,14 +3,7 @@
    ============================================================ */
 
 /* ── 根容器 ── */
-#liao-cardbook-view {
-  background: var(--lcb-bg, rgba(210,232,252,0.72));
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
+
 
 /* ── 封面 ── */
 .lcb-cover {
@@ -20,10 +13,15 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  background: var(--lcb-cover-bg, linear-gradient(145deg, rgba(180,218,248,0.82) 0%, rgba(210,235,255,0.72) 50%, rgba(190,222,252,0.78) 100%));
+  background: var(--lcb-cover-bg, linear-gradient(145deg,
+    rgba(180,218,248,0.82) 0%,
+    rgba(210,235,255,0.72) 50%,
+    rgba(190,222,252,0.78) 100%));
   -webkit-backdrop-filter: blur(24px);
   backdrop-filter: blur(24px);
+  /* 不需要 position:fixed，跟随面板 */
 }
+
 
 .lcb-cover-glass {
   display: flex;
@@ -339,15 +337,16 @@
 
 /* ── 抽卡预览层 ── */
 .lcb-card-preview {
-  position: fixed;
+  position: absolute;
   inset: 0;
-  z-index: 470;
+  z-index: 10;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 20px;
 }
+
 
 .lcb-preview-backdrop {
   position: absolute;

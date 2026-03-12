@@ -103,15 +103,8 @@ function closeLiaoApp() {
   document.getElementById('liao-app').classList.remove('show');
 }
 
-document.getElementById('liao-close-btn').addEventListener('click', closeLiaoApp);
-
 /* ---------- 标签切换 ---------- */
 function switchLiaoTab(tabId) {
-  /* 切换任何标签时先关闭卡册 */
-  if (typeof LiaoCardBook !== 'undefined' && tabId !== 'rolelib') {
-    LiaoCardBook.close();
-  }
-
   document.querySelectorAll('.liao-tab-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.tab === tabId);
   });
@@ -121,19 +114,29 @@ function switchLiaoTab(tabId) {
 
   if (tabId === 'chatlist') renderChatList();
   if (tabId === 'rolelib') {
-    if (typeof LiaoCardBook !== 'undefined') {
-      LiaoCardBook.open();
-      return; /* 不执行后续的 renderSuiyan 等 */
-    } else if (typeof renderRoleLib === 'function') {
-      renderRoleLib();
+    /* 刷新封面角色数量 */
+    const countEl = document.getElementById('lcb-cover-count');
+    if (countEl) {
+      const count = typeof liaoRoles !== 'undefined' ? liaoRoles.length : 0;
+      countEl.textContent = count + ' 位角色';
     }
   }
-  if (tabId === 'myhome') { /* 我的面板无需额外渲染 */ }
   if (tabId === 'suiyan') renderSuiyan();
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
-
+/* ---------- 标签点击事件委托 ---------- */
+document.addEventListener('click', function (e) {
+  const btn = e.target.closest('.liao-tab-btn');
+  if (!btn) return;
+  if (btn.id === 'liao-close-btn') {
+    closeLiaoApp();
+    return;
+  }
+  const tabId = btn.dataset.tab;
+  if (!tabId) return;
+  switchLiaoTab(tabId);
+});
 
 /* ---------- 弹窗遮罩点击关闭 ---------- */
 [
