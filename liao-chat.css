@@ -260,46 +260,33 @@
   align-self: flex-start;
 }
 
-/* ---- 角色气泡：胶囊圆润 ---- */
+/* ---- 角色气泡：拟态玻璃 ---- */
 .chat-msg-row:not(.user-row) .chat-msg-bubble {
-  max-width: 80vw;
-  width: fit-content;
-  padding: 5px 16px;
-  border-radius: 999px;
-  font-size: 12px;
-  line-height: 1.55;
-  color: #1a3a6a;
-  background: rgba(210,230,255,0.55);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(140,190,255,0.40);
-  box-shadow: 0 2px 12px rgba(80,140,220,0.10), inset 0 1px 0 rgba(255,255,255,0.55);
-  word-break: break-word;
-  white-space: pre-wrap;
-  position: relative;
-  box-sizing: border-box;
+  background: rgba(210,230,255,0.55) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(140,190,255,0.40) !important;
+  box-shadow: 0 2px 12px rgba(80,140,220,0.10), inset 0 1px 0 rgba(255,255,255,0.55) !important;
+  border-radius: 999px !important;
+  padding: 6px 14px !important;
+  font-size: 12px !important;
+  line-height: 1.55 !important;
+  color: #1a3a6a !important;
 }
 
-/* ---- 用户气泡：胶囊圆润 ---- */
+/* ---- 用户气泡：拟态玻璃深蓝 ---- */
 .chat-msg-row.user-row .chat-msg-bubble {
-  max-width: 80vw;
-  width: fit-content;
-  padding: 5px 16px;
-  border-radius: 999px;
-  font-size: 12px;
-  line-height: 1.55;
-  background: rgba(70,130,220,0.68);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(100,160,255,0.35);
-  box-shadow: 0 2px 12px rgba(50,100,200,0.18), inset 0 1px 0 rgba(255,255,255,0.22);
-  color: #fff;
-  word-break: break-word;
-  white-space: pre-wrap;
-  position: relative;
-  box-sizing: border-box;
+  background: rgba(70,130,220,0.68) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(100,160,255,0.35) !important;
+  box-shadow: 0 2px 12px rgba(50,100,200,0.18), inset 0 1px 0 rgba(255,255,255,0.22) !important;
+  border-radius: 999px !important;
+  padding: 6px 14px !important;
+  font-size: 12px !important;
+  line-height: 1.55 !important;
+  color: #fff !important;
 }
-
 
 /* ---- 特殊消息气泡透明（语音、转账、假图片等） ---- */
 .bubble-emoji-only,
