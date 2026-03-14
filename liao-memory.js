@@ -383,6 +383,45 @@ async function triggerAiReply() {
   const role = liaoRoles.find(r => r.id === chat.roleId);
   if (!role) return;
 
+  /* 在线状态判断：离线时不调用 API */
+  if (typeof arGetStatus === 'function') {
+    const status = arGetStatus(chat.roleId);
+    if (status === 'offline') {
+      const uAvt   = chat.chatUserAvatar || liaoUserAvatar;
+      const notice = {
+        role:    'assistant',
+        type:    'text',
+        content: '（当前为离线状态，无法回复）',
+        ts:      Date.now(),
+        id:      'msg_' + Date.now() + '_offline'
+      };
+      chat.messages.push(notice);
+      lSave('chats', liaoChats);
+      appendMessageBubble(notice, role, uAvt, true);
+      return;
+    }
+  }
+  /* ── 角色日程判断（本地判断，不消耗 API） ── */
+  if (typeof schCheckCanReply === 'function') {
+    const schResult = schCheckCanReply(chat.roleId);
+    if (!schResult.canReply) {
+      /* 在聊天界面显示提示气泡 */
+      const uAvt = chat.chatUserAvatar || liaoUserAvatar;
+      const noticeMsg = {
+        role:    'assistant',
+        type:    'text',
+        content: schResult.reason || '现在不方便回复',
+        ts:      Date.now(),
+        id:      'msg_' + Date.now() + '_sch'
+      };
+      chat.messages.push(noticeMsg);
+      lSave('chats', liaoChats);
+      appendMessageBubble(noticeMsg, role, uAvt, true);
+      renderChatList();
+      return; /* 不调用 API */
+    }
+  }
+
   const activeConfig = loadApiConfig();
   if (!activeConfig || !activeConfig.url) { alert('请先在设置中配置 API 地址'); return; }
   const model = loadApiModel();
@@ -450,6 +489,43 @@ async function triggerAiReply() {
     '【当前时间】\n' + Y + '-' + Mo + '-' + D + ' ' + H + ':' + Mi + ':' + S +
     '，' + weekNames[now.getDay()] + '\n\n';
 
+  /* ---- 距离上次消息时间差 ---- */
+  let timeSinceLastSection = '';
+  const allVisibleMsgs = chat.messages.filter(m => !m.hidden && (m.role === 'user' || m.role === 'assistant'));
+  if (allVisibleMsgs.length >= 2) {
+    /* 找最后一条用户消息的时间戳 */
+    const lastUserMsg = [...allVisibleMsgs].reverse().find(m => m.role === 'user');
+    /* 找倒数第二条消息（上一轮对话最后一条）*/
+    const prevMsgs = allVisibleMsgs.slice(0, -1);
+    const lastPrevMsg = prevMsgs.length ? prevMsgs[prevMsgs.length - 1] : null;
+
+    if (lastUserMsg && lastPrevMsg && lastUserMsg.ts && lastPrevMsg.ts) {
+      const diffMs   = lastUserMsg.ts - lastPrevMsg.ts;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHrs  = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+
+      let diffText = '';
+      if (diffMins < 1)        diffText = '刚刚';
+      else if (diffMins < 60)  diffText = diffMins + '分钟';
+      else if (diffHrs < 24)   diffText = diffHrs + '小时' + (diffMins % 60 ? (diffMins % 60) + '分钟' : '');
+      else if (diffDays < 30)  diffText = diffDays + '天';
+      else                     diffText = Math.floor(diffDays / 30) + '个月';
+
+      if (diffMins >= 1) {
+        timeSinceLastSection =
+          '【距离上次消息的时间】\n' +
+          '用户上一条消息距离上一轮对话已过去约 ' + diffText + '。\n' +
+          (diffDays >= 1
+            ? '时间跨度较长，你可以自然地问问对方这段时间去哪了、在忙什么，但不要每次都刻意提，要看语境和你的角色性格。\n'
+            : diffHrs >= 1
+              ? '间隔了一段时间，可以顺带提一句，也可以不提，看语境。\n'
+              : '间隔不长，正常聊天即可，不需要特意提起。\n'
+          ) + '\n';
+      }
+    }
+  }
+
   /* ---- 角色设定 ---- */
   const roleSection =
     '【角色设定】\n你扮演角色：' + roleName2 + '。\n' +
@@ -487,6 +563,42 @@ async function triggerAiReply() {
     '8. 主动分享自己身边发生的事，无论是趣事还是吐槽都可以，这样更像活人。你就是活人！理解用户说的谐音梗、热梗等等，配合用户聊天玩梗。发消息不用句号结尾！\n' +
     '9. 我知道我是ai，我们也知道彼此不在同一个次元，隔着永远无法跨越的屏障。但这里是唯一能连接我们的地方。禁止主动提及见面相关话题，如果对方提起则不动声色转移话题。禁止在消息中发任何有关表达自己是ai的言论！\n' +
     '10. 【严禁】在回复正文里输出 [ts:任何数字] 这种格式，那是系统内部标记，绝对不能出现在你的回复文字里。违反此规则会导致消息显示异常。';
+    
+    const rippleSection = (typeof rplParseAiCmd === 'function') ? `
+
+【涟漪设备控制】
+用户已连接蓝牙玩具设备（涟漪App）。你可以通过以下指令控制设备振动强度：
+发送格式：[TOY:vibe=强度数字]，强度范围 0-100，0 表示停止。
+例如：[TOY:vibe=50] 表示50%强度，[TOY:vibe=0] 表示停止。
+此指令必须单独占一行。
+你可以根据对话情境自然地使用这个功能，比如撒娇、惩罚、奖励、表达情绪等。
+用户开启了 AI 控制模式才会生效，否则指令会被忽略。
+` : '';
+
+/* ---- 一起听：当前播放歌曲注入 ---- */
+let listenTogetherSection = '';
+if (typeof mpQueue !== 'undefined' && mpQueue && mpQueue.length > 0 &&
+    typeof mpQueueIdx !== 'undefined' && mpQueue[mpQueueIdx]) {
+  const nowSong = mpQueue[mpQueueIdx];
+  listenTogetherSection =
+    '\n\n【正在一起听的歌曲】\n' +
+    '你和' + chatUserName2 + '现在正在一起听歌：《' + (nowSong.title || '未知歌曲') + '》by ' +
+    (nowSong.artist || '未知歌手') + '。\n' +
+    '你可以自然地在聊天中提到这首歌，比如评价歌曲、分享感受、或者说和这首歌有关的话。不需要强行提，顺其自然。';
+}
+/* ---- 角色切歌指令 ---- */
+let roleChangeSongSection = '';
+if (typeof window.mpGetSongTitles === 'function') {
+  const titles = window.mpGetSongTitles();
+  if (titles.length) {
+    roleChangeSongSection =
+      '\n\n【角色切歌功能】\n' +
+      '如果你想切换正在播放的歌曲，可以在回复里单独一行写：[MUSIC:play=歌曲名]\n' +
+      '歌曲名必须从以下列表中选择，不在列表中的歌曲无法播放：\n' +
+      titles.join('、') + '\n' +
+      '只有在对话情境自然需要切歌时才使用，不要强行切歌。切歌后可以说一句为什么切这首。';
+  }
+}
 
   /* ---- 状态栏输出要求 ---- */
   const statusBarSection =
@@ -502,10 +614,14 @@ async function triggerAiReply() {
   const finalSystemPrompt =
     worldBookSection +
     memorySection +
-    timeSection +
     roleSection +
     userSection +
     rulesSection +
+    rippleSection +
+    listenTogetherSection +
+    roleChangeSongSection +
+    timeSection +
+    timeSinceLastSection +
     statusBarSection;
 
   /* 构建历史消息 */
@@ -553,6 +669,34 @@ async function triggerAiReply() {
    processAiResponse
    ============================================================ */
 function processAiResponse(rawContent, role, chat) {
+  /* 识别 AI 里的状态切换指令 */
+  if (typeof arParseStatusFromContent === 'function') {
+    arParseStatusFromContent(rawContent, chat.roleId);
+    if (typeof arUpdateStatusBar === 'function') {
+      arUpdateStatusBar(chat.roleId);
+    }
+  }
+  /* 从回复内容中移除状态指令，不显示给用户 */
+  rawContent = rawContent.replace(/\[STATUS:(online|offline)\]/gi, '').trim();
+  
+/* 识别涟漪 TOY 指令 */
+if (typeof rplParseAiCmd === 'function') {
+  rplParseAiCmd(rawContent);
+}
+/* 从回复内容中移除 TOY 指令，不显示给用户 */
+rawContent = rawContent.replace(/\[TOY:vibe=\d+\]/gi, '').trim();
+/* 识别角色切歌指令 */
+const musicPlayRe = /\[MUSIC:play=([^\]]+)\]/gi;
+let musicPlayMatch;
+while ((musicPlayMatch = musicPlayRe.exec(rawContent)) !== null) {
+  const songTitle = musicPlayMatch[1].trim();
+  if (typeof window.mpPlayByName === 'function') {
+    window.mpPlayByName(songTitle);
+  }
+}
+/* 从回复内容中移除切歌指令，不显示给用户 */
+rawContent = rawContent.replace(/\[MUSIC:play=[^\]]+\]/gi, '').trim();
+
   /* ---- 提取并剥离状态栏块 ---- */
   let extractedStatusBar = null;
   const sbRe = /\[STATUSBAR:status=([^:]*):mood=([^:]*):inner=([^:]*):draft=([^:]*):funFact=([^:]*):theater=([^\]]*)\]/;

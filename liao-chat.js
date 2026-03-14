@@ -259,6 +259,25 @@ function openChatView(chatIdx) {
   const csCloseBtn = document.getElementById('cs-close-btn');
   if (csCloseBtn) csCloseBtn.dataset.returnTo = '';
 
+/* 更新在线状态显示 */
+if (typeof arUpdateStatusBar === 'function') {
+  arUpdateStatusBar(chat.roleId);
+}
+
+/* 绑定在线状态点击切换 */
+const statusRow = document.getElementById('chat-status-row');
+if (statusRow && !statusRow._arBound) {
+  statusRow._arBound = true;
+  statusRow.addEventListener('click', () => {
+    if (currentChatIdx < 0) return;
+    const c      = liaoChats[currentChatIdx];
+    const cur    = arGetStatus(c.roleId);
+    const newSt  = cur === 'online' ? 'offline' : 'online';
+    arSetStatus(c.roleId, newSt);
+    arUpdateStatusBar(c.roleId);
+  });
+}
+
   document.getElementById('liao-chat-view').classList.add('show');
   setTimeout(scrollChatToBottom, 100);
 }
@@ -312,9 +331,14 @@ function renderChatMessages() {
   }
 
   const toRender = msgs.length > maxLoad ? msgs.slice(-maxLoad) : msgs;
-  toRender.forEach(msg => {
-    appendMessageBubble(msg, role, chatUserAvatar, false);
-  });
+let lastRenderedTs = null;
+toRender.forEach(msg => {
+  if (shouldInsertTimeDivider(lastRenderedTs, msg.ts)) {
+    area.appendChild(createTimeDivider(msg.ts));
+  }
+  lastRenderedTs = msg.ts || lastRenderedTs;
+  appendMessageBubble(msg, role, chatUserAvatar, false);
+});
   scrollChatToBottom();
 }
 
@@ -398,6 +422,12 @@ function sendUserMessage() {
   const quoteBar = document.getElementById('chat-quote-bar');
   if (quoteBar) quoteBar.style.display = 'none';
   appendMessageBubble(msgObj, role, uAvt, true);
+
+/* 自动回复判断 */
+if (typeof arTryAutoReply === 'function') {
+  arTryAutoReply(currentChatIdx, content);
+}
+
 }
 
 /* ============================================================
@@ -500,7 +530,22 @@ function switchChatSettingsTab(tabId) {
     renderMemoryLists();
     renderOtherMemoryList();
   }
+  /* 加这一段 */
+  if (tabId === 'cs-tab-schedule') {
+    if (currentChatIdx >= 0 && typeof schInitUI === 'function') {
+      const chat = liaoChats[currentChatIdx];
+      if (chat) schInitUI(chat.roleId);
+    }
+  }
+  if (tabId === 'cs-tab-autoreply') {
+  if (currentChatIdx >= 0 && typeof arInitTab === 'function') {
+    const chat = liaoChats[currentChatIdx];
+    if (chat) arInitTab(chat.roleId);
+  }
 }
+
+}
+
 
 document.querySelectorAll('.cs-tab-btn').forEach(btn => {
   btn.addEventListener('click', function () {
@@ -859,3 +904,63 @@ document.getElementById('cs-timestamp-save-btn').addEventListener('click', () =>
     if (e.target === this) this.style.display = 'none';
   });
 });
+
+/* ============================================================
+   微信式时间分隔条
+   ============================================================ */
+
+/* 判断是否需要插入分隔条（间隔超过20分钟） */
+function shouldInsertTimeDivider(prevTs, curTs) {
+  if (!prevTs || !curTs) return false;
+  return (curTs - prevTs) >= 20 * 60 * 1000;
+}
+
+/* 动态格式化时间：今天/昨天/今年/跨年 */
+function formatDividerTime(ts) {
+  if (!ts) return '';
+  const now  = new Date();
+  const date = new Date(ts);
+
+  const nowY  = now.getFullYear();
+  const nowM  = now.getMonth();
+  const nowD  = now.getDate();
+  const dateY = date.getFullYear();
+  const dateM = date.getMonth();
+  const dateD = date.getDate();
+
+  const H  = String(date.getHours()).padStart(2, '0');
+  const Mi = String(date.getMinutes()).padStart(2, '0');
+  const timeStr = H + ':' + Mi;
+
+  /* 今天 */
+  if (dateY === nowY && dateM === nowM && dateD === nowD) {
+    return timeStr;
+  }
+
+  /* 昨天 */
+  const yesterday = new Date(now);
+  yesterday.setDate(nowD - 1);
+  if (
+    dateY === yesterday.getFullYear() &&
+    dateM === yesterday.getMonth() &&
+    dateD === yesterday.getDate()
+  ) {
+    return '昨天 ' + timeStr;
+  }
+
+  /* 今年内 */
+  if (dateY === nowY) {
+    return (dateM + 1) + '月' + dateD + '日 ' + timeStr;
+  }
+
+  /* 跨年 */
+  return dateY + '年' + (dateM + 1) + '月' + dateD + '日 ' + timeStr;
+}
+
+/* 创建分隔条DOM元素 */
+function createTimeDivider(ts) {
+  const div = document.createElement('div');
+  div.className = 'chat-time-divider';
+  div.textContent = formatDividerTime(ts);
+  return div;
+}

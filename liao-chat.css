@@ -505,3 +505,23 @@ body.timestamp-hidden .chat-msg-timestamp {
     max-width: 65vw;
   }
 }
+
+/* ── 微信式时间分隔条 ── */
+.chat-time-divider {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.88);
+  background: rgba(0, 0, 0, 0.22);
+  padding: 3px 10px;
+  border-radius: 999px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  max-width: fit-content;
+  margin: 10px auto 6px;
+  display: block;
+  text-align: center;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+

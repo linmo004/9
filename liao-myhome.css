@@ -1,12 +1,11 @@
 /* ============================================================
-   liao-myhome.css — 我的主页 INS 风样式
+   liao-myhome.css — 我的主页 油管/INS 风样式
    ============================================================ */
 
-/* ── 面板容器 ── */
 .liao-panel[data-panel="myhome"] {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  background: #fafafa;
+  background: #fff;
   padding-bottom: 40px;
 }
 
@@ -15,55 +14,15 @@
    ============================================================ */
 .mh-profile-section {
   position: relative;
-  padding: 18px 16px 14px;
+  padding: 16px 16px 14px;
   background: #fff;
   border-bottom: 1px solid rgba(0,0,0,0.06);
 }
 
-/* ── 切换面具按钮（左上角） ── */
-.mh-mask-switch-btn {
-  position: absolute;
-  top: 14px;
-  left: 14px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  background: rgba(153,200,237,0.12);
-  border: 1.5px solid rgba(153,200,237,0.35);
-  border-radius: 10px;
-  padding: 5px 8px;
-  cursor: pointer;
-  font-family: inherit;
-  -webkit-appearance: none;
-  transition: background .15s;
-  z-index: 2;
-}
-
-.mh-mask-switch-btn:active {
-  background: rgba(153,200,237,0.28);
-}
-
-.mh-mask-switch-icon {
-  font-size: 15px;
-  line-height: 1;
-  color: var(--primary, #99C8ED);
-}
-
-.mh-mask-switch-label {
-  font-size: 9px;
-  color: var(--text-mid, #5a6a80);
-  letter-spacing: .04em;
-}
-
-/* ── 头像 + 信息行 ── */
 .mh-profile-row {
   display: flex;
   align-items: flex-start;
   gap: 14px;
-  padding-top: 6px;
-  /* 左边留出面具按钮的空间 */
-  padding-left: 68px;
 }
 
 /* ── 头像 ── */
@@ -74,8 +33,8 @@
 }
 
 .mh-avatar-img {
-  width: 72px;
-  height: 72px;
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
   object-fit: cover;
   border: 2.5px solid rgba(153,200,237,0.45);
@@ -94,15 +53,16 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding-top: 4px;
+  gap: 5px;
+  padding-top: 2px;
 }
 
-/* ── 名字行 ── */
+/* ── 名字行（名字 + 面具切换） ── */
 .mh-name-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .mh-name {
@@ -113,7 +73,7 @@
   border-bottom: 1.5px solid transparent;
   line-height: 1.3;
   min-width: 20px;
-  max-width: 160px;
+  max-width: 140px;
   word-break: break-all;
   transition: border-color .15s;
   cursor: text;
@@ -123,42 +83,35 @@
   border-bottom-color: var(--primary, #99C8ED);
 }
 
-/* ── 小保存按键 ── */
-.mh-save-btn {
-  flex-shrink: 0;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--primary, #99C8ED);
-  color: #fff;
+/* ── 面具切换：@名字 样式 ── */
+.mh-mask-switch-btn {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--primary, #99C8ED);
   border: none;
-  font-size: 11px;
-  font-weight: 700;
+  background: none;
+  border-bottom: 1.5px solid var(--primary, #99C8ED);
+  padding: 0 0 1px 0;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   font-family: inherit;
   -webkit-appearance: none;
-  transition: opacity .15s, transform .1s;
-  line-height: 1;
+  transition: opacity .15s;
+  white-space: nowrap;
+  line-height: 1.4;
 }
 
-.mh-save-btn:active {
-  opacity: 0.72;
-  transform: scale(0.9);
+.mh-mask-switch-btn:active {
+  opacity: 0.6;
 }
 
-/* ── 人设描述文字（固定高度，不自适应） ── */
+/* ── 人设描述 ── */
 .mh-setting-text {
   font-size: 12px;
   color: rgba(0,0,0,0.45);
   line-height: 1.55;
   outline: none;
-  border: none;
   cursor: text;
-  /* 固定高度，不自适应 */
-  height: 54px;
+  height: 48px;
   overflow: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -171,16 +124,36 @@
   border-bottom-color: rgba(153,200,237,0.5);
 }
 
-/* 滚动条隐藏 */
 .mh-setting-text::-webkit-scrollbar { display: none; }
 .mh-setting-text { scrollbar-width: none; }
+
+/* ── 保存按钮 ── */
+.mh-save-btn {
+  align-self: flex-start;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--primary, #99C8ED);
+  color: #fff;
+  border: none;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  -webkit-appearance: none;
+  transition: opacity .15s;
+  margin-top: 2px;
+}
+
+.mh-save-btn:active {
+  opacity: 0.72;
+}
 
 /* ============================================================
    分割线
    ============================================================ */
 .mh-divider {
-  height: 1px;
-  background: rgba(0,0,0,0.06);
+  height: 8px;
+  background: #f2f2f2;
   margin: 0;
 }
 
@@ -190,111 +163,37 @@
 .mh-works-list {
   display: flex;
   flex-direction: column;
-  gap: 0;
   background: #fff;
 }
 
-/* ── 单个作品条目 ── */
 .mh-work-item {
   display: flex;
-  align-items: stretch;
-  padding: 14px 16px;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
+  flex-direction: row;
+  align-items: center;
+  padding: 12px 0 12px 14px;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
   cursor: pointer;
   transition: background .13s;
-  position: relative;
   gap: 12px;
 }
 
 .mh-work-item:active {
-  background: rgba(153,200,237,0.08);
+  background: #f9f9f9;
 }
 
 .mh-work-item:last-child {
   border-bottom: none;
 }
 
-/* ── 左侧文字信息 ── */
-.mh-work-info {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 5px;
-}
-
-/* 视频标题 - 大黑字 */
-.mh-work-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: #111;
-  outline: none;
-  line-height: 1.35;
-  word-break: break-word;
-  border-bottom: 1.5px solid transparent;
-  transition: border-color .15s;
-  cursor: text;
-}
-
-.mh-work-title:focus {
-  border-bottom-color: var(--primary, #99C8ED);
-}
-
-/* 视频标签 - 半透明小字 */
-.mh-work-tag {
-  font-size: 11.5px;
-  color: rgba(0,0,0,0.38);
-  outline: none;
-  line-height: 1.4;
-  border-bottom: 1.5px solid transparent;
-  transition: border-color .15s;
-  cursor: text;
-}
-
-.mh-work-tag:focus {
-  border-bottom-color: rgba(153,200,237,0.4);
-}
-
-/* 用户名 - 半透明小字 */
-.mh-work-user {
-  font-size: 11.5px;
-  color: rgba(0,0,0,0.38);
-  outline: none;
-  line-height: 1.4;
-  border-bottom: 1.5px solid transparent;
-  transition: border-color .15s;
-  cursor: text;
-}
-
-.mh-work-user:focus {
-  border-bottom-color: rgba(153,200,237,0.4);
-}
-
-/* 视频时长 - 半透明小字 */
-.mh-work-dur {
-  font-size: 11.5px;
-  color: rgba(0,0,0,0.38);
-  outline: none;
-  line-height: 1.4;
-  border-bottom: 1.5px solid transparent;
-  transition: border-color .15s;
-  cursor: text;
-}
-
-.mh-work-dur:focus {
-  border-bottom-color: rgba(153,200,237,0.4);
-}
-
-/* ── 右侧封面图 ── */
+/* ── 左侧横版封面（16:9） ── */
 .mh-work-cover {
   flex-shrink: 0;
-  width: 80px;
-  height: 80px;
-  border-radius: 10px;
+  width: 136px;
+  height: 77px;
+  border-radius: 8px;
   overflow: hidden;
-  background: rgba(153,200,237,0.15);
-  border: 1.5px solid rgba(153,200,237,0.22);
+  background: rgba(153,200,237,0.12);
+  border: 1.5px solid rgba(153,200,237,0.18);
   position: relative;
   cursor: pointer;
   display: flex;
@@ -321,14 +220,108 @@
 }
 
 .mh-work-cover-placeholder {
-  font-size: 28px;
-  color: rgba(153,200,237,0.6);
+  font-size: 22px;
+  color: rgba(153,200,237,0.55);
   pointer-events: none;
   user-select: none;
 }
 
+.mh-work-cover::after {
+  content: '换封面';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0,0,0,0.42);
+  color: rgba(255,255,255,0.9);
+  font-size: 9px;
+  text-align: center;
+  padding: 3px 0;
+  opacity: 0;
+  transition: opacity .18s;
+}
+
+.mh-work-cover:hover::after,
+.mh-work-cover:active::after {
+  opacity: 1;
+}
+
+/* ── 中间文字信息 ── */
+.mh-work-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+
+.mh-work-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111;
+  outline: none;
+  line-height: 1.4;
+  word-break: break-word;
+  border-bottom: 1.5px solid transparent;
+  transition: border-color .15s;
+  cursor: text;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mh-work-title[contenteditable="true"]:focus {
+  display: block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+  border-bottom-color: var(--primary, #99C8ED);
+}
+
+.mh-work-tag,
+.mh-work-user,
+.mh-work-dur {
+  font-size: 11px;
+  color: rgba(0,0,0,0.38);
+  outline: none;
+  line-height: 1.4;
+  border-bottom: 1.5px solid transparent;
+  transition: border-color .15s;
+  cursor: text;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mh-work-tag:focus,
+.mh-work-user:focus,
+.mh-work-dur:focus {
+  border-bottom-color: rgba(153,200,237,0.4);
+  white-space: normal;
+  overflow: visible;
+}
+
+/* ── 最右边进入箭头区域 ── */
+.mh-work-enter {
+  flex-shrink: 0;
+  width: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: rgba(0,0,0,0.18);
+  align-self: stretch;
+  cursor: pointer;
+  transition: color .13s;
+}
+
+.mh-work-enter:active {
+  color: rgba(0,0,0,0.4);
+}
+
 /* ============================================================
-   面具切换弹窗内的条目
+   面具弹窗条目
    ============================================================ */
 .mh-mask-item {
   display: flex;
@@ -398,29 +391,94 @@
 }
 
 /* ============================================================
+   URL输入弹窗（头像和封面共用）
+   ============================================================ */
+.mh-url-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 540;
+  background: rgba(26,31,46,0.42);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.mh-url-modal.show {
+  display: flex;
+}
+
+.mh-url-modal-box {
+  background: #fff;
+  border-radius: 22px 22px 0 0;
+  width: 100%;
+  max-width: 480px;
+  padding: 20px 18px 40px;
+}
+
+.mh-url-modal-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-dark, #2c3448);
+  margin-bottom: 12px;
+}
+
+.mh-url-modal-input {
+  width: 100%;
+  border: 1.5px solid var(--light-blue, #B3D8F4);
+  border-radius: 11px;
+  padding: 9px 12px;
+  font-size: 13px;
+  color: var(--text-dark, #2c3448);
+  background: var(--bg2, #F8F9FA);
+  outline: none;
+  font-family: inherit;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+
+.mh-url-modal-input:focus {
+  border-color: var(--primary, #99C8ED);
+}
+
+.mh-url-modal-btns {
+  display: flex;
+  gap: 10px;
+}
+
+.mh-url-modal-or {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-light, #9aafc4);
+  margin: 6px 0;
+}
+
+/* ============================================================
    暗色模式
    ============================================================ */
 body.dark-mode .liao-panel[data-panel="myhome"] {
   background: #111114;
 }
 
-body.dark-mode .mh-profile-section {
+body.dark-mode .mh-profile-section,
+body.dark-mode .mh-works-list {
   background: #1a1a1f;
-  border-bottom-color: rgba(255,255,255,0.07);
+}
+
+body.dark-mode .mh-divider {
+  background: #0d0d10;
 }
 
 body.dark-mode .mh-name { color: #e8eaf0; }
-
 body.dark-mode .mh-setting-text { color: rgba(255,255,255,0.38); }
 
-body.dark-mode .mh-works-list { background: #1a1a1f; }
-
 body.dark-mode .mh-work-item {
-  border-bottom-color: rgba(255,255,255,0.06);
+  border-bottom-color: rgba(255,255,255,0.05);
 }
 
 body.dark-mode .mh-work-item:active {
-  background: rgba(153,200,237,0.06);
+  background: rgba(255,255,255,0.04);
 }
 
 body.dark-mode .mh-work-title { color: #e8eaf0; }
@@ -428,16 +486,16 @@ body.dark-mode .mh-work-title { color: #e8eaf0; }
 body.dark-mode .mh-work-tag,
 body.dark-mode .mh-work-user,
 body.dark-mode .mh-work-dur {
-  color: rgba(255,255,255,0.35);
+  color: rgba(255,255,255,0.32);
 }
 
 body.dark-mode .mh-work-cover {
-  background: rgba(153,200,237,0.08);
-  border-color: rgba(153,200,237,0.15);
+  background: rgba(153,200,237,0.07);
+  border-color: rgba(153,200,237,0.12);
 }
 
-body.dark-mode .mh-divider {
-  background: rgba(255,255,255,0.06);
+body.dark-mode .mh-work-enter {
+  color: rgba(255,255,255,0.15);
 }
 
 body.dark-mode .mh-mask-item {
@@ -447,3 +505,9 @@ body.dark-mode .mh-mask-item {
 
 body.dark-mode .mh-mask-name { color: #e8eaf0; }
 body.dark-mode .mh-mask-sub  { color: #5a6a80; }
+
+body.dark-mode .mh-url-modal-box {
+  background: #1a1a1f;
+}
+
+body.dark-mode .mh-url-modal-title { color: #e8eaf0; }
