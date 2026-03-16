@@ -639,13 +639,13 @@ async function applyP2Image(src) {
   if (p2ModalTarget === 'ucbg') {
     const bgEl = document.getElementById('p2-uc-bg');
     if (bgEl) bgEl.style.backgroundImage = 'url(' + src + ')';
-    if (isBase64) { await imgSave('p2UcBg', src); save('p2UcBg', '__idb__'); }
+    if (isBase64) { await imgSave('p2UcBg', src); localStorage.setItem('halo9_p2UcBg', '__idb__'); }
     else { save('p2UcBg', src); imgDelete('p2UcBg'); }
 
   } else if (p2ModalTarget === 'album') {
     const bgEl = document.getElementById('p2-album-bg');
     if (bgEl) bgEl.style.backgroundImage = 'url(' + src + ')';
-    if (isBase64) { await imgSave('p2AlbumBg', src); save('p2AlbumBg', '__idb__'); }
+    if (isBase64) { await imgSave('p2AlbumBg', src); localStorage.setItem('halo9_p2AlbumBg', '__idb__'); }
     else { save('p2AlbumBg', src); imgDelete('p2AlbumBg'); }
 
   } else if (p2ModalTarget === 'cdimg') {
@@ -659,7 +659,7 @@ async function applyP2Image(src) {
         r3.style.backgroundPosition = 'center';
       }
     }
-    if (isBase64) { await imgSave('p2CdImg', src); save('p2CdImg', '__idb__'); }
+    if (isBase64) { await imgSave('p2CdImg', src); localStorage.setItem('halo9_p2CdImg', '__idb__'); }
     else { save('p2CdImg', src); imgDelete('p2CdImg'); }
 
   } else if (p2ModalTarget.startsWith('card-')) {
@@ -719,9 +719,9 @@ document.getElementById('p2-img-modal').addEventListener('click', function(e) {
 (function initP2UserCard() {
   /* 恢复背景 */
   (async () => {
-    let bg = load('p2UcBg', null);
+    let bg = localStorage.getItem('halo9_p2UcBg');
     if (bg === '__idb__') bg = await imgLoad('p2UcBg', null);
-    if (bg) {
+    if (bg && bg !== '__idb__') {
       const bgEl = document.getElementById('p2-uc-bg');
       if (bgEl) bgEl.style.backgroundImage = 'url(' + bg + ')';
     }
@@ -940,13 +940,13 @@ var p2CardUrls = load('page2Cards', ['', '', '', '']);
 (function initP2Album() {
   /* 恢复专辑背景 */
   (async () => {
-  let bg = load('p2AlbumBg', null);
-  if (bg === '__idb__') bg = await imgLoad('p2AlbumBg', null);
-  if (bg) {
-    const bgEl = document.getElementById('p2-album-bg');
-    if (bgEl) bgEl.style.backgroundImage = 'url(' + bg + ')';
-  }
-})();
+    let bg = localStorage.getItem('halo9_p2AlbumBg');
+    if (bg === '__idb__') bg = await imgLoad('p2AlbumBg', null);
+    if (bg && bg !== '__idb__') {
+      const bgEl = document.getElementById('p2-album-bg');
+      if (bgEl) bgEl.style.backgroundImage = 'url(' + bg + ')';
+    }
+  })();
 
   /* 点击专辑主体换封面 */
   const albumWidget = document.getElementById('p2-album-widget');
@@ -959,17 +959,17 @@ var p2CardUrls = load('page2Cards', ['', '', '', '']);
 
   /* 恢复 CD 图片 */
   (async () => {
-  let cdImg = load('p2CdImg', null);
-  if (cdImg === '__idb__') cdImg = await imgLoad('p2CdImg', null);
-  if (cdImg) {
-    const r3 = document.querySelector('#p2-cd .p2-cd-r3');
-    if (r3) {
-      r3.style.backgroundImage    = 'url(' + cdImg + ')';
-      r3.style.backgroundSize     = 'cover';
-      r3.style.backgroundPosition = 'center';
+    let cdImg = localStorage.getItem('halo9_p2CdImg');
+    if (cdImg === '__idb__') cdImg = await imgLoad('p2CdImg', null);
+    if (cdImg && cdImg !== '__idb__') {
+      const r3 = document.querySelector('#p2-cd .p2-cd-r3');
+      if (r3) {
+        r3.style.backgroundImage    = 'url(' + cdImg + ')';
+        r3.style.backgroundSize     = 'cover';
+        r3.style.backgroundPosition = 'center';
+      }
     }
-  }
-})();
+  })();
 
   /* 点击 CD 非金属区换 CD 图（r3、r4 可点击） */
   const cdClickable = document.getElementById('p2-cd-clickable');

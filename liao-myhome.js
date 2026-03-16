@@ -37,9 +37,13 @@
   }
 
   /* ── 渲染 ── */
-  function renderMyhome(data) {
+  async function renderMyhome(data) {
     const avatarImg = document.getElementById('mh-avatar-img');
-    if (avatarImg && data.avatar) avatarImg.src = data.avatar;
+    if (avatarImg && data.avatar) {
+      let src = data.avatar;
+      if (src.startsWith('__idb__')) src = await imgLoad(src.replace('__idb__', ''), null) || src;
+      avatarImg.src = src;
+    }
 
     const nameEl = document.getElementById('mh-name');
     if (nameEl) nameEl.textContent = data.name || '用户名';
@@ -50,7 +54,8 @@
     /* 面具按钮显示当前名字 */
     updateMaskBtnLabel(data.name);
 
-    data.works.forEach((work, idx) => {
+        for (let idx = 0; idx < data.works.length; idx++) {
+      const work = data.works[idx];
       const titleEl = document.getElementById('mhwt-'  + idx);
       const tagEl   = document.getElementById('mhwtg-' + idx);
       const userEl  = document.getElementById('mhwu-'  + idx);
@@ -65,7 +70,9 @@
 
       if (imgEl) {
         if (work.cover) {
-          imgEl.src = work.cover;
+          let coverSrc = work.cover;
+          if (coverSrc.startsWith('__idb__')) coverSrc = await imgLoad(coverSrc.replace('__idb__', ''), null) || coverSrc;
+          imgEl.src = coverSrc;
           imgEl.classList.add('visible');
           if (phEl) phEl.style.display = 'none';
         } else {
@@ -73,7 +80,7 @@
           if (phEl) phEl.style.display = '';
         }
       }
-    });
+    }
   }
 
   function updateMaskBtnLabel(name) {
@@ -211,7 +218,8 @@
               : e.target.result;
             const img = document.getElementById('mh-avatar-img');
             if (img) img.src = compressed;
-            mhData.avatar = compressed;
+            await imgSave('mhAvatar', compressed);
+            mhData.avatar = '__idb__mhAvatar';
             mhSave(mhData);
           };
           reader.readAsDataURL(file);
@@ -356,7 +364,8 @@
         const phEl  = document.getElementById('mhwcp-' + idx);
         if (imgEl) { imgEl.src = compressed; imgEl.classList.add('visible'); }
         if (phEl) phEl.style.display = 'none';
-        mhData.works[idx].cover = compressed;
+        await imgSave('mhCover_' + idx, compressed);
+        mhData.works[idx].cover = '__idb__mhCover_' + idx;
         mhSave(mhData);
       };
       reader.readAsDataURL(file);
