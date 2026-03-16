@@ -30,15 +30,19 @@ function buildSuiyanItem(post, idx) {
   const likedByUser = post.likedBy && post.likedBy.includes('user');
 
   let commentsHtml = '';
-  if (post.comments && post.comments.length) {
-    const rows = post.comments.map(c => {
-  const replyTag = c.isReply
-    ? `<span style="font-size:10px;color:#9aafc4;margin-right:3px;">↩回复</span>`
-    : '';
-  return `<div class="suiyan-comment-item"><span class="suiyan-comment-author">${escHtml(c.author)}：</span>${replyTag}${escHtml(c.text)}</div>`;
-}).join('');
+    if (post.comments && post.comments.length) {
+    const rows = post.comments.map((c, cidx) => {
+      const replyTag = c.isReply
+        ? `<span style="font-size:10px;color:#9aafc4;margin-right:3px;">↩回复</span>`
+        : '';
+      return `<div class="suiyan-comment-item" style="display:flex;align-items:center;justify-content:space-between;">
+        <div><span class="suiyan-comment-author">${escHtml(c.author)}：</span>${replyTag}${escHtml(c.text)}</div>
+        <button class="delete-comment-btn" data-post-idx="${idx}" data-comment-idx="${cidx}" style="background:none;border:none;font-size:11px;color:#e07a7a;cursor:pointer;flex-shrink:0;padding:0 0 0 8px;">删除</button>
+      </div>`;
+    }).join('');
     commentsHtml = `<div class="suiyan-comments">${rows}</div>`;
   }
+
 
   // 媒体内容（图片等）
   let mediaHtml = '';
@@ -65,6 +69,7 @@ function buildSuiyanItem(post, idx) {
         <span class="action-icon">○</span>
         <span>${post.comments ? post.comments.length : 0}</span>
       </button>
+      <button class="suiyan-action-btn delete-post-btn" data-idx="${idx}" style="margin-left:auto;color:#e07a7a;">删除</button>
     </div>
     ${commentsHtml}`;
 
@@ -85,6 +90,23 @@ function buildSuiyanItem(post, idx) {
 
   div.querySelector('.comment-btn').addEventListener('click', function () {
     openCommentModal(parseInt(this.dataset.idx));
+  });
+  div.querySelector('.delete-post-btn').addEventListener('click', function () {
+    if (!confirm('确定删除这条随言？')) return;
+    const i = parseInt(this.dataset.idx);
+    liaoSuiyan.splice(i, 1);
+    lSave('suiyan', liaoSuiyan);
+    renderSuiyan();
+  });
+  div.querySelectorAll('.delete-comment-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+      if (!confirm('确定删除这条评论？')) return;
+      const pi = parseInt(this.dataset.postIdx);
+      const ci = parseInt(this.dataset.commentIdx);
+      liaoSuiyan[pi].comments.splice(ci, 1);
+      lSave('suiyan', liaoSuiyan);
+      renderSuiyan();
+    });
   });
 
   return div;
