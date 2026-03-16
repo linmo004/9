@@ -21,6 +21,8 @@ function renderSuiyan() {
   [...liaoSuiyan].reverse().forEach((post, revIdx) => {
     const realIdx = liaoSuiyan.length - 1 - revIdx;
     list.appendChild(buildSuiyanItem(post, realIdx));
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
   });
 }
 
@@ -37,7 +39,8 @@ function buildSuiyanItem(post, idx) {
         : '';
       return `<div class="suiyan-comment-item" style="display:flex;align-items:center;justify-content:space-between;">
         <div><span class="suiyan-comment-author">${escHtml(c.author)}：</span>${replyTag}${escHtml(c.text)}</div>
-        <button class="delete-comment-btn" data-post-idx="${idx}" data-comment-idx="${cidx}" style="background:none;border:none;font-size:11px;color:#e07a7a;cursor:pointer;flex-shrink:0;padding:0 0 0 8px;">删除</button>
+        <button class="delete-comment-btn" data-post-idx="${idx}" data-comment-idx="${cidx}" style="background:none;border:none;cursor:pointer;flex-shrink:0;padding:0 0 0 8px;"><i data-lucide="x" style="width:12px;height:12px;stroke:#e07a7a;display:block;"></i></button>
+
       </div>`;
     }).join('');
     commentsHtml = `<div class="suiyan-comments">${rows}</div>`;
@@ -69,7 +72,7 @@ function buildSuiyanItem(post, idx) {
         <span class="action-icon">○</span>
         <span>${post.comments ? post.comments.length : 0}</span>
       </button>
-      <button class="suiyan-action-btn delete-post-btn" data-idx="${idx}" style="margin-left:auto;color:#e07a7a;">删除</button>
+      <button class="suiyan-action-btn delete-post-btn" data-idx="${idx}" style="margin-left:auto;color:#e07a7a;"><i data-lucide="x" style="width:14px;height:14px;stroke:#e07a7a;"></i></button>
     </div>
     ${commentsHtml}`;
 
