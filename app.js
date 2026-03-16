@@ -684,10 +684,10 @@ async function applyP2Image(src) {
 }
 
 
-document.getElementById('p2-img-modal-confirm').addEventListener('click', function() {
-  if (p2ModalPending) { applyP2Image(p2ModalPending); return; }
+document.getElementById('p2-img-modal-confirm').addEventListener('click', async function() {
+  if (p2ModalPending) { await applyP2Image(p2ModalPending); return; }
   const url = document.getElementById('p2-img-modal-url').value.trim();
-  if (url) { p2ModalPending = url; applyP2Image(url); return; }
+  if (url) { p2ModalPending = url; await applyP2Image(url); return; }
   alert('请输入图片URL或选择本地文件');
 });
 
@@ -699,9 +699,9 @@ document.getElementById('p2-img-modal-file').addEventListener('change', function
   const file = this.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = async function(e) {
     p2ModalPending = e.target.result;
-    applyP2Image(e.target.result);
+    await applyP2Image(e.target.result);
   };
   reader.readAsDataURL(file);
   this.value = '';
