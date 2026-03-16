@@ -1,0 +1,284 @@
+<!-- ===================== 群聊室 App ===================== -->
+<div id="groupchat-app" style="display:none;position:fixed;inset:0;z-index:400;
+  background:#f0f0f0;flex-direction:column;">
+
+  <div class="gc-topbar">
+    <button class="gc-topbar-back" id="gc-close-btn">
+      <i data-lucide="chevron-left" style="width:22px;height:22px;stroke:#333;stroke-width:2;"></i>
+    </button>
+    <div class="gc-topbar-title">群聊室</div>
+    <button class="gc-topbar-action" id="gc-new-btn">
+      <i data-lucide="plus" style="width:22px;height:22px;stroke:#07C160;stroke-width:2.5;"></i>
+    </button>
+  </div>
+
+  <div class="gc-list-wrap" id="gc-group-list-wrap">
+    <div id="gc-group-list"></div>
+    <div id="gc-empty-hint" style="display:none;
+      text-align:center;padding:60px 20px;color:#aaa;font-size:13px;">
+      还没有群聊，点击右上角 + 新建
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 新建群聊弹窗 ===================== -->
+<div id="gc-create-modal" style="display:none;position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,0.45);align-items:flex-end;justify-content:center;">
+  <div class="gc-modal-box">
+    <div class="gc-modal-title">新建群聊</div>
+
+    <label class="gc-modal-label">群名称</label>
+    <input class="gc-modal-input" id="gc-new-name" placeholder="输入群名称…">
+
+    <label class="gc-modal-label">群头像 URL（可选）</label>
+    <input class="gc-modal-input" id="gc-new-avatar" placeholder="https://…">
+
+    <label class="gc-modal-label">选择角色成员（可多选）</label>
+    <div id="gc-role-picker" class="gc-role-picker"></div>
+
+    <div class="gc-modal-btns">
+      <button class="gc-btn-primary" id="gc-create-confirm">创建</button>
+      <button class="gc-btn-ghost" id="gc-create-cancel">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 群聊界面（全屏） ===================== -->
+<div id="gc-chat-view" style="display:none;position:fixed;inset:0;z-index:450;
+  background:#f0f0f0;flex-direction:column;">
+
+  <div class="gc-chat-topbar">
+    <button class="gc-chat-back" id="gc-chat-back">
+      <i data-lucide="chevron-left" style="width:22px;height:22px;stroke:#333;stroke-width:2;"></i>
+    </button>
+    <div style="display:flex;flex-direction:column;align-items:center;flex:1;min-width:0;">
+      <div class="gc-chat-title" id="gc-chat-title">群聊</div>
+      <div class="gc-chat-subtitle" id="gc-chat-subtitle">0人</div>
+    </div>
+    <button class="gc-chat-settings-btn" id="gc-chat-settings-btn">
+      <i data-lucide="ellipsis" style="width:22px;height:22px;stroke:#333;stroke-width:2;"></i>
+    </button>
+  </div>
+
+  <div class="gc-messages-area" id="gc-messages-area"></div>
+
+  <div class="gc-typing-indicator" id="gc-typing">
+    <div class="gc-typing-dot"></div>
+    <div class="gc-typing-dot"></div>
+    <div class="gc-typing-dot"></div>
+    <span class="gc-typing-name" id="gc-typing-name"></span>
+  </div>
+
+  <div class="gc-inputbar">
+    <button class="gc-input-icon-btn" id="gc-emoji-btn" title="表情包">
+      <i data-lucide="smile" style="width:24px;height:24px;stroke:#07C160;stroke-width:1.8;"></i>
+    </button>
+    <input class="gc-input-field" id="gc-input-field"
+      type="text" placeholder="发送消息…" autocomplete="off">
+    <button class="gc-input-icon-btn" id="gc-extra-btn" title="更多">
+      <i data-lucide="plus-circle" style="width:24px;height:24px;stroke:#07C160;stroke-width:1.8;"></i>
+    </button>
+    <button class="gc-send-btn" id="gc-send-btn">发送</button>
+  </div>
+
+  <div class="gc-extra-bar" id="gc-extra-bar" style="display:none;">
+    <div class="gc-extra-grid">
+
+      <button class="gc-extra-item" id="gc-extra-photo">
+        <div class="gc-extra-icon">
+          <i data-lucide="image" style="width:26px;height:26px;stroke:#555;stroke-width:1.6;"></i>
+        </div>
+        <div class="gc-extra-label">图片</div>
+      </button>
+
+      <button class="gc-extra-item" id="gc-extra-voice">
+        <div class="gc-extra-icon">
+          <i data-lucide="mic" style="width:26px;height:26px;stroke:#555;stroke-width:1.6;"></i>
+        </div>
+        <div class="gc-extra-label">语音</div>
+      </button>
+
+      <button class="gc-extra-item" id="gc-extra-ai">
+        <div class="gc-extra-icon" style="background:linear-gradient(135deg,#07C160,#0a9b4b);">
+          <i data-lucide="radio" style="width:26px;height:26px;stroke:#fff;stroke-width:1.6;"></i>
+        </div>
+        <div class="gc-extra-label">AI回复</div>
+      </button>
+
+      <button class="gc-extra-item" id="gc-extra-members">
+        <div class="gc-extra-icon">
+          <i data-lucide="users" style="width:26px;height:26px;stroke:#555;stroke-width:1.6;"></i>
+        </div>
+        <div class="gc-extra-label">成员</div>
+      </button>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 群设置面板 ===================== -->
+<div id="gc-settings-panel" style="display:none;position:fixed;inset:0;z-index:460;
+  background:rgba(0,0,0,0.4);align-items:flex-end;justify-content:center;">
+  <div class="gc-settings-box">
+    <div class="gc-settings-header">
+      <div class="gc-settings-title">群聊设置</div>
+      <button class="gc-settings-close" id="gc-settings-close">
+        <i data-lucide="x" style="width:20px;height:20px;stroke:#aaa;stroke-width:2;"></i>
+      </button>
+    </div>
+    <div class="gc-members-row" id="gc-members-row"></div>
+    <div class="gc-settings-item" id="gc-settings-rename">
+      <span>修改群名称</span>
+      <i data-lucide="chevron-right" style="width:16px;height:16px;stroke:#ccc;stroke-width:2;"></i>
+    </div>
+    <div class="gc-settings-item" id="gc-settings-notice">
+      <span>群公告</span>
+      <i data-lucide="chevron-right" style="width:16px;height:16px;stroke:#ccc;stroke-width:2;"></i>
+    </div>
+    <div class="gc-settings-item" id="gc-settings-autoreply">
+  <span>自动群聊设置</span>
+  <i data-lucide="chevron-right" style="width:16px;height:16px;stroke:#ccc;stroke-width:2;"></i>
+</div>
+        <div class="gc-settings-item" id="gc-settings-emojis">
+      <span>群表情包管理</span>
+      <i data-lucide="chevron-right" style="width:16px;height:16px;stroke:#ccc;stroke-width:2;"></i>
+    </div>
+    <div class="gc-settings-item gc-settings-danger" id="gc-settings-delete">
+      <span>解散该群</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 语音输入弹窗 ===================== -->
+<div id="gc-voice-modal" style="display:none;position:fixed;inset:0;z-index:510;
+  background:rgba(0,0,0,0.45);align-items:center;justify-content:center;">
+  <div class="gc-modal-box" style="border-radius:16px;max-width:320px;">
+    <div class="gc-modal-title">发送语音</div>
+    <input class="gc-modal-input" id="gc-voice-input" placeholder="输入语音内容…">
+    <div class="gc-modal-btns">
+      <button class="gc-btn-primary" id="gc-voice-confirm">发送</button>
+      <button class="gc-btn-ghost" id="gc-voice-cancel">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 图片发送弹窗 ===================== -->
+<div id="gc-photo-modal" style="display:none;position:fixed;inset:0;z-index:510;
+  background:rgba(0,0,0,0.45);align-items:center;justify-content:center;">
+  <div class="gc-modal-box" style="border-radius:16px;max-width:320px;">
+    <div class="gc-modal-title">发送图片</div>
+    <input class="gc-modal-input" id="gc-photo-url" placeholder="图片 URL…">
+    <div style="text-align:center;margin:4px 0;font-size:11px;color:#aaa;">或</div>
+    <button class="gc-btn-ghost" id="gc-photo-local-btn" style="width:100%;margin-bottom:8px;">
+      本地选择
+    </button>
+    <input type="file" id="gc-photo-file" accept="image/*" style="display:none;">
+    <img id="gc-photo-preview" style="display:none;width:100%;max-height:140px;
+      object-fit:contain;border-radius:8px;margin-bottom:8px;" alt="">
+    <div class="gc-modal-btns">
+      <button class="gc-btn-primary" id="gc-photo-confirm">发送</button>
+      <button class="gc-btn-ghost" id="gc-photo-cancel">取消</button>
+    </div>
+  </div>
+</div>
+<!-- ===================== 群表情包管理面板 ===================== -->
+<div id="gc-emoji-manage-panel" style="display:none;position:fixed;inset:0;z-index:470;
+  background:#f7f7f7;flex-direction:column;">
+
+  <div class="gc-topbar">
+    <button class="gc-topbar-back" id="gc-emoji-manage-back">
+      <i data-lucide="chevron-left" style="width:22px;height:22px;stroke:#333;stroke-width:2;"></i>
+    </button>
+    <div class="gc-topbar-title">群表情包管理</div>
+    <button class="gc-topbar-action" id="gc-emoji-manage-add-btn">
+      <i data-lucide="plus" style="width:22px;height:22px;stroke:#07C160;stroke-width:2.5;"></i>
+    </button>
+  </div>
+
+  <!-- 分类标签栏 -->
+  <div id="gc-emoji-cat-bar" style="
+    display:flex;gap:8px;padding:10px 12px;
+    overflow-x:auto;background:#fff;
+    border-bottom:1px solid #e5e5e5;flex-shrink:0;">
+  </div>
+
+  <!-- 表情包网格 -->
+  <div id="gc-emoji-manage-grid" style="
+    flex:1;overflow-y:auto;
+    display:grid;grid-template-columns:repeat(4,1fr);
+    gap:10px;padding:12px;">
+  </div>
+
+  <!-- 底部：选择哪些分类可供群成员使用 -->
+  <div style="background:#fff;border-top:1px solid #e5e5e5;padding:12px 14px 28px;flex-shrink:0;">
+    <div style="font-size:12px;color:#888;margin-bottom:8px;">选择可供群成员使用的分类：</div>
+    <div id="gc-emoji-allowed-cats" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+  </div>
+</div>
+
+<!-- ===================== 添加群表情包弹窗 ===================== -->
+<div id="gc-emoji-add-modal" style="display:none;position:fixed;inset:0;z-index:510;
+  background:rgba(0,0,0,0.45);align-items:flex-end;justify-content:center;">
+  <div class="gc-modal-box">
+    <div class="gc-modal-title">添加表情包</div>
+
+    <label class="gc-modal-label">表情包名称</label>
+    <input class="gc-modal-input" id="gc-emoji-add-name" placeholder="表情包名称…">
+
+    <label class="gc-modal-label">图片 URL</label>
+    <input class="gc-modal-input" id="gc-emoji-add-url" placeholder="https://…">
+
+    <div style="text-align:center;margin:4px 0;font-size:11px;color:#aaa;">或</div>
+    <button class="gc-btn-ghost" id="gc-emoji-add-local-btn" style="width:100%;margin-bottom:8px;">
+      本地上传
+    </button>
+    <input type="file" id="gc-emoji-add-file" accept="image/*" style="display:none;">
+    <img id="gc-emoji-add-preview" style="display:none;width:80px;height:80px;
+      object-fit:contain;border-radius:8px;margin-bottom:8px;" alt="">
+
+    <label class="gc-modal-label">分类名称</label>
+    <input class="gc-modal-input" id="gc-emoji-add-cat" placeholder="例如：搞笑、日常…">
+
+    <div class="gc-modal-btns">
+      <button class="gc-btn-primary" id="gc-emoji-add-confirm">添加</button>
+      <button class="gc-btn-ghost" id="gc-emoji-add-cancel">取消</button>
+    </div>
+  </div>
+</div>
+<!-- ===================== 自动群聊设置弹窗 ===================== -->
+<div id="gc-autoreply-modal" style="display:none;position:fixed;inset:0;z-index:510;
+  background:rgba(0,0,0,0.45);align-items:flex-end;justify-content:center;">
+  <div class="gc-modal-box">
+    <div class="gc-modal-title">自动群聊设置</div>
+
+    <label class="gc-modal-label">定时触发（每隔多少秒自动聊一轮，0 为关闭）</label>
+    <input class="gc-modal-input" id="gc-autoreply-interval"
+      type="number" min="0" placeholder="例如 60，填 0 关闭">
+
+    <label class="gc-modal-label" style="margin-top:12px;">
+      每天固定时间触发（可添加多个）
+    </label>
+    <div id="gc-autoreply-timelist"
+      style="display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 8px;min-height:32px;">
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input class="gc-modal-input" id="gc-autoreply-time-input"
+        type="time" style="flex:1;margin-bottom:0;">
+      <button class="gc-btn-primary" id="gc-autoreply-time-add"
+        style="flex:none;width:60px;padding:10px 0;">添加</button>
+    </div>
+    <div style="font-size:11px;color:#aaa;margin-top:4px;">
+      点击时间标签可删除。网页需保持打开状态才能触发。
+    </div>
+
+    <div class="gc-modal-btns" style="margin-top:14px;">
+      <button class="gc-btn-primary" id="gc-autoreply-save">保存</button>
+      <button class="gc-btn-ghost" id="gc-autoreply-cancel">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 消息操作菜单 ===================== -->
+<div id="gc-msg-menu" style="display:none;position:fixed;z-index:600;">
+  <div class="gc-msg-menu-box" id="gc-msg-menu-box"></div>
+</div>
