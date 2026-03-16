@@ -719,19 +719,13 @@ document.getElementById('p2-img-modal').addEventListener('click', function(e) {
 (function initP2UserCard() {
   /* 恢复背景 */
   (async () => {
-  let bg = load('p2UcBg', null);
-  if (bg === '__idb__') bg = await imgLoad('p2UcBg', null);
-  if (bg) {
-    const bgEl = document.getElementById('p2-uc-bg');
-    if (bgEl) bgEl.style.backgroundImage = 'url(' + bg + ')';
-  }
-})();
-
-
-  if (bg) {
-    const bgEl = document.getElementById('p2-uc-bg');
-    if (bgEl) bgEl.style.backgroundImage = 'url(' + bg + ')';
-  }
+    let bg = load('p2UcBg', null);
+    if (bg === '__idb__') bg = await imgLoad('p2UcBg', null);
+    if (bg) {
+      const bgEl = document.getElementById('p2-uc-bg');
+      if (bgEl) bgEl.style.backgroundImage = 'url(' + bg + ')';
+    }
+  })();
 
   /* 同步头像 */
   const av   = load('userAvatar', null);
