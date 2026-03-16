@@ -722,7 +722,11 @@ rawContent = rawContent.replace(/\[MUSIC:play=[^\]]+\]/gi, '').trim();
     rawContent = rawContent.replace(sbRe, '').trim();
   }
 
-  const lines           = rawContent.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  const lines           = rawContent
+  .replace(/\[ts:\d+\]/g, '\n')
+  .split('\n')
+  .map(l => l.trim())
+  .filter(l => l.length > 0);
   const chatUserAvatar2 = chat.chatUserAvatar || liaoUserAvatar;
   let cumulativeDelay   = 0;
   const baseTs          = Date.now();
