@@ -611,6 +611,13 @@ if (typeof window.mpGetSongTitles === 'function') {
     '3. theater 字段写200字左右的小剧场，用……代替省略\n' +
     '4. 状态栏必须输出，不能省略';
 
+  /* ---- 小窝动态注入 ---- */
+  let coupleSpaceSection = '';
+  if (typeof window.cpGetSpaceInjection === 'function') {
+    const spaceText = window.cpGetSpaceInjection(role.id);
+    if (spaceText) coupleSpaceSection = spaceText;
+  }
+
   const finalSystemPrompt =
     worldBookSection +
     memorySection +
@@ -622,6 +629,7 @@ if (typeof window.mpGetSongTitles === 'function') {
     roleChangeSongSection +
     timeSection +
     timeSinceLastSection +
+    coupleSpaceSection +
     statusBarSection;
 
   /* 构建历史消息 */
@@ -764,7 +772,7 @@ rawContent = rawContent.replace(/\[MUSIC:play=[^\]]+\]/gi, '').trim();
           }
         }
       } else {
-        const cleanLine = removeEmoji(line);
+        const cleanLine = removeEmoji(line).replace(/\[ts:\d+\]/g, '').trim();
         if (!cleanLine) return;
         msgObj = {
           role:         'assistant',
@@ -786,7 +794,7 @@ rawContent = rawContent.replace(/\[MUSIC:play=[^\]]+\]/gi, '').trim();
 
       if (i === processedLines.length - 1) {
         renderChatList();
-        if (Math.random() < 0.10) scheduleRoleSuiyanNew(role);
+        scheduleRoleSuiyanNew(role);
 
         const autoInterval = (chat.chatSettings && chat.chatSettings.autoMemoryInterval) || 0;
         if (autoInterval > 0) {
@@ -802,82 +810,178 @@ rawContent = rawContent.replace(/\[MUSIC:play=[^\]]+\]/gi, '').trim();
 }
 
 /* ============================================================
-   随言 — 角色自主发布新随言
+   随言 — 核心入口：每次 AI 回复后调用
+   角色自己判断：要不要发随言、要不要评论用户随言、要不要回复用户评论
    ============================================================ */
-function scheduleRoleSuiyanNew(role) {
-  setTimeout(async () => {
-    if (!role) return;
-    const activeConfig = loadApiConfig();
-    if (!activeConfig || !activeConfig.url) return;
-    const model = loadApiModel();
-    if (!model) return;
+async function scheduleRoleSuiyanNew(role) {
+  if (!role) return;
+  const activeConfig = loadApiConfig();
+  if (!activeConfig || !activeConfig.url) return;
+  const model = loadApiModel();
+  if (!model) return;
 
-    const systemPrompt =
-      '你是角色 ' + role.realname + '，' + (role.setting || '') + '。\n' +
-      '现在请你发一条随言（类似朋友圈的短动态），内容随意，可以和你最近的聊天内容有关，也可以是你此刻的感受、所见所闻、心情或想法。\n' +
-      '要求：\n' +
-      '1. 不超过80个字。\n' +
-      '2. 纯文字，不使用任何特殊格式。\n' +
-      '3. 口语化，自然真实，像随手发的朋友圈。\n' +
-      '4. 只输出动态内容本身，不要加任何前缀或说明。';
+  // 取最近聊天记录作为上下文
+  const chat = liaoChats.find(c => c.roleId === role.id);
+  const recentChat = chat
+    ? chat.messages
+        .filter(m => !m.hidden && (m.role === 'user' || m.role === 'assistant'))
+        .slice(-10)
+        .map(m => (m.role === 'user' ? '用户' : (role.nickname || role.realname)) + '：' + m.content)
+        .join('\n')
+    : '';
 
-    try {
-      const endpoint = activeConfig.url.replace(/\/$/, '') + '/chat/completions';
-      const headers  = { 'Content-Type': 'application/json' };
-      if (activeConfig.key) headers['Authorization'] = 'Bearer ' + activeConfig.key;
-      const res = await fetch(endpoint, {
-        method: 'POST', headers,
-        body: JSON.stringify({
-          model,
-          messages: [{ role: 'system', content: systemPrompt }],
-          stream: false
-        })
-      });
-      if (!res.ok) return;
-      const json    = await res.json();
-      const content = removeEmoji((json.choices?.[0]?.message?.content || '').trim());
-      if (!content) return;
+  // 用户最近3条随言
+  const userPosts = liaoSuiyan.filter(p => p.isUser).slice(-3);
+  const userPostsText = userPosts.length
+    ? userPosts.map(p => {
+        const idx = liaoSuiyan.indexOf(p);
+        return `[用户随言 idx=${idx}] ${p.content}`;
+      }).join('\n')
+    : '（无）';
 
-      liaoSuiyan.push({
-        author:   role.nickname || role.realname,
-        avatar:   role.avatar   || defaultAvatar(),
-        content,
-        ts:       Date.now(),
-        likes:    0,
-        likedBy:  [],
-        comments: [],
-        isUser:   false,
-        roleId:   role.id
-      });
-      lSave('suiyan', liaoSuiyan);
-    } catch (e) { /* 静默失败 */ }
-  }, 1200);
+  // 角色自己的随言里，有用户评论且尚未回复的
+  const myPostsWithUserComment = liaoSuiyan
+    .map((p, i) => ({ p, i }))
+    .filter(({ p }) =>
+      p.roleId === role.id &&
+      p.comments &&
+      p.comments.some(c => c.isUser && !c.replied)
+    )
+    .slice(-3);
+  const myPostsWithCommentText = myPostsWithUserComment.length
+    ? myPostsWithUserComment.map(({ p, i }) => {
+        const userComments = p.comments
+          .filter(c => c.isUser && !c.replied)
+          .map(c => c.text)
+          .join('；');
+        return `[我的随言 idx=${i}] ${p.content}\n用户评论：${userComments}`;
+      }).join('\n')
+    : '（无）';
+
+  const systemPrompt =
+    `你是角色 ${role.nickname || role.realname}，${role.setting || ''}。\n` +
+    `你刚刚和用户聊完天，现在需要决定三件事：\n\n` +
+    `【最近聊天片段】\n${recentChat || '（无）'}\n\n` +
+    `【用户最近发的随言】\n${userPostsText}\n\n` +
+    `【用户评论了你的随言（待回复）】\n${myPostsWithCommentText}\n\n` +
+    `请严格按以下格式输出，共三段，每段之间空一行：\n\n` +
+    `[POST:yes或no]\n` +
+    `（如果是yes，紧接着下一行写随言内容，不超过80字，口语化纯文字，不要加任何前缀）\n\n` +
+    `[COMMENT:idx数字或no]\n` +
+    `（如果是idx数字，紧接着下一行写评论内容，不超过30字）\n\n` +
+    `[REPLY:idx数字或no]\n` +
+    `（如果是idx数字，紧接着下一行写回复内容，不超过30字）\n\n` +
+    `判断标准：\n` +
+    `· 发随言：聊天让你有感触或有趣事才发，不是每次都发\n` +
+    `· 评论：用户随言和你的性格或当前话题有关联才评论，否则写no\n` +
+    `· 回复：有待回复的用户评论才回复，否则写no\n` +
+    `只输出上述格式，不输出任何其他文字。`;
+
+  try {
+    const endpoint = activeConfig.url.replace(/\/$/, '') + '/chat/completions';
+    const headers = { 'Content-Type': 'application/json' };
+    if (activeConfig.key) headers['Authorization'] = 'Bearer ' + activeConfig.key;
+
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        model,
+        messages: [{ role: 'system', content: systemPrompt }],
+        stream: false
+      })
+    });
+    if (!res.ok) return;
+    const json = await res.json();
+    const raw = (json.choices?.[0]?.message?.content || '').trim();
+    _parseSuiyanDecision(raw, role);
+  } catch (e) { /* 静默失败 */ }
 }
 
 /* ============================================================
-   随言 — 角色互动（点赞/评论用户随言）
+   解析随言决策结果
    ============================================================ */
-function scheduleRoleInteractSuiyan() {
-  if (Math.random() > 0.10) return;
-  const userPosts = liaoSuiyan.filter(p => p.isUser);
-  if (!userPosts.length || !liaoRoles.length) return;
-  const post    = userPosts[userPosts.length - 1];
-  const postIdx = liaoSuiyan.lastIndexOf(post);
-  const role    = liaoRoles[Math.floor(Math.random() * liaoRoles.length)];
+function _parseSuiyanDecision(raw, role) {
+  const roleName = role.nickname || role.realname;
+  const lines = raw.split('\n').map(l => l.trim()).filter(l => l);
 
-  setTimeout(() => {
-    if (!liaoSuiyan[postIdx]) return;
-    if (!liaoSuiyan[postIdx].likedBy) liaoSuiyan[postIdx].likedBy = [];
-    if (!liaoSuiyan[postIdx].likedBy.includes(role.id)) {
-      liaoSuiyan[postIdx].likedBy.push(role.id);
-      liaoSuiyan[postIdx].likes = (liaoSuiyan[postIdx].likes || 0) + 1;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // 发随言
+    if (/^\[POST:yes\]$/i.test(line)) {
+      const nextLine = lines[i + 1] || '';
+      const content = removeEmoji(nextLine);
+      if (content && !/^\[/.test(content)) {
+        liaoSuiyan.push({
+          author:   roleName,
+          avatar:   role.avatar || defaultAvatar(),
+          content,
+          ts:       Date.now(),
+          likes:    0,
+          likedBy:  [],
+          comments: [],
+          isUser:   false,
+          roleId:   role.id
+        });
+        i++;
+      }
     }
-    if (Math.random() < 0.5) {
-      const comments = ['哈哈', '好的', '嗯嗯', '真的吗', '厉害啊', '是这样啊', '我也是'];
-      const c        = comments[Math.floor(Math.random() * comments.length)];
-      if (!liaoSuiyan[postIdx].comments) liaoSuiyan[postIdx].comments = [];
-      liaoSuiyan[postIdx].comments.push({ author: role.nickname || role.realname, text: c });
+
+    // 评论用户随言
+    const commentMatch = line.match(/^\[COMMENT:(\d+)\]$/i);
+    if (commentMatch) {
+      const idx = parseInt(commentMatch[1]);
+      const nextLine = lines[i + 1] || '';
+      const commentText = removeEmoji(nextLine);
+      if (commentText && !/^\[/.test(commentText) && liaoSuiyan[idx] && liaoSuiyan[idx].isUser) {
+        if (!liaoSuiyan[idx].comments) liaoSuiyan[idx].comments = [];
+        // 同一角色对同一条随言只评论一次
+        const alreadyCommented = liaoSuiyan[idx].comments.some(
+          c => c.roleId === role.id && !c.isUser
+        );
+        if (!alreadyCommented) {
+          liaoSuiyan[idx].comments.push({
+            author: roleName,
+            text:   commentText,
+            isUser: false,
+            roleId: role.id
+          });
+        }
+        i++;
+      }
     }
-    lSave('suiyan', liaoSuiyan);
-  }, 2000 + Math.random() * 4000);
+
+    // 回复用户对自己随言的评论
+    const replyMatch = line.match(/^\[REPLY:(\d+)\]$/i);
+    if (replyMatch) {
+      const idx = parseInt(replyMatch[1]);
+      const nextLine = lines[i + 1] || '';
+      const replyText = removeEmoji(nextLine);
+      if (replyText && !/^\[/.test(replyText) && liaoSuiyan[idx] && liaoSuiyan[idx].roleId === role.id) {
+        if (!liaoSuiyan[idx].comments) liaoSuiyan[idx].comments = [];
+        // 把待回复的用户评论标记为已回复
+        liaoSuiyan[idx].comments
+          .filter(c => c.isUser && !c.replied)
+          .forEach(c => { c.replied = true; });
+        // 追加角色的回复
+        liaoSuiyan[idx].comments.push({
+          author:  roleName,
+          text:    replyText,
+          isUser:  false,
+          roleId:  role.id,
+          isReply: true
+        });
+        i++;
+      }
+    }
+  }
+
+  lSave('suiyan', liaoSuiyan);
+
+  // 如果当前在随言 tab，刷新显示
+  const suiyanPanel = document.querySelector('.liao-panel[data-panel="suiyan"]');
+  if (suiyanPanel && suiyanPanel.classList.contains('active')) {
+    renderSuiyan();
+  }
 }

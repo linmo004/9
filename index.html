@@ -31,6 +31,9 @@
 <link rel="stylesheet" href="ripple.css">
 <link rel="stylesheet" href="music.css">
 <link rel="stylesheet" href="groupchat.css">
+<link rel="stylesheet" href="couple.css">
+<link rel="stylesheet" href="couple-home.css">
+<link rel="stylesheet" href="couple-radio.css">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <script src="https://unpkg.com/dexie@3/dist/dexie.js"></script>
 </head>
@@ -57,6 +60,7 @@
 <div id="partial-ripple"></div>
 <div id="partial-music"></div>
 <div id="partial-groupchat"></div>
+<div id="partial-couple"></div>
 <script>
 (function () {
   const partials = [
@@ -76,6 +80,7 @@
     { id: 'partial-ripple', file: 'ripple.html' },
     { id: 'partial-music',           file: 'music.html' },
     { id: 'partial-groupchat', file: 'groupchat.html' },
+    { id: 'partial-couple', file: 'couple.html' },
   ];
 
   async function loadAll() {
@@ -117,6 +122,7 @@
 
   async function initScripts() {
     await loadScript('db-images.js');
+    await loadScript('liao-db.js');
     await loadScript('app.js');
     await loadScript('settings-1.js');
     await loadScript('settings-2.js');
@@ -147,6 +153,15 @@
     await loadScript('ripple.js');
     await loadScript('music.js');
     await loadScript('groupchat.js');
+    await loadScript('couple-core.js');
+    await loadScript('couple-home.js');
+    await loadScript('couple-radio.js');
+    await loadScript('couple-blog.js');
+    await loadScript('couple-album.js');
+    await loadScript('couple-diary.js');
+    await loadScript('couple-anniversary.js');
+    await loadScript('couple-whisper.js');
+    await loadScript('couple-pet.js');
     if (typeof lucide !== 'undefined') lucide.createIcons();
     if (typeof window.initSettings === 'function') window.initSettings();
   }

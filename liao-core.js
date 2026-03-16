@@ -4,8 +4,16 @@
 
 /* ---------- 存取工具 ---------- */
 function lSave(key, val) {
-  try { localStorage.setItem('liao_' + key, JSON.stringify(val)); } catch (e) {}
+  const fullKey = 'liao_' + key;
+  if (typeof window.LIAO_BIG_KEYS !== 'undefined' &&
+      window.LIAO_BIG_KEYS.includes(fullKey) &&
+      typeof window.liaoDbSave === 'function') {
+    window.liaoDbSave(fullKey, val);
+    return;
+  }
+  try { localStorage.setItem(fullKey, JSON.stringify(val)); } catch (e) {}
 }
+
 function lLoad(key, def) {
   try {
     const v = localStorage.getItem('liao_' + key);
@@ -13,13 +21,34 @@ function lLoad(key, def) {
   } catch (e) { return def; }
 }
 
+
 /* ---------- 全局数据 ---------- */
-let liaoRoles      = lLoad('roles', []);
-let liaoChats      = lLoad('chats', []);
-let liaoSuiyan     = lLoad('suiyan', []);
+let liaoRoles      = [];
+let liaoChats      = [];
+let liaoSuiyan     = [];
 let liaoUserName   = lLoad('userName', '用户');
 let liaoUserAvatar = lLoad('userAvatar', 'https://api.dicebear.com/7.x/bottts-neutral/svg?seed=user');
 let liaoBgSrc      = lLoad('suiyanBg', '');
+
+/* 从 IndexedDB 异步加载大数据，加载完后刷新界面 */
+(async function loadBigData() {
+  try {
+    if (typeof window.liaoDbLoad === 'function') {
+      liaoRoles  = await window.liaoDbLoad('liao_roles',  []);
+      liaoChats  = await window.liaoDbLoad('liao_chats',  []);
+      liaoSuiyan = await window.liaoDbLoad('liao_suiyan', []);
+    } else {
+      liaoRoles  = lLoad('roles',  []);
+      liaoChats  = lLoad('chats',  []);
+      liaoSuiyan = lLoad('suiyan', []);
+    }
+    liaoChats.forEach(c => { if (typeof initChatMemory === 'function') initChatMemory(c); });
+  } catch (e) {
+    liaoRoles  = lLoad('roles',  []);
+    liaoChats  = lLoad('chats',  []);
+    liaoSuiyan = lLoad('suiyan', []);
+  }
+})();
 
 let currentChatIdx = -1;
 
@@ -105,6 +134,13 @@ function closeLiaoApp() {
 
 /* ---------- 标签切换 ---------- */
 function switchLiaoTab(tabId) {
+  // 切换 tab 时，强制关闭聊天界面和聊天设置覆盖层
+  const chatView = document.getElementById('liao-chat-view');
+  const chatSettings = document.getElementById('liao-chat-settings');
+  if (chatView) chatView.classList.remove('show');
+  if (chatSettings) chatSettings.classList.remove('show');
+  currentChatIdx = -1;
+
   document.querySelectorAll('.liao-tab-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.tab === tabId);
   });
@@ -120,14 +156,12 @@ function switchLiaoTab(tabId) {
       countEl.textContent = count + ' 位角色';
     }
   }
-  /* ↓ 加上这一行 */
   if (tabId === 'myhome') {
     if (typeof window.initMyhomePanel === 'function') window.initMyhomePanel();
   }
   if (tabId === 'suiyan') renderSuiyan();
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
-
 
 /* ---------- 标签点击事件委托 ---------- */
 document.addEventListener('click', function (e) {

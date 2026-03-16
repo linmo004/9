@@ -1,0 +1,202 @@
+<!-- ===================== 我们的小窝 App ===================== -->
+<div id="couple-app" style="display:none;position:fixed;inset:0;z-index:400;
+  background:#f0f5ff;flex-direction:column;">
+
+  <!-- ===== 角色选择界面 ===== -->
+  <div id="couple-role-select" style="display:flex;flex-direction:column;
+    height:100%;background:linear-gradient(160deg,#e8f0fe 0%,#fce4ec 100%);">
+
+    <div style="padding:52px 24px 20px;text-align:center;">
+      <div style="font-size:26px;font-weight:800;color:#3d5afe;letter-spacing:0.04em;">
+        我们的小窝
+      </div>
+      <div style="font-size:13px;color:#90a4c8;margin-top:6px;">
+        选择一位角色，开始你们的专属空间
+      </div>
+    </div>
+
+    <div style="flex:1;overflow-y:auto;padding:0 16px 40px;">
+      <div id="couple-role-list" style="display:flex;flex-direction:column;gap:12px;"></div>
+      <div id="couple-role-empty" style="display:none;text-align:center;
+        padding:60px 20px;color:#b0bec5;font-size:13px;">
+        还没有角色，请先在了了中创建角色
+      </div>
+    </div>
+
+    <div style="padding:16px 24px 40px;text-align:center;">
+      <button id="couple-select-close" style="background:none;border:1.5px solid #c5cae9;
+        color:#7986cb;border-radius:999px;padding:10px 32px;font-size:14px;
+        font-family:inherit;cursor:pointer;">关闭</button>
+    </div>
+  </div>
+
+  <!-- ===== 主界面 ===== -->
+  <div id="couple-main" style="display:none;flex-direction:column;height:100%;">
+
+    <!-- 顶部栏 -->
+    <div id="couple-topbar" style="display:flex;align-items:center;height:52px;
+      padding:0 14px;background:#fff;border-bottom:1px solid #e8eaf6;
+      flex-shrink:0;position:relative;">
+      <button id="couple-back-btn" style="background:none;border:none;cursor:pointer;
+        padding:6px 10px 6px 0;display:flex;align-items:center;">
+        <i data-lucide="chevron-left" style="width:22px;height:22px;stroke:#3d5afe;stroke-width:2;"></i>
+      </button>
+      <div style="flex:1;text-align:center;">
+        <div id="couple-topbar-title" style="font-size:16px;font-weight:700;color:#1a237e;">
+          我们的小窝
+        </div>
+        <div id="couple-topbar-sub" style="font-size:10px;color:#9fa8da;"></div>
+      </div>
+      <button id="couple-settings-btn" style="background:none;border:none;cursor:pointer;
+        padding:6px 0 6px 10px;display:flex;align-items:center;">
+        <i data-lucide="settings" style="width:20px;height:20px;stroke:#7986cb;stroke-width:1.8;"></i>
+      </button>
+    </div>
+
+    <!-- Tab 内容区 -->
+    <div style="flex:1;overflow:hidden;position:relative;">
+      <div id="couple-panel-home"         class="couple-panel"></div>
+      <div id="couple-panel-radio"        class="couple-panel"></div>
+      <div id="couple-panel-blog"         class="couple-panel"></div>
+      <div id="couple-panel-album"        class="couple-panel"></div>
+      <div id="couple-panel-diary"        class="couple-panel"></div>
+      <div id="couple-panel-anniversary"  class="couple-panel"></div>
+      <div id="couple-panel-whisper"      class="couple-panel"></div>
+      <div id="couple-panel-pet"          class="couple-panel"></div>
+    </div>
+
+    <!-- 底部 Tab 导航 -->
+    <div id="couple-tabs" style="display:flex;align-items:center;
+      background:#fff;border-top:1px solid #e8eaf6;
+      padding:6px 0 calc(6px + env(safe-area-inset-bottom));
+      flex-shrink:0;overflow-x:auto;scrollbar-width:none;">
+
+      <button class="cp-tab-btn active" data-tab="home">
+        <i data-lucide="home" class="cp-tab-icon"></i>
+        <span class="cp-tab-label">主页</span>
+      </button>
+      <button class="cp-tab-btn" data-tab="radio">
+        <i data-lucide="radio" class="cp-tab-icon"></i>
+        <span class="cp-tab-label">电台</span>
+      </button>
+      <button class="cp-tab-btn" data-tab="blog">
+        <i data-lucide="book-open" class="cp-tab-icon"></i>
+        <span class="cp-tab-label">博客</span>
+      </button>
+      <button class="cp-tab-btn" data-tab="album">
+        <i data-lucide="image" class="cp-tab-icon"></i>
+        <span class="cp-tab-label">相册</span>
+      </button>
+      <button class="cp-tab-btn" data-tab="diary">
+        <i data-lucide="book" class="cp-tab-icon"></i>
+        <span class="cp-tab-label">日记</span>
+      </button>
+      <button class="cp-tab-btn" data-tab="anniversary">
+        <i data-lucide="calendar-heart" class="cp-tab-icon"></i>
+        <span class="cp-tab-label">纪念日</span>
+      </button>
+      <button class="cp-tab-btn" data-tab="whisper">
+        <i data-lucide="mail" class="cp-tab-icon"></i>
+        <span class="cp-tab-label">悄悄话</span>
+      </button>
+      <button class="cp-tab-btn" data-tab="pet">
+        <i data-lucide="paw-print" class="cp-tab-icon"></i>
+        <span class="cp-tab-label">小家</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== 设置面板 ===== -->
+  <div id="couple-settings-panel" style="display:none;position:absolute;inset:0;
+    z-index:50;background:#f0f5ff;flex-direction:column;">
+
+    <div style="display:flex;align-items:center;height:52px;padding:0 14px;
+      background:#fff;border-bottom:1px solid #e8eaf6;flex-shrink:0;">
+      <button id="couple-settings-back" style="background:none;border:none;cursor:pointer;
+        padding:6px 10px 6px 0;display:flex;align-items:center;">
+        <i data-lucide="chevron-left" style="width:22px;height:22px;stroke:#3d5afe;stroke-width:2;"></i>
+      </button>
+      <div style="flex:1;text-align:center;font-size:16px;font-weight:700;color:#1a237e;">
+        小窝设置
+      </div>
+      <div style="width:38px;"></div>
+    </div>
+
+    <div style="flex:1;overflow-y:auto;padding:16px 14px 40px;">
+
+      <!-- 博客自动发帖 -->
+      <div class="cp-setting-section">
+        <div class="cp-setting-section-title">博客自动发帖</div>
+        <div class="cp-setting-row">
+          <span class="cp-setting-label">定时触发（每隔多少分钟，0关闭）</span>
+          <input class="cp-setting-input" id="cp-blog-interval" type="number" min="0" placeholder="0">
+        </div>
+        <div class="cp-setting-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+          <span class="cp-setting-label">固定时间点（可多个）</span>
+          <div id="cp-blog-times-list" style="display:flex;flex-wrap:wrap;gap:6px;min-height:28px;"></div>
+          <div style="display:flex;gap:8px;width:100%;">
+            <input class="cp-setting-input" id="cp-blog-time-input" type="time" style="flex:1;">
+            <button class="cp-setting-add-btn" id="cp-blog-time-add">添加</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 悄悄话自动发送 -->
+      <div class="cp-setting-section">
+        <div class="cp-setting-section-title">角色自动发悄悄话</div>
+        <div class="cp-setting-row">
+          <span class="cp-setting-label">定时触发（每隔多少分钟，0关闭）</span>
+          <input class="cp-setting-input" id="cp-whisper-interval" type="number" min="0" placeholder="0">
+        </div>
+        <div class="cp-setting-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+          <span class="cp-setting-label">固定时间点（可多个）</span>
+          <div id="cp-whisper-times-list" style="display:flex;flex-wrap:wrap;gap:6px;min-height:28px;"></div>
+          <div style="display:flex;gap:8px;width:100%;">
+            <input class="cp-setting-input" id="cp-whisper-time-input" type="time" style="flex:1;">
+            <button class="cp-setting-add-btn" id="cp-whisper-time-add">添加</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 日记自动写作 -->
+      <div class="cp-setting-section">
+        <div class="cp-setting-section-title">角色自动写日记</div>
+        <div class="cp-setting-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+          <span class="cp-setting-label">固定时间点（可多个）</span>
+          <div id="cp-diary-times-list" style="display:flex;flex-wrap:wrap;gap:6px;min-height:28px;"></div>
+          <div style="display:flex;gap:8px;width:100%;">
+            <input class="cp-setting-input" id="cp-diary-time-input" type="time" style="flex:1;">
+            <button class="cp-setting-add-btn" id="cp-diary-time-add">添加</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 粉丝头像管理 -->
+      <div class="cp-setting-section">
+        <div class="cp-setting-section-title">粉丝头像库（用于随机生成粉丝）</div>
+        <div id="cp-fan-avatar-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;"></div>
+        <div style="display:flex;gap:8px;">
+          <input class="cp-setting-input" id="cp-fan-avatar-input"
+            placeholder="粉丝头像 URL…" style="flex:1;">
+          <button class="cp-setting-add-btn" id="cp-fan-avatar-add">添加</button>
+        </div>
+      </div>
+
+      <!-- 在一起纪念日 -->
+      <div class="cp-setting-section">
+        <div class="cp-setting-section-title">在一起纪念日</div>
+        <div class="cp-setting-row">
+          <span class="cp-setting-label">开始日期</span>
+          <input class="cp-setting-input" id="cp-together-date" type="date">
+        </div>
+      </div>
+
+      <button id="cp-settings-save" style="width:100%;background:linear-gradient(135deg,#3d5afe,#7986cb);
+        color:#fff;border:none;border-radius:999px;padding:13px;font-size:15px;
+        font-weight:700;font-family:inherit;cursor:pointer;margin-top:8px;">
+        保存设置
+      </button>
+    </div>
+  </div>
+
+</div>

@@ -31,9 +31,12 @@ function buildSuiyanItem(post, idx) {
 
   let commentsHtml = '';
   if (post.comments && post.comments.length) {
-    const rows = post.comments.map(c =>
-      `<div class="suiyan-comment-item"><span class="suiyan-comment-author">${escHtml(c.author)}：</span>${escHtml(c.text)}</div>`
-    ).join('');
+    const rows = post.comments.map(c => {
+  const replyTag = c.isReply
+    ? `<span style="font-size:10px;color:#9aafc4;margin-right:3px;">↩回复</span>`
+    : '';
+  return `<div class="suiyan-comment-item"><span class="suiyan-comment-author">${escHtml(c.author)}：</span>${replyTag}${escHtml(c.text)}</div>`;
+}).join('');
     commentsHtml = `<div class="suiyan-comments">${rows}</div>`;
   }
 
@@ -78,8 +81,6 @@ function buildSuiyanItem(post, idx) {
     }
     lSave('suiyan', liaoSuiyan);
     renderSuiyan();
-    // 用户点赞后，角色有概率互动
-    if (typeof scheduleRoleInteractSuiyan === 'function') scheduleRoleInteractSuiyan();
   });
 
   div.querySelector('.comment-btn').addEventListener('click', function () {
@@ -206,10 +207,6 @@ document.getElementById('liao-post-confirm').addEventListener('click', () => {
   lSave('suiyan', liaoSuiyan);
   document.getElementById('liao-post-modal').classList.remove('show');
   renderSuiyan();
-  // 发完随言后，角色有概率互动
-  if (typeof scheduleRoleInteractSuiyan === 'function') {
-    setTimeout(scheduleRoleInteractSuiyan, 1500);
-  }
 });
 
 document.getElementById('liao-post-cancel').addEventListener('click', () => {
@@ -244,7 +241,7 @@ document.getElementById('liao-comment-confirm').addEventListener('click', () => 
   const text = document.getElementById('liao-comment-input').value.trim();
   if (!text || commentTargetIdx < 0) return;
   if (!liaoSuiyan[commentTargetIdx].comments) liaoSuiyan[commentTargetIdx].comments = [];
-  liaoSuiyan[commentTargetIdx].comments.push({ author: liaoUserName, text });
+  liaoSuiyan[commentTargetIdx].comments.push({ author: liaoUserName, text, isUser: true });
   lSave('suiyan', liaoSuiyan);
   document.getElementById('liao-comment-modal').classList.remove('show');
   renderSuiyan();
