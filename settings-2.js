@@ -616,13 +616,19 @@ window.initSettings = function () {
   let iconEditKey = '';
   let iconTab     = 'url';
 
-  function restoreAllIcons() {
-    iconRegistry.forEach(reg => {
-      if (customIcons[reg.key]) {
-        document.querySelectorAll(reg.selector).forEach(el => { el.src = customIcons[reg.key]; });
-      }
-    });
+  async function restoreAllIcons() {
+  for (const reg of iconRegistry) {
+    let src = customIcons[reg.key];
+    if (!src) continue;
+    if (src.startsWith('__idb__')) {
+      src = await imgLoad('customIcon_' + reg.key, null) || '';
+    }
+    if (src) {
+      document.querySelectorAll(reg.selector).forEach(el => { el.src = src; });
+    }
   }
+}
+
   restoreAllIcons();
 
   function renderIconReplaceList() {
@@ -682,8 +688,16 @@ window.initSettings = function () {
   });
 
   function applyIconSrc(key, src) {
+  customIcons[key] = src;
+  /* base64 图片存 IndexedDB，URL 存 localStorage */
+  if (src && src.startsWith('data:')) {
+    imgSave('customIcon_' + key, src);
+    customIcons[key] = '__idb__' + key;
+  } else {
     customIcons[key] = src;
-    sSave('customIcons', customIcons);
+    imgDelete('customIcon_' + key);
+  }
+  sSave('customIcons', customIcons);
     const reg = iconRegistry.find(r => r.key === key);
     if (reg) document.querySelectorAll(reg.selector).forEach(el => { el.src = src; });
     renderIconReplaceList();

@@ -283,8 +283,8 @@ document.getElementById('carousel-cancel-btn').addEventListener('click', functio
    ============================================================ */
 let avatarTab = 'url';
 
-(function restoreAvatar() {
-  const av = load('userAvatar', null);
+(async function restoreAvatar() {
+  const av = await imgLoad('userAvatar', null) || load('userAvatar', null);
   if (av) document.getElementById('user-avatar').src = av;
 })();
 
@@ -321,9 +321,13 @@ document.getElementById('avatar-confirm-btn').addEventListener('click', function
     const file = document.getElementById('avatar-file-input').files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = e => {
-      document.getElementById('user-avatar').src = e.target.result;
-      save('userAvatar', e.target.result);
+    reader.onload = async e => {
+  const compressed = typeof compressImage === 'function'
+    ? await compressImage(e.target.result, 300, 0.85)
+    : e.target.result;
+  document.getElementById('user-avatar').src = compressed;
+  await imgSave('userAvatar', compressed);
+  localStorage.removeItem('halo9_userAvatar');
       document.getElementById('avatar-modal').classList.remove('show');
       const p2av = document.getElementById('p2-uc-avatar');
       if (p2av) p2av.src = e.target.result;
@@ -375,14 +379,21 @@ let msgData = load('msgData', [
 ]);
 let msgEditIdx = 0, msgTab = 'url';
 
-function renderMsgWidget() {
-  msgData.forEach((data, idx) => {
+async function renderMsgWidget() {
+  for (let idx = 0; idx < msgData.length; idx++) {
+    const data    = msgData[idx];
     const avatarEl  = document.getElementById('msg-avatar-'  + idx);
     const bubblesEl = document.getElementById('msg-bubbles-' + idx);
-    if (avatarEl)  avatarEl.src = data.avatar;
+    if (avatarEl) {
+      let src = data.avatar;
+      if (src && src.startsWith('__idb__')) {
+        src = await imgLoad(src.replace('__idb__', ''), null) || '';
+      }
+      avatarEl.src = src;
+    }
     if (bubblesEl) bubblesEl.innerHTML =
       data.messages.map(msg => `<div class="msg-bubble">${msg}</div>`).join('');
-  });
+  }
 }
 renderMsgWidget();
 
@@ -439,9 +450,14 @@ document.getElementById('msg-confirm-btn').addEventListener('click', function() 
       return;
     }
     const reader = new FileReader();
-    reader.onload = e => {
-      msgData[msgEditIdx].avatar = e.target.result;
-      save('msgData', msgData);
+    reader.onload = async e => {
+  const compressed = typeof compressImage === 'function'
+    ? await compressImage(e.target.result, 200, 0.80)
+    : e.target.result;
+  const idbKey = 'msgAvatar_' + msgEditIdx;
+  await imgSave(idbKey, compressed);
+  msgData[msgEditIdx].avatar = '__idb__' + idbKey;
+  save('msgData', msgData);
       renderMsgWidget();
       document.getElementById('msg-modal').classList.remove('show');
     };
