@@ -519,6 +519,18 @@ if (pinVal.length === rpPinLength && /^\d{4}$/.test(pinVal)) {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
+function rpApplyWallpaper() {
+  var homeView = document.getElementById('rp-home-view');
+  if (!homeView) return;
+  var wp = rpCurrentRoleData.wallpaper || '';
+  if (wp) {
+    homeView.style.backgroundImage    = 'url(' + wp + ')';
+    homeView.style.backgroundSize     = 'cover';
+    homeView.style.backgroundPosition = 'center';
+  } else {
+    homeView.style.backgroundImage = '';
+  }
+}
 
 function rpClose() {
   var app = document.getElementById('rolephone-app');
