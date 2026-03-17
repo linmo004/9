@@ -2,32 +2,23 @@
 <div id="rolephone-app" style="display:none;">
 
   <!-- ========== 锁屏界面 ========== -->
-  <div id="rp-lockscreen-view" class="rp-view">
+  <div id="rp-lockscreen-view" class="rp-view" style="display:none;">
     <div class="rp-ls-bg"></div>
-
-    <!-- 角色信息 -->
     <div class="rp-ls-top">
       <img class="rp-ls-avatar" id="rp-ls-avatar" src="" alt="">
       <div class="rp-ls-name" id="rp-ls-name">角色名</div>
       <div class="rp-ls-time" id="rp-ls-time">00:00</div>
       <div class="rp-ls-date" id="rp-ls-date"></div>
     </div>
-
-    <!-- 4位密码点 -->
     <div class="rp-pin-dots">
       <div class="rp-pin-dot" data-idx="0"></div>
       <div class="rp-pin-dot" data-idx="1"></div>
       <div class="rp-pin-dot" data-idx="2"></div>
       <div class="rp-pin-dot" data-idx="3"></div>
     </div>
-
-    <!-- 错误提示 -->
     <div class="rp-pin-error" id="rp-pin-error"></div>
-
-    <!-- 忘记密码 -->
     <div class="rp-pin-forget" id="rp-pin-forget">忘记密码</div>
-
-    <!-- 数字键盘 -->
+    <div id="rp-ls-back-btn" style="margin-top:16px;font-size:13px;color:rgba(255,255,255,0.5);cursor:pointer;z-index:1;">返回聊天</div>
     <div class="rp-pin-keyboard">
       <div class="rp-pin-key" data-key="1"><span class="rp-key-num">1</span><span class="rp-key-alpha"></span></div>
       <div class="rp-pin-key" data-key="2"><span class="rp-key-num">2</span><span class="rp-key-alpha">ABC</span></div>
@@ -40,52 +31,58 @@
       <div class="rp-pin-key" data-key="9"><span class="rp-key-num">9</span><span class="rp-key-alpha">WXYZ</span></div>
       <div class="rp-pin-key rp-key-empty"></div>
       <div class="rp-pin-key rp-key-zero" data-key="0"><span class="rp-key-num">0</span></div>
-      <div class="rp-pin-key rp-key-del" data-key="del">⌫</div>
+      <div class="rp-pin-key rp-key-del" data-key="del">
+        <i data-lucide="delete" style="width:20px;height:20px;"></i>
+      </div>
     </div>
   </div>
 
   <!-- ========== 主页 ========== -->
   <div id="rp-home-view" class="rp-view" style="display:none;">
-
-    <!-- 状态栏 -->
     <div class="rp-status-bar">
       <div class="rp-status-time" id="rp-home-time">00:00</div>
       <div class="rp-status-right">
-        <span id="rp-home-weather">☀️ --°C</span>
+        <i data-lucide="cloud-sun" style="width:13px;height:13px;"></i>
+        <span id="rp-home-weather">--°C</span>
         <span id="rp-home-date"></span>
       </div>
     </div>
 
-    <!-- 主体内容 -->
     <div class="rp-home-body">
-
-      <!-- 第一行 -->
+      <!-- 第一行：便签、屏幕健康、趣问、梦境 + 备忘录小组件 -->
       <div class="rp-home-row">
-        <!-- 左：2x2 App 网格 -->
         <div class="rp-app-grid-2x2">
-          <div class="rp-app-item" data-rpapp="liao">
-            <div class="rp-app-icon rp-icon-liao">💬</div>
-            <div class="rp-app-name">了了</div>
-          </div>
           <div class="rp-app-item" data-rpapp="notes">
-            <div class="rp-app-icon rp-icon-notes">📝</div>
+            <div class="rp-app-icon rp-icon-notes">
+              <i data-lucide="notebook-pen" style="width:24px;height:24px;color:#fff;"></i>
+            </div>
             <div class="rp-app-name">便签</div>
           </div>
           <div class="rp-app-item" data-rpapp="health">
-            <div class="rp-app-icon rp-icon-health">📱</div>
+            <div class="rp-app-icon rp-icon-health">
+              <i data-lucide="smartphone" style="width:24px;height:24px;color:#fff;"></i>
+            </div>
             <div class="rp-app-name">屏幕健康</div>
           </div>
           <div class="rp-app-item" data-rpapp="forum">
-            <div class="rp-app-icon rp-icon-forum">🗨️</div>
+            <div class="rp-app-icon rp-icon-forum">
+              <i data-lucide="message-circle-question" style="width:24px;height:24px;color:#fff;"></i>
+            </div>
             <div class="rp-app-name">趣问</div>
           </div>
+          <div class="rp-app-item" data-rpapp="dream">
+            <div class="rp-app-icon rp-icon-dream">
+              <i data-lucide="moon-star" style="width:24px;height:24px;color:#fff;"></i>
+            </div>
+            <div class="rp-app-name">梦境</div>
+          </div>
         </div>
-
-        <!-- 右：备忘录小组件 -->
         <div class="rp-widget rp-widget-memo">
           <div class="rp-widget-header">
             <span class="rp-widget-title">备忘录</span>
-            <button class="rp-widget-add-btn" id="rp-memo-add-btn">+</button>
+            <button class="rp-widget-add-btn" id="rp-memo-add-btn">
+              <i data-lucide="plus" style="width:14px;height:14px;"></i>
+            </button>
           </div>
           <div class="rp-memo-list" id="rp-memo-list">
             <div class="rp-memo-empty">暂无备忘</div>
@@ -93,18 +90,72 @@
         </div>
       </div>
 
-      <!-- 第二行 -->
+      <!-- 第二行：相册、音乐、购物车、步数 + 拍立得 -->
       <div class="rp-home-row">
-        <!-- 左：拍立得小组件 -->
         <div class="rp-widget rp-widget-photo">
           <div class="rp-photo-frame">
             <img class="rp-photo-img" id="rp-photo-img" src="" alt="">
-            <div class="rp-photo-empty" id="rp-photo-empty">📷<br>点击添加照片</div>
+            <div class="rp-photo-empty" id="rp-photo-empty">
+              <i data-lucide="camera" style="width:22px;height:22px;color:#aeaeb2;"></i>
+              <span>点击添加照片</span>
+            </div>
           </div>
           <div class="rp-photo-caption" id="rp-photo-caption">拍立得</div>
         </div>
+        <div class="rp-app-grid-2x2">
+          <div class="rp-app-item" data-rpapp="album">
+            <div class="rp-app-icon rp-icon-album">
+              <i data-lucide="image" style="width:24px;height:24px;color:#fff;"></i>
+            </div>
+            <div class="rp-app-name">相册</div>
+          </div>
+          <div class="rp-app-item" data-rpapp="music">
+            <div class="rp-app-icon rp-icon-music">
+              <i data-lucide="music-2" style="width:24px;height:24px;color:#fff;"></i>
+            </div>
+            <div class="rp-app-name">音乐</div>
+          </div>
+          <div class="rp-app-item" data-rpapp="shop">
+            <div class="rp-app-icon rp-icon-shop">
+              <i data-lucide="shopping-cart" style="width:24px;height:24px;color:#fff;"></i>
+            </div>
+            <div class="rp-app-name">购物车</div>
+          </div>
+          <div class="rp-app-item" data-rpapp="steps">
+            <div class="rp-app-icon rp-icon-steps">
+              <i data-lucide="footprints" style="width:24px;height:24px;color:#fff;"></i>
+            </div>
+            <div class="rp-app-name">步数</div>
+          </div>
+        </div>
+      </div>
 
-        <!-- 右：占位 App 网格 -->
+      <!-- 第三行：通话记录、钱包、追剧、外卖 -->
+      <div class="rp-home-row">
+        <div class="rp-app-grid-2x2">
+          <div class="rp-app-item" data-rpapp="wallet">
+            <div class="rp-app-icon rp-icon-wallet">
+              <i data-lucide="wallet" style="width:24px;height:24px;color:#fff;"></i>
+            </div>
+            <div class="rp-app-name">钱包</div>
+          </div>
+          <div class="rp-app-item" data-rpapp="drama">
+            <div class="rp-app-icon rp-icon-drama">
+              <i data-lucide="tv-2" style="width:24px;height:24px;color:#fff;"></i>
+            </div>
+            <div class="rp-app-name">追剧</div>
+          </div>
+          <div class="rp-app-item" data-rpapp="food">
+            <div class="rp-app-icon rp-icon-food">
+              <i data-lucide="bike" style="width:24px;height:24px;color:#fff;"></i>
+            </div>
+            <div class="rp-app-name">外卖</div>
+          </div>
+          <div class="rp-app-item rp-app-placeholder">
+            <div class="rp-app-icon rp-icon-placeholder"></div>
+            <div class="rp-app-name">敬请期待</div>
+          </div>
+        </div>
         <div class="rp-app-grid-2x2">
           <div class="rp-app-item rp-app-placeholder">
             <div class="rp-app-icon rp-icon-placeholder"></div>
@@ -125,91 +176,68 @@
         </div>
       </div>
 
-    </div><!-- /rp-home-body -->
+    </div>
 
-    <!-- Dock -->
+    <!-- Dock：通话记录放第一个 -->
     <div class="rp-dock">
-      <div class="rp-dock-item rp-dock-phone">
-        <div class="rp-dock-icon">📞</div>
+      <div class="rp-dock-item" id="rp-dock-call-btn" style="cursor:pointer;">
+        <div class="rp-app-icon rp-icon-call" style="width:52px;height:52px;border-radius:14px;">
+          <i data-lucide="phone" style="width:24px;height:24px;color:#fff;"></i>
+        </div>
       </div>
       <div class="rp-dock-item rp-dock-home-btn" id="rp-dock-home-btn">
         <div class="rp-dock-home-circle"></div>
       </div>
       <div class="rp-dock-item rp-dock-back" id="rp-dock-back-btn">
-        <div class="rp-dock-icon">✕</div>
+        <i data-lucide="x" style="width:20px;height:20px;color:#3a3a3c;"></i>
       </div>
     </div>
-  </div>
-
-  <!-- ========== 了了 App ========== -->
-  <div id="rp-liao-view" class="rp-view" style="display:none;">
-    <div class="rp-app-topbar">
-      <button class="rp-back-btn" data-rpback="rp-home-view">←</button>
-      <div class="rp-app-topbar-title">了了</div>
-      <button class="rp-topbar-right-btn" id="rp-liao-compose-btn">＋</button>
-    </div>
-    <div class="rp-chat-list" id="rp-liao-chat-list">
-      <div class="rp-list-empty">暂无聊天记录</div>
-    </div>
-  </div>
-
-  <!-- ========== 了了聊天详情 ========== -->
-  <div id="rp-liao-chat-view" class="rp-view" style="display:none;">
-    <div class="rp-app-topbar">
-      <button class="rp-back-btn" data-rpback="rp-liao-view">←</button>
-      <div class="rp-liao-chat-topbar-info">
-        <img class="rp-liao-chat-avatar" id="rp-liao-chat-avatar" src="" alt="">
-        <div class="rp-app-topbar-title" id="rp-liao-chat-name">聊天</div>
-      </div>
-      <button class="rp-topbar-right-btn" id="rp-liao-gen-btn">✦</button>
-    </div>
-    <div class="rp-liao-messages" id="rp-liao-messages"></div>
   </div>
 
   <!-- ========== 便签 App ========== -->
   <div id="rp-notes-view" class="rp-view" style="display:none;">
     <div class="rp-app-topbar">
-      <button class="rp-back-btn" data-rpback="rp-home-view">←</button>
+      <button class="rp-back-btn" data-rpback="rp-home-view">
+        <i data-lucide="chevron-left" style="width:20px;height:20px;"></i>
+      </button>
       <div class="rp-app-topbar-title">便签</div>
-      <button class="rp-topbar-right-btn" id="rp-notes-add-btn">＋</button>
+      <button class="rp-topbar-right-btn" id="rp-notes-add-btn">
+        <i data-lucide="plus" style="width:20px;height:20px;"></i>
+      </button>
     </div>
-    <!-- 三个 Tab -->
     <div class="rp-tabs">
       <button class="rp-tab-btn active" data-rptab="rp-todo-tab">待办</button>
       <button class="rp-tab-btn" data-rptab="rp-diary-tab">日记</button>
       <button class="rp-tab-btn" data-rptab="rp-memo-tab">随记</button>
     </div>
-    <!-- 待办 -->
     <div class="rp-tab-panel active" id="rp-todo-tab">
-      <div class="rp-notes-list" id="rp-todo-list">
-        <div class="rp-list-empty">暂无待办</div>
-      </div>
+      <div class="rp-notes-list" id="rp-todo-list"><div class="rp-list-empty">暂无待办</div></div>
     </div>
-    <!-- 日记 -->
     <div class="rp-tab-panel" id="rp-diary-tab">
-      <div class="rp-notes-list" id="rp-diary-list">
-        <div class="rp-list-empty">暂无日记</div>
-      </div>
+      <div class="rp-notes-list" id="rp-diary-list"><div class="rp-list-empty">暂无日记</div></div>
     </div>
-    <!-- 随记 -->
     <div class="rp-tab-panel" id="rp-memo-tab">
-      <div class="rp-notes-list" id="rp-random-list">
-        <div class="rp-list-empty">暂无随记</div>
-      </div>
+      <div class="rp-notes-list" id="rp-random-list"><div class="rp-list-empty">暂无随记</div></div>
     </div>
   </div>
 
   <!-- ========== 日记/随记详情 ========== -->
   <div id="rp-diary-detail-view" class="rp-view" style="display:none;">
     <div class="rp-app-topbar">
-      <button class="rp-back-btn" data-rpback="rp-notes-view">←</button>
+      <button class="rp-back-btn" data-rpback="rp-notes-view">
+        <i data-lucide="chevron-left" style="width:20px;height:20px;"></i>
+      </button>
       <div class="rp-diary-detail-meta">
         <span id="rp-detail-date"></span>
         <span id="rp-detail-weather"></span>
       </div>
       <div class="rp-topbar-actions">
-        <button class="rp-topbar-right-btn" id="rp-detail-fav-btn">☆</button>
-        <button class="rp-topbar-right-btn rp-danger-btn" id="rp-detail-del-btn">🗑</button>
+        <button class="rp-topbar-right-btn" id="rp-detail-fav-btn">
+          <i data-lucide="star" style="width:18px;height:18px;"></i>
+        </button>
+        <button class="rp-topbar-right-btn rp-danger-btn" id="rp-detail-del-btn">
+          <i data-lucide="trash-2" style="width:18px;height:18px;"></i>
+        </button>
       </div>
     </div>
     <div class="rp-diary-detail-body">
@@ -220,9 +248,13 @@
   <!-- ========== 屏幕健康 App ========== -->
   <div id="rp-health-view" class="rp-view" style="display:none;">
     <div class="rp-app-topbar">
-      <button class="rp-back-btn" data-rpback="rp-home-view">←</button>
+      <button class="rp-back-btn" data-rpback="rp-home-view">
+        <i data-lucide="chevron-left" style="width:20px;height:20px;"></i>
+      </button>
       <div class="rp-app-topbar-title">屏幕健康</div>
-      <div style="width:36px;"></div>
+      <button class="rp-topbar-right-btn" id="rp-health-add-btn">
+        <i data-lucide="plus" style="width:20px;height:20px;"></i>
+      </button>
     </div>
     <div class="rp-health-body">
       <div class="rp-health-summary">
@@ -236,19 +268,23 @@
   <!-- ========== 趣问 App ========== -->
   <div id="rp-forum-view" class="rp-view" style="display:none;">
     <div class="rp-app-topbar">
-      <button class="rp-back-btn" data-rpback="rp-home-view">←</button>
+      <button class="rp-back-btn" data-rpback="rp-home-view">
+        <i data-lucide="chevron-left" style="width:20px;height:20px;"></i>
+      </button>
       <div class="rp-app-topbar-title">趣问</div>
-      <button class="rp-topbar-right-btn" id="rp-forum-add-btn">＋</button>
+      <button class="rp-topbar-right-btn" id="rp-forum-add-btn">
+        <i data-lucide="plus" style="width:20px;height:20px;"></i>
+      </button>
     </div>
-    <div class="rp-forum-list" id="rp-forum-list">
-      <div class="rp-list-empty">暂无帖子</div>
-    </div>
+    <div class="rp-forum-list" id="rp-forum-list"><div class="rp-list-empty">暂无帖子</div></div>
   </div>
 
   <!-- ========== 趣问帖子详情 ========== -->
   <div id="rp-forum-detail-view" class="rp-view" style="display:none;">
     <div class="rp-app-topbar">
-      <button class="rp-back-btn" data-rpback="rp-forum-view">←</button>
+      <button class="rp-back-btn" data-rpback="rp-forum-view">
+        <i data-lucide="chevron-left" style="width:20px;height:20px;"></i>
+      </button>
       <div class="rp-app-topbar-title">帖子详情</div>
       <div style="width:36px;"></div>
     </div>
@@ -263,6 +299,179 @@
     </div>
   </div>
 
+  <!-- ========== 梦境 App ========== -->
+  <div id="rp-dream-view" class="rp-view" style="display:none;">
+    <div class="rp-app-topbar">
+      <button class="rp-back-btn" data-rpback="rp-home-view">
+        <i data-lucide="chevron-left" style="width:20px;height:20px;"></i>
+      </button>
+      <div class="rp-app-topbar-title">梦境</div>
+      <button class="rp-topbar-right-btn" id="rp-dream-add-btn">
+        <i data-lucide="plus" style="width:20px;height:20px;"></i>
+      </button>
+    </div>
+    <div class="rp-generic-list" id="rp-dream-list"><div class="rp-list-empty">暂无记录，点右上角生成</div></div>
+  </div>
+
+  <!-- ========== 梦境详情 ========== -->
+  <div id="rp-dream-detail-view" class="rp-view" style="display:none;">
+    <div class="rp-app-topbar">
+      <button class="rp-back-btn" data-rpback="rp-dream-view">
+        <i data-lucide="chevron-left" style="width:20px;height:20px;"></i>
+      </button>
+      <div class="rp-app-topbar-title" id="rp-dream-detail-title">梦境详情</div>
+      <button class="rp-topbar-right-btn rp-danger-btn" id="rp-dream-del-btn">
+        <i data-lucide="trash-2" style="width:18px;height:18px;"></i>
+      </button>
+    </div>
+    <div class="rp-diary-detail-body">
+      <div class="rp-diary-detail-content" id="rp-dream-detail-content"></div>
+    </div>
+  </div>
+
+  <!-- ========== 相册 App ========== -->
+  <div id="rp-album-view" class="rp-view" style="display:none;">
+    <div class="rp-app-topbar">
+      <button class="rp-back-btn" data-rpback="rp-home-view">
+        <i data-lucide="chevron-left" style="width:20px;height:20px;"></i>
+      </button>
+      <div class="rp-app-topbar-title">相册</div>
+      <button class="rp-topbar-right-btn" id="rp-album-add-btn">
+        <i data-lucide="plus" style="width:20px;height:20px;"></i>
+      </button>
+    </div>
+    <div class="rp-album-grid" id="rp-album-grid">
+      <div class="rp-list-empty">暂无照片，点右上角生成</div>
+    </div>
+  </div>
+
+  <!-- ========== 相册详情 ========== -->
+  <div id="rp-album-detail-view" class="rp-view" style="display:none;">
+    <div class="rp-app-topbar">
+      <button class="rp-back-btn" data-rpback="rp-album-view">
+        <i data-lucide="chevron-left" style="width:20px;height:20px;"></i>
+      </button>
+      <div class="rp-app-topbar-title" id="rp-album-detail-title">照片详情</div>
+      <button class="rp-topbar-right-btn rp-danger-btn" id="rp-album-del-btn">
+        <i data-lucide="trash-2" style="width:18px;height:18px;"></i>
+      </button>
+    </div>
+    <div class="rp-diary-detail-body">
+      <div class="rp-album-detail-scene" id="rp-album-detail-scene"></div>
+    </div>
+  </div>
+
+  <!-- ========== 音乐 App ========== -->
+  <div id="rp-music-view" class="rp-view" style="display:none;">
+    <div class="rp-app-topbar">
+      <button class="rp-back-btn" data-rpback="rp-home-view">
+        <i data-lucide="chevron-left" style="width:20px;height:20px;"></i>
+      </button>
+      <div class="rp-app-topbar-title">音乐</div>
+      <button class="rp-topbar-right-btn" id="rp-music-add-btn">
+        <i data-lucide="plus" style="width:20px;height:20px;"></i>
+      </button>
+    </div>
+    <div class="rp-generic-list" id="rp-music-list"><div class="rp-list-empty">暂无歌单，点右上角生成</div></div>
+  </div>
+
+  <!-- ========== 购物车 App ========== -->
+  <div id="rp-shop-view" class="rp-view" style="display:none;">
+    <div class="rp-app-topbar">
+      <button class="rp-back-btn" data-rpback="rp-home-view">
+        <i data-lucide="chevron-left" style="width:20px;height:20px;"></i>
+      </button>
+      <div class="rp-app-topbar-title">购物车</div>
+      <button class="rp-topbar-right-btn" id="rp-shop-add-btn">
+        <i data-lucide="plus" style="width:20px;height:20px;"></i>
+      </button>
+    </div>
+    <div class="rp-generic-list" id="rp-shop-list"><div class="rp-list-empty">暂无商品，点右上角生成</div></div>
+  </div>
+
+  <!-- ========== 步数 App ========== -->
+  <div id="rp-steps-view" class="rp-view" style="display:none;">
+    <div class="rp-app-topbar">
+      <button class="rp-back-btn" data-rpback="rp-home-view">
+        <i data-lucide="chevron-left" style="width:20px;height:20px;"></i>
+      </button>
+      <div class="rp-app-topbar-title">步数</div>
+      <button class="rp-topbar-right-btn" id="rp-steps-add-btn">
+        <i data-lucide="plus" style="width:20px;height:20px;"></i>
+      </button>
+    </div>
+    <div class="rp-health-body">
+      <div class="rp-health-summary">
+        <div class="rp-health-label">今日步数</div>
+        <div class="rp-health-total" id="rp-steps-total" style="color:#34c759;">0</div>
+        <div class="rp-health-label" id="rp-steps-distance" style="margin-top:4px;"></div>
+      </div>
+      <div class="rp-generic-list" id="rp-steps-list"></div>
+    </div>
+  </div>
+
+  <!-- ========== 通话记录 App ========== -->
+  <div id="rp-call-view" class="rp-view" style="display:none;">
+    <div class="rp-app-topbar">
+      <button class="rp-back-btn" data-rpback="rp-home-view">
+        <i data-lucide="chevron-left" style="width:20px;height:20px;"></i>
+      </button>
+      <div class="rp-app-topbar-title">通话记录</div>
+      <button class="rp-topbar-right-btn" id="rp-call-add-btn">
+        <i data-lucide="plus" style="width:20px;height:20px;"></i>
+      </button>
+    </div>
+    <div class="rp-generic-list" id="rp-call-list"><div class="rp-list-empty">暂无记录，点右上角生成</div></div>
+  </div>
+
+  <!-- ========== 钱包 App ========== -->
+  <div id="rp-wallet-view" class="rp-view" style="display:none;">
+    <div class="rp-app-topbar">
+      <button class="rp-back-btn" data-rpback="rp-home-view">
+        <i data-lucide="chevron-left" style="width:20px;height:20px;"></i>
+      </button>
+      <div class="rp-app-topbar-title">钱包</div>
+      <button class="rp-topbar-right-btn" id="rp-wallet-add-btn">
+        <i data-lucide="plus" style="width:20px;height:20px;"></i>
+      </button>
+    </div>
+    <div class="rp-health-body">
+      <div class="rp-health-summary">
+        <div class="rp-health-label">本月支出</div>
+        <div class="rp-health-total" id="rp-wallet-total" style="color:#ff9500;">0.00 元</div>
+      </div>
+      <div class="rp-generic-list" id="rp-wallet-list"></div>
+    </div>
+  </div>
+
+  <!-- ========== 追剧 App ========== -->
+  <div id="rp-drama-view" class="rp-view" style="display:none;">
+    <div class="rp-app-topbar">
+      <button class="rp-back-btn" data-rpback="rp-home-view">
+        <i data-lucide="chevron-left" style="width:20px;height:20px;"></i>
+      </button>
+      <div class="rp-app-topbar-title">追剧</div>
+      <button class="rp-topbar-right-btn" id="rp-drama-add-btn">
+        <i data-lucide="plus" style="width:20px;height:20px;"></i>
+      </button>
+    </div>
+    <div class="rp-generic-list" id="rp-drama-list"><div class="rp-list-empty">暂无追剧，点右上角生成</div></div>
+  </div>
+
+  <!-- ========== 外卖 App ========== -->
+  <div id="rp-food-view" class="rp-view" style="display:none;">
+    <div class="rp-app-topbar">
+      <button class="rp-back-btn" data-rpback="rp-home-view">
+        <i data-lucide="chevron-left" style="width:20px;height:20px;"></i>
+      </button>
+      <div class="rp-app-topbar-title">外卖</div>
+      <button class="rp-topbar-right-btn" id="rp-food-add-btn">
+        <i data-lucide="plus" style="width:20px;height:20px;"></i>
+      </button>
+    </div>
+    <div class="rp-generic-list" id="rp-food-list"><div class="rp-list-empty">暂无订单，点右上角生成</div></div>
+  </div>
+
   <!-- ========== 加载弹窗 ========== -->
   <div id="rp-loading-modal" style="display:none;">
     <div class="rp-loading-mask">
@@ -273,7 +482,7 @@
     </div>
   </div>
 
-  <!-- ========== 备忘录添加弹窗 ========== -->
+  <!-- ========== 备忘录添加弹窗（保留备用） ========== -->
   <div id="rp-memo-modal" style="display:none;">
     <div class="rp-inner-modal-mask">
       <div class="rp-inner-modal-box">
@@ -286,40 +495,45 @@
       </div>
     </div>
   </div>
+<!-- ========== 便签选项弹窗 ========== -->
+<div id="rp-notes-option-modal" style="display:none;">
+  <div class="rp-inner-modal-mask">
+    <div class="rp-inner-modal-box" style="gap:8px;">
+      <div class="rp-inner-modal-title">新建</div>
+      <button class="rp-notes-option-btn" id="rp-notes-opt-todo">
+        <i data-lucide="check-square" style="width:18px;height:18px;"></i>
+        待办
+      </button>
+      <button class="rp-notes-option-btn" id="rp-notes-opt-diary">
+        <i data-lucide="book-open" style="width:18px;height:18px;"></i>
+        日记
+      </button>
+      <button class="rp-notes-option-btn" id="rp-notes-opt-memo">
+        <i data-lucide="pen-line" style="width:18px;height:18px;"></i>
+        随记
+      </button>
+      <button class="rp-inner-btn-ghost" id="rp-notes-opt-cancel" style="margin-top:4px;">取消</button>
+    </div>
+  </div>
+</div>
 
   <!-- ========== 便签新建弹窗 ========== -->
   <div id="rp-notes-modal" style="display:none;">
     <div class="rp-inner-modal-mask">
       <div class="rp-inner-modal-box">
-        <div class="rp-inner-modal-title" id="rp-notes-modal-title">新建日记</div>
-        <select class="rp-inner-modal-input" id="rp-notes-weather-select" style="margin-bottom:10px;">
-          <option value="☀️">☀️ 晴天</option>
-          <option value="🌤️">🌤️ 多云</option>
-          <option value="🌧️">🌧️ 下雨</option>
-          <option value="⛅">⛅ 阴天</option>
-          <option value="❄️">❄️ 下雪</option>
+        <div class="rp-inner-modal-title" id="rp-notes-modal-title">添加待办</div>
+        <select class="rp-inner-modal-input" id="rp-notes-weather-select" style="margin-bottom:10px;display:none;">
+          <option value="晴天">晴天</option>
+          <option value="多云">多云</option>
+          <option value="下雨">下雨</option>
+          <option value="阴天">阴天</option>
+          <option value="下雪">下雪</option>
         </select>
         <textarea class="rp-inner-modal-input" id="rp-notes-content-input"
           placeholder="输入内容…" style="min-height:100px;resize:none;margin-top:8px;"></textarea>
         <div class="rp-inner-modal-btns">
           <button class="rp-inner-btn-ghost" id="rp-notes-modal-cancel">取消</button>
           <button class="rp-inner-btn-primary" id="rp-notes-modal-confirm">保存</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========== 趣问新建帖子弹窗 ========== -->
-  <div id="rp-forum-new-modal" style="display:none;">
-    <div class="rp-inner-modal-mask">
-      <div class="rp-inner-modal-box">
-        <div class="rp-inner-modal-title">发布帖子</div>
-        <input class="rp-inner-modal-input" id="rp-forum-title-input" placeholder="帖子标题…">
-        <textarea class="rp-inner-modal-input" id="rp-forum-content-input"
-          placeholder="帖子内容…" style="min-height:90px;resize:none;margin-top:8px;"></textarea>
-        <div class="rp-inner-modal-btns">
-          <button class="rp-inner-btn-ghost" id="rp-forum-new-cancel">取消</button>
-          <button class="rp-inner-btn-primary" id="rp-forum-new-confirm">发布</button>
         </div>
       </div>
     </div>

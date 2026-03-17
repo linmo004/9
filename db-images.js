@@ -4,11 +4,10 @@
    文字类数据仍使用 localStorage，互不干扰
    ============================================================ */
 
+/* 数据库实例由 liao-db.js 统一管理，这里只做兼容声明 */
 const _imgDB = new Dexie('Halo9Images');
-
-_imgDB.version(1).stores({
-  images: '&key'
-});
+_imgDB.version(1).stores({ images: '&key' });
+_imgDB.version(2).stores({ images: '&key', liaoData: '&key' });
 
 /**
  * 存储图片到 IndexedDB

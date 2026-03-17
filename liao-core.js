@@ -48,7 +48,10 @@ let liaoBgSrc      = lLoad('suiyanBg', '');
     liaoChats  = lLoad('chats',  []);
     liaoSuiyan = lLoad('suiyan', []);
   }
+  /* 数据加载完成标记 */
+  window._liaoDataReady = true;
 })();
+
 
 let currentChatIdx = -1;
 
